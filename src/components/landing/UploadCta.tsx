@@ -66,7 +66,11 @@ export default function UploadCta({
         }
         throw new Error(message);
       }
+
       const data = await response.json();
+      console.log("data", data);
+      console.log("data.id", data.id);
+
       setProjectId(data.id || data);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unexpected error";
