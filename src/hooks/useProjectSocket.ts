@@ -16,6 +16,7 @@ export function useProjectSocket(projectId: string | null) {
     if (!sock || !projectId) return;
 
     const onConnect = () => {
+      console.log("onConnect");
       setConnected(true);
       sock.emit("project:join", { projectId });
     };
