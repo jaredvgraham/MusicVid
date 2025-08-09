@@ -9,6 +9,8 @@ import { promises as fs } from "fs";
 import path from "path";
 import { tmpdir } from "os";
 import { spawn } from "child_process";
+import ffmpegStatic from "ffmpeg-static";
+import ffprobeStatic from "ffprobe-static";
 
 export const runtime = "nodejs";
 
@@ -16,7 +18,8 @@ async function runFfmpeg(
   args: string[]
 ): Promise<{ code: number; stderr: string; stdout: string }> {
   return new Promise((resolve, reject) => {
-    const ff = spawn("ffmpeg", args, { stdio: ["ignore", "pipe", "pipe"] });
+    const ffBinary = (ffmpegStatic as unknown as string) || "ffmpeg";
+    const ff = spawn(ffBinary, args, { stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
     ff.stdout.on("data", (d) => (stdout += d.toString()));
@@ -35,7 +38,9 @@ function buildSubtitlesFilter(srtPath: string): string {
 
 async function probeHasVideoStream(filePath: string): Promise<boolean> {
   return new Promise((resolve) => {
-    const ff = spawn("ffprobe", [
+    const ffprobeBinary =
+      (ffprobeStatic as unknown as { path?: string })?.path || "ffprobe";
+    const ff = spawn(ffprobeBinary, [
       "-v",
       "error",
       "-select_streams",
