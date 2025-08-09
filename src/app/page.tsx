@@ -1,11 +1,18 @@
-import React from "react";
+"use client";
+import React, { useState } from "react";
 import UploadCta from "../components/landing/UploadCta";
 import Hero from "../components/landing/Hero";
 import { FeatureGrid } from "../components/landing/FeatureGrid";
 import { Steps } from "../components/landing/Steps";
 import Showcase from "../components/landing/Showcase";
+import { useProjectSocket } from "../hooks/useProjectSocket";
 
 export default function Page(): React.ReactElement {
+  const [projectId, setProjectId] = useState<string | null>(null);
+  const { connected, finished, video } = useProjectSocket(projectId);
+  console.log("connected", connected);
+  console.log("finished", finished);
+  console.log("video", video);
   return (
     <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
       {/* Ambient background */}
@@ -20,7 +27,11 @@ export default function Page(): React.ReactElement {
         <Hero />
 
         {/* Upload CTA */}
-        <UploadCta />
+        <UploadCta
+          setProjectId={setProjectId}
+          finished={finished}
+          video={video || ""}
+        />
 
         {/* Social proof */}
         <p className="mx-auto mt-6 max-w-xl text-center text-xs text-white/40">

@@ -3,7 +3,17 @@
 import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 
-export default function UploadCta(): React.ReactElement {
+interface UploadCtaProps {
+  setProjectId: (projectId: string) => void;
+  finished: boolean;
+  video: string;
+}
+
+export default function UploadCta({
+  setProjectId,
+  finished,
+  video,
+}: UploadCtaProps) {
   const [isUploading, setIsUploading] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -56,7 +66,8 @@ export default function UploadCta(): React.ReactElement {
         }
         throw new Error(message);
       }
-      console.log(await response.json());
+      const data = await response.json();
+      setProjectId(data.id || data);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unexpected error";
       setError(message);
@@ -94,6 +105,14 @@ export default function UploadCta(): React.ReactElement {
       await processFile(file);
     }
   };
+
+  if (finished && video) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl">
+        <video src={video} controls className="w-full" />
+      </div>
+    );
+  }
 
   return (
     <div className="mx-auto mt-10 max-w-2xl">

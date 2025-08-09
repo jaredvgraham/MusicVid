@@ -12,14 +12,15 @@
     "@clerk/nextjs": "^6.30.0",
     "@clerk/themes": "^2.4.6",
     "assemblyai": "^4.14.2",
+    "ffmpeg-static": "^5.2.0",
+    "ffprobe-static": "^3.1.0",
     "framer-motion": "^12.23.12",
     "mongoose": "^8.17.1",
     "next": "15.4.6",
     "react": "19.1.0",
     "react-dom": "19.1.0",
-    "svix": "^1.71.0",
-    "ffmpeg-static": "^5.2.0",
-    "ffprobe-static": "^3.1.0"
+    "socket.io-client": "^4.8.1",
+    "svix": "^1.71.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",
