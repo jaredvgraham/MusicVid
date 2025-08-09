@@ -11,14 +11,54 @@ import { tmpdir } from "os";
 import { spawn } from "child_process";
 import ffmpegStatic from "ffmpeg-static";
 import ffprobeStatic from "ffprobe-static";
+import fsSync from "fs";
 
 export const runtime = "nodejs";
+
+function resolveFfmpegBinary(): string {
+  const fromModule = (ffmpegStatic as unknown as string) || "";
+  const candidates = [
+    fromModule,
+    "/var/task/node_modules/ffmpeg-static/ffmpeg",
+    path.join(process.cwd(), "node_modules", "ffmpeg-static", "ffmpeg"),
+    "ffmpeg",
+  ].filter(Boolean) as string[];
+  for (const p of candidates) {
+    try {
+      if (p && p !== "ffmpeg" && fsSync.existsSync(p)) return p;
+    } catch {}
+  }
+  return fromModule || "ffmpeg";
+}
+
+function resolveFfprobeBinary(): string {
+  const fromModule =
+    (ffprobeStatic as unknown as { path?: string })?.path || "";
+  const candidates = [
+    fromModule,
+    "/var/task/node_modules/ffprobe-static/bin/ffprobe",
+    path.join(
+      process.cwd(),
+      "node_modules",
+      "ffprobe-static",
+      "bin",
+      "ffprobe"
+    ),
+    "ffprobe",
+  ].filter(Boolean) as string[];
+  for (const p of candidates) {
+    try {
+      if (p && p !== "ffprobe" && fsSync.existsSync(p)) return p;
+    } catch {}
+  }
+  return fromModule || "ffprobe";
+}
 
 async function runFfmpeg(
   args: string[]
 ): Promise<{ code: number; stderr: string; stdout: string }> {
   return new Promise((resolve, reject) => {
-    const ffBinary = (ffmpegStatic as unknown as string) || "ffmpeg";
+    const ffBinary = resolveFfmpegBinary();
     const ff = spawn(ffBinary, args, { stdio: ["ignore", "pipe", "pipe"] });
     let stdout = "";
     let stderr = "";
@@ -38,8 +78,7 @@ function buildSubtitlesFilter(srtPath: string): string {
 
 async function probeHasVideoStream(filePath: string): Promise<boolean> {
   return new Promise((resolve) => {
-    const ffprobeBinary =
-      (ffprobeStatic as unknown as { path?: string })?.path || "ffprobe";
+    const ffprobeBinary = resolveFfprobeBinary();
     const ff = spawn(ffprobeBinary, [
       "-v",
       "error",
