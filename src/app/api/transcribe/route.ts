@@ -50,6 +50,13 @@ export async function POST(req: NextRequest) {
         }),
       }
     );
+    if (!res.ok) {
+      console.log("Failed to render lyrics", res.statusText);
+      return NextResponse.json(
+        { error: "Failed to render lyrics", status: res.statusText },
+        { status: 500 }
+      );
+    }
     console.log("res", res);
     return NextResponse.json({ id: transcript.id, text: transcript.text });
   } catch (error) {
