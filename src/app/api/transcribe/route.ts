@@ -46,7 +46,7 @@ export async function POST(req: NextRequest) {
       {
         method: "POST",
         body: JSON.stringify({
-          id: project.id,
+          id: id,
         }),
       }
     );
