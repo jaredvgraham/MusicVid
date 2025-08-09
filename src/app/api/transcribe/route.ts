@@ -12,12 +12,7 @@ export async function POST(req: NextRequest) {
     await dbConnect();
     const { id } = await req.json();
     console.log("id", id);
-    console.log("id", id);
-    console.log("id", id);
-    console.log("id", id);
-    console.log("id", id);
-    console.log("id", id);
-    console.log("id", id);
+
     const project = await Project.findById(id).lean<ProjectDocument>();
     if (!project) {
       console.log("Project not found");
@@ -46,6 +41,16 @@ export async function POST(req: NextRequest) {
     console.log(transcript.text);
     console.log(transcript.words);
     await Project.findByIdAndUpdate(id, { transcript: transcript.words });
+    const res = await fetch(
+      "https://lyricsync-production.up.railway.app/render",
+      {
+        method: "POST",
+        body: JSON.stringify({
+          id: project.id,
+        }),
+      }
+    );
+    console.log("res", res);
     return NextResponse.json({ id: transcript.id, text: transcript.text });
   } catch (error) {
     console.log("error", error);
