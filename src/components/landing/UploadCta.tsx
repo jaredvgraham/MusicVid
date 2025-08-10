@@ -2,6 +2,7 @@
 
 import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
+import { LoadingSpinner } from "../ui/LoadingSpinner";
 
 interface UploadCtaProps {
   setProjectId: (projectId: string) => void;
@@ -18,6 +19,7 @@ export default function UploadCta({
   const [error, setError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const { userId } = useAuth();
+  const [hasId, setHasId] = useState(false);
 
   const processFile = async (file: File) => {
     const allowed = [
@@ -70,7 +72,7 @@ export default function UploadCta({
       const data = await response.json();
       console.log("data", data);
       console.log("data.id", data.id);
-
+      setHasId(true);
       setProjectId(data.id || data);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unexpected error";
@@ -109,6 +111,14 @@ export default function UploadCta({
       await processFile(file);
     }
   };
+
+  if (!finished && hasId) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl">
+        <LoadingSpinner />
+      </div>
+    );
+  }
 
   if (finished && video) {
     return (
