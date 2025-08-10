@@ -8,6 +8,7 @@ export interface Word {
 }
 
 export interface ProjectDocument extends Document {
+  _id: mongoose.Types.ObjectId;
   userId: string;
   timeCreated: Date;
   failed: boolean;

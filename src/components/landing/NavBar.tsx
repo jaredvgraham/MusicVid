@@ -8,10 +8,10 @@ import { useState } from "react";
 type NavItem = { label: string; href: string };
 
 const navItems: NavItem[] = [
-  { label: "Features", href: "#features" },
-  { label: "Templates", href: "#templates" },
-  { label: "Pricing", href: "#pricing" },
-  { label: "Docs", href: "#docs" },
+  { label: "Features", href: "/#features" },
+  { label: "Templates", href: "/#templates" },
+  { label: "Pricing", href: "/#pricing" },
+  { label: "Docs", href: "/#docs" },
 ];
 
 export default function NavBar(): React.ReactElement {
@@ -41,6 +41,14 @@ export default function NavBar(): React.ReactElement {
               {item.label}
             </Link>
           ))}
+          <SignedIn>
+            <Link
+              href="/dashboard"
+              className="text-sm text-white/70 transition hover:text-white"
+            >
+              Dashboard
+            </Link>
+          </SignedIn>
         </nav>
 
         {/* Right: Auth & CTA (desktop) */}
@@ -105,6 +113,16 @@ export default function NavBar(): React.ReactElement {
                   {item.label}
                 </Link>
               ))}
+              <SignedIn>
+                <Link
+                  key="Dashboard"
+                  href="/dashboard"
+                  className="rounded-md px-2 py-2 text-sm text-white/80 hover:bg-white/10"
+                  onClick={() => setOpen(false)}
+                >
+                  Dashboard
+                </Link>
+              </SignedIn>
             </nav>
             <div className="mt-3 flex items-center gap-2">
               <SignedOut>
