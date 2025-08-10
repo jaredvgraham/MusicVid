@@ -3,13 +3,12 @@
 
 import { useEffect, useState } from "react";
 import { getSocket } from "../lib/socket";
-
-type FinishedPayload = { id: string; video?: string };
+import { Project } from "../types";
 
 export function useProjectSocket(projectId: string | null) {
   const [connected, setConnected] = useState(false);
   const [finished, setFinished] = useState(false);
-  const [video, setVideo] = useState<string | null>(null);
+  const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -26,10 +25,10 @@ export function useProjectSocket(projectId: string | null) {
     };
     const onDisconnect = () => setConnected(false);
     const onJoined = () => {};
-    const onFinished = (payload: FinishedPayload) => {
+    const onFinished = (payload: Project) => {
       if (payload?.id === projectId) {
         setFinished(true);
-        setVideo(payload.video ?? null);
+        setProject(payload);
       }
     };
 
@@ -49,5 +48,5 @@ export function useProjectSocket(projectId: string | null) {
     };
   }, [projectId]);
 
-  return { connected, finished, video, error };
+  return { connected, finished, project, error };
 }

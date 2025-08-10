@@ -3,18 +3,19 @@
 import { useAuth } from "@clerk/nextjs";
 import React, { useState } from "react";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
+import { Project } from "@/types";
 
 interface UploadCtaProps {
   setProjectId: (projectId: string) => void;
   finished: boolean;
-  video: string;
+  project: Project;
   error: string | null;
 }
 
 export default function UploadCta({
   setProjectId,
   finished,
-  video,
+  project,
   error,
 }: UploadCtaProps) {
   const [isUploading, setIsUploading] = useState(false);
@@ -130,10 +131,10 @@ export default function UploadCta({
     );
   }
 
-  if (finished && video) {
+  if (finished && project.video) {
     return (
       <div className="mx-auto mt-10 max-w-2xl">
-        <video src={video} controls className="w-full" />
+        <video src={project.video} controls className="w-full" />
       </div>
     );
   }

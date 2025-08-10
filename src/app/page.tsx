@@ -9,10 +9,10 @@ import { useProjectSocket } from "../hooks/useProjectSocket";
 
 export default function Page(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const { connected, finished, video, error } = useProjectSocket(projectId);
+  const { connected, finished, project, error } = useProjectSocket(projectId);
   console.log("connected", connected);
   console.log("finished", finished);
-  console.log("video", video);
+  console.log("project", project);
   return (
     <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
       {/* Ambient background */}
@@ -31,7 +31,7 @@ export default function Page(): React.ReactElement {
           setProjectId={setProjectId}
           finished={finished}
           error={error}
-          video={video || ""}
+          project={project || { id: "", video: "", transcript: [] }}
         />
 
         {/* Social proof */}
