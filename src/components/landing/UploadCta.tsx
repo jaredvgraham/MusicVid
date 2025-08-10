@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuth } from "@clerk/nextjs";
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { Project } from "@/types";
 
@@ -23,6 +23,13 @@ export default function UploadCta({
   const [isDragging, setIsDragging] = useState(false);
   const { userId } = useAuth();
   const [hasId, setHasId] = useState(false);
+
+  // Preserve spinner on refresh if a pending project id exists in localStorage
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const persisted = window.localStorage.getItem("mv:projectId");
+    if (persisted) setHasId(true);
+  }, []);
 
   const processFile = async (file: File) => {
     const allowed = [
