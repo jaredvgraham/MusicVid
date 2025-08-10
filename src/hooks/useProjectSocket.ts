@@ -10,6 +10,7 @@ export function useProjectSocket(projectId: string | null) {
   const [connected, setConnected] = useState(false);
   const [finished, setFinished] = useState(false);
   const [video, setVideo] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const sock = getSocket();
@@ -19,6 +20,9 @@ export function useProjectSocket(projectId: string | null) {
       console.log("onConnect");
       setConnected(true);
       sock.emit("project:join", { projectId });
+    };
+    const onError = (error: string) => {
+      setError(error);
     };
     const onDisconnect = () => setConnected(false);
     const onJoined = () => {};
@@ -33,7 +37,7 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("disconnect", onDisconnect);
     sock.on("project:joined", onJoined);
     sock.on("project:finished", onFinished);
-
+    sock.on("error", onError);
     if (!sock.connected) sock.connect();
 
     return () => {
@@ -45,5 +49,5 @@ export function useProjectSocket(projectId: string | null) {
     };
   }, [projectId]);
 
-  return { connected, finished, video };
+  return { connected, finished, video, error };
 }

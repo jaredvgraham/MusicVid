@@ -9,7 +9,7 @@ import { useProjectSocket } from "../hooks/useProjectSocket";
 
 export default function Page(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const { connected, finished, video } = useProjectSocket(projectId);
+  const { connected, finished, video, error } = useProjectSocket(projectId);
   console.log("connected", connected);
   console.log("finished", finished);
   console.log("video", video);
@@ -30,6 +30,7 @@ export default function Page(): React.ReactElement {
         <UploadCta
           setProjectId={setProjectId}
           finished={finished}
+          error={error}
           video={video || ""}
         />
 

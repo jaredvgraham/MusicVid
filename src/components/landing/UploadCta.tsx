@@ -8,15 +8,17 @@ interface UploadCtaProps {
   setProjectId: (projectId: string) => void;
   finished: boolean;
   video: string;
+  error: string | null;
 }
 
 export default function UploadCta({
   setProjectId,
   finished,
   video,
+  error,
 }: UploadCtaProps) {
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
   const { userId } = useAuth();
   const [hasId, setHasId] = useState(false);
@@ -33,7 +35,7 @@ export default function UploadCta({
       "audio/ogg",
     ];
     if (!allowed.includes(file.type)) {
-      setError(
+      setUploadError(
         "Unsupported file format. Please upload WAV, MP3, FLAC, M4A, AAC or OGG."
       );
       return;
@@ -41,7 +43,7 @@ export default function UploadCta({
 
     try {
       setIsUploading(true);
-      setError(null);
+      setUploadError(null);
 
       const formData = new FormData();
       formData.append("file", file, file.name);
@@ -76,7 +78,7 @@ export default function UploadCta({
       setProjectId(data.id || data);
     } catch (e: unknown) {
       const message = e instanceof Error ? e.message : "Unexpected error";
-      setError(message);
+      setUploadError(message);
     } finally {
       setIsUploading(false);
     }
@@ -111,6 +113,14 @@ export default function UploadCta({
       await processFile(file);
     }
   };
+
+  if (error) {
+    return (
+      <div className="mx-auto mt-10 max-w-2xl">
+        <p className="text-red-400">{error}</p>
+      </div>
+    );
+  }
 
   if (!finished && hasId) {
     return (
@@ -172,7 +182,9 @@ export default function UploadCta({
           </button>
           <span className="text-xs text-white/40">No account needed</span>
         </div>
-        {error && <p className="mt-3 text-sm text-red-400">{error}</p>}
+        {uploadError && (
+          <p className="mt-3 text-sm text-red-400">{uploadError}</p>
+        )}
       </label>
     </div>
   );
