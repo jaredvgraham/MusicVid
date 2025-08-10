@@ -21,6 +21,7 @@ export function useProjectSocket(projectId: string | null) {
       sock.emit("project:join", { projectId });
     };
     const onError = (error: string) => {
+      console.log("onError socket", error);
       setError(error);
     };
     const onDisconnect = () => setConnected(false);

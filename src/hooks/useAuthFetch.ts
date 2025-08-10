@@ -3,6 +3,7 @@
 import { useSession } from "@clerk/nextjs";
 
 export const useAuthFetch = () => {
+  console.log("useAuthFetch");
   const { session } = useSession();
 
   const authFetch = async <T = unknown>(
@@ -10,13 +11,9 @@ export const useAuthFetch = () => {
     options: RequestInit = {}
   ): Promise<T> => {
     const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
-    const url = `${baseUrl.replace(/\/$/, "")}/${endpoint.replace(/^\//, "")}`;
-
-    const token = await session?.getToken();
-    if (!token) throw new Error("No token found");
+    const url = `${baseUrl}${endpoint.replace(/^\//, "")}`;
 
     const headers = new Headers(options.headers ?? {});
-    headers.set("Authorization", `Bearer ${token}`);
 
     // Auto-set JSON header if body is plain object/string and not FormData
     const hasBody = options.body !== undefined && options.body !== null;
