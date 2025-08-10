@@ -1,12 +1,6 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Project, Word } from "@/types";
@@ -103,7 +97,7 @@ export default function WorkspacePage(): React.ReactElement {
     } finally {
       setSaving(false);
     }
-  }, [projectId, draft]);
+  }, [projectId, draft, authFetch]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;

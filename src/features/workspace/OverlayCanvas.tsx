@@ -1,12 +1,12 @@
 "use client";
 
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import React, { useMemo, useState } from "react";
 import { useEditor } from "./EditorContext";
-import type { TextClip, Word } from "@/types";
+import type { TextClip } from "@/types";
 
 export function OverlayCanvas(): React.ReactElement {
-  const { transcript, project, videoRef, currentTimeMs } = useEditor();
-  const [clips, setClips] = useState<TextClip[]>(project.textClips ?? []);
+  const { transcript, project, currentTimeMs } = useEditor();
+  const [clips] = useState<TextClip[]>(project.textClips ?? []);
 
   // Determine active words (for default lyric overlay)
   const activeWords = useMemo(() => {

@@ -158,7 +158,7 @@ export function Timeline(): React.ReactElement {
               2,
               ((w.end - w.start) / 1000) * pixelsPerSecond
             );
-            const lane = Math.max(0, Math.min(3, Number((w as any).lane ?? 0)));
+            const lane = Math.max(0, Math.min(3, Number(w.lane ?? 0)));
             const laneTop = 24 + lane * 28;
             const isSelected = selectedIndex === i;
             return (
@@ -201,7 +201,7 @@ export function Timeline(): React.ReactElement {
                       startY: e.clientY,
                       origStart: w.start,
                       origEnd: w.end,
-                      origLane: (w as any).lane ?? 0,
+                      origLane: w.lane ?? 0,
                     });
                   }}
                 >

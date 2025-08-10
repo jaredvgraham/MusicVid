@@ -6,8 +6,6 @@ import { useEditor, formatTime, useEditorHotkeys } from "./EditorContext";
 export function ControlsBar(): React.ReactElement {
   const {
     playing,
-    play,
-    pause,
     togglePlay,
     currentTimeMs,
     pixelsPerSecond,
