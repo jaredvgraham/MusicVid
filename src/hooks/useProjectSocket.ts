@@ -28,6 +28,7 @@ export function useProjectSocket(projectId: string | null) {
     const onFinished = (payload: Project) => {
       if (payload?.id === projectId) {
         setFinished(true);
+        console.log("onFinished", payload);
         setProject(payload);
       }
     };
