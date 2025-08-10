@@ -8,7 +8,7 @@ export interface UserDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
 }
-
+//
 const UserSchema = new Schema<UserDocument>(
   {
     clerkId: { type: String, required: true, unique: true, index: true },
