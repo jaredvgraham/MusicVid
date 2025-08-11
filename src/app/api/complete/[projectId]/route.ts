@@ -2,13 +2,11 @@ import { NextResponse } from "next/server";
 import dbConnect from "@/backend/lib/db";
 import Project from "@/backend/models/Project";
 
-export async function GET(_req: Request, ctx: { params: Record<string, string | string[]> }) {
+export async function GET(_req: Request, context: { params: Promise<{ projectId: string }> }) {
   try {
     await dbConnect();
 
-    const projectId = Array.isArray(ctx.params.projectId)
-      ? ctx.params.projectId[0]
-      : (ctx.params.projectId as string | undefined);
+    const { projectId } = await context.params;
 
     if (!projectId) {
       return NextResponse.json({ completed: false, error: "Missing projectId" }, { status: 400 });
