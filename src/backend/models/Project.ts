@@ -31,10 +31,10 @@ const ProjectSchema = new Schema<ProjectDocument>(
     s3_url: { type: String },
     callbackStatus: { type: Number },
     transcript: { type: Array },
-    video: { type: String },
-    song: { type: String },
     name: { type: String },
     lyrics: { type: String },
+    video: { type: String },
+    song: { type: String },
   },
   { timestamps: true }
 );

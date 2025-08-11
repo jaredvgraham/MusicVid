@@ -17,6 +17,7 @@ export async function GET() {
     const result = await ProjectClient.getProjects(userId);
 
     if (Array.isArray(result)) {
+<<<<<<< HEAD
         const mapped = result.map((doc) => {
             const rawVideo = (doc as any).video as string | undefined;
             const s3Url = (doc as any).s3_url as string | undefined;
@@ -39,6 +40,17 @@ export async function GET() {
             return new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime();
         });
         return NextResponse.json({ projects: mapped });
+=======
+        const projects = result.map((doc) => ({
+            _id: doc._id.toString(),
+            song: doc.song,
+            name: doc.name || undefined,
+            timeCreated: doc.timeCreated instanceof Date ? doc.timeCreated.toISOString() : (doc.timeCreated as any),
+            video: doc.video ?? (doc as any).s3_url,
+        }));
+        console.log(JSON.stringify(projects, null, 2));
+        return NextResponse.json({ projects });
+>>>>>>> b2efbc6c382940ef1a58f2b445c2e96b76b2de15
     } else {
         const status = result.statusCode ?? 500;
         return NextResponse.json({ error: result }, { status });
