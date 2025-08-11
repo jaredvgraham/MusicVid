@@ -31,6 +31,7 @@ const Dashboard = (): React.ReactElement => {
           data?.error?.message ?? `Request failed: ${response.status}`;
         throw new Error(message);
       }
+      console.log(response);
       const data = await response.json();
       if (data.error) {
         setError(data.error.message);
@@ -139,6 +140,7 @@ const Dashboard = (): React.ReactElement => {
                 {hasVideo && (
                   <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
                     <video
+                      key={`${project._id}-${project.video}`}
                       src={project.video}
                       className="h-full w-full"
                       controls

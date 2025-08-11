@@ -42,6 +42,7 @@ export async function GET() {
         new Date(b.timeCreated).getTime() - new Date(a.timeCreated).getTime()
       );
     });
+    console.log(JSON.stringify(mapped, null, 2));
     return NextResponse.json({ projects: mapped });
   } else {
     const status = result.statusCode ?? 500;
