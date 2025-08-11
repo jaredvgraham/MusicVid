@@ -16,6 +16,8 @@ export interface ProjectDocument extends Document {
   transcript?: Word[];
   video?: string;
   song?: string;
+  name?: string;
+  lyrics?: string;
   callbackStatus?: number;
   createdAt: Date;
   updatedAt: Date;
@@ -29,6 +31,8 @@ const ProjectSchema = new Schema<ProjectDocument>(
     s3_url: { type: String },
     callbackStatus: { type: Number },
     transcript: { type: Array },
+    name: { type: String },
+    lyrics: { type: String },
     video: { type: String },
     song: { type: String },
   },
