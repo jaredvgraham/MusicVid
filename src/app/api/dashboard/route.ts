@@ -20,9 +20,11 @@ export async function GET() {
         const projects = result.map((doc) => ({
             _id: doc._id.toString(),
             song: doc.song,
+            name: doc.name || undefined,
             timeCreated: doc.timeCreated instanceof Date ? doc.timeCreated.toISOString() : (doc.timeCreated as any),
             video: doc.video ?? (doc as any).s3_url,
         }));
+        console.log(JSON.stringify(projects, null, 2));
         return NextResponse.json({ projects });
     } else {
         const status = result.statusCode ?? 500;

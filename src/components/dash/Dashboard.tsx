@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation';
 
 type ClientProject = {
     _id: string;
@@ -17,7 +18,7 @@ const Dashboard = (): React.ReactElement => {
     const [projects, setProjects] = useState<ClientProject[]>([]);
     const [query, setQuery] = useState<string>("");
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-
+    const router = useRouter();
     const loadProjects = useCallback(async () => {
         try {
             setError(null);
@@ -58,7 +59,7 @@ const Dashboard = (): React.ReactElement => {
     const filteredProjects = useMemo(() => {
         const q = query.trim().toLowerCase();
         if (!q) return projects;
-        return projects.filter(p => ((p.name ?? p.song ?? "untitled").toLowerCase().includes(q)));
+        return projects.filter(p => ((p.name ?? "untitled").toLowerCase().includes(q)));
     }, [projects, query]);
 
     const formatDate = (value: string | number | Date): string => {
@@ -159,6 +160,7 @@ const Dashboard = (): React.ReactElement => {
                                     <button
                                         type="button"
                                         className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                                        onClick={() => router.push(`/workspace/${project._id}`)}
                                     >
                                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
                                             <path d="M3 7h18M3 12h18M3 17h18" />
@@ -197,6 +199,7 @@ function HeaderSection({
     isRefreshing: boolean;
     projectCount: number;
 }) {
+    const router = useRouter();
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
             <div>
@@ -243,6 +246,7 @@ function HeaderSection({
                     <button
                         type="button"
                         className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90"
+                        onClick={() => router.push('/upload')}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 5v14M5 12h14" />
