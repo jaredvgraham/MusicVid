@@ -100,7 +100,7 @@ export default function Upload(): React.ReactElement {
       formData.append("file", file, file.name);
       formData.append("model", "htdemucs"); // kept for compatibility per API
       formData.append("user_id", userId || "");
-      formData.append("project_name", projectName.trim());
+      formData.append("name", projectName.trim());
       if (lyrics.trim()) formData.append("lyrics", lyrics.trim());
 
       const response = await fetch(
