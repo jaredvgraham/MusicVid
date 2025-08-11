@@ -16,6 +16,8 @@ export interface ProjectDocument extends Document {
   transcript?: Word[];
   video?: string;
   song?: string;
+  name?: string;
+  lyrics?: string;
   callbackStatus?: number;
   createdAt: Date;
   updatedAt: Date;
@@ -31,6 +33,8 @@ const ProjectSchema = new Schema<ProjectDocument>(
     transcript: { type: Array },
     video: { type: String },
     song: { type: String },
+    name: { type: String },
+    lyrics: { type: String },
   },
   { timestamps: true }
 );
