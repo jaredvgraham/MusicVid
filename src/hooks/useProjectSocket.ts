@@ -42,7 +42,11 @@ export function useProjectSocket(projectId: string | null) {
       setError(msg);
     };
     const onProjectError = (payload: any) => {
-      localStorage.removeItem("mv:projectId");
+      if (typeof window !== "undefined") {
+        try {
+          localStorage.removeItem("mv:projectId");
+        } catch {}
+      }
       const id = (payload && (payload.id || payload.projectId)) as
         | string
         | undefined;
