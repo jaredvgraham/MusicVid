@@ -8,9 +8,10 @@ class ProjectClient {
   ): Promise<ProjectDocument[] | ApiError> {
     await dbConnect();
     try {
-      const projects = await Project.find({ userId: clerkId }).sort({
+      const projects = await Project.find({ user_id: clerkId }).sort({
         timeCreated: -1,
       });
+      console.log(JSON.stringify(projects, null, 2));
       return projects;
     } catch (err: unknown) {
       return this.handleCatch(err);

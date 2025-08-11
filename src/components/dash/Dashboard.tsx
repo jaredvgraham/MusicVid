@@ -175,6 +175,7 @@ const Dashboard = (): React.ReactElement => {
                   <button
                     type="button"
                     className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                    onClick={() => router.push(`/workspace/${project._id}`)}
                   >
                     <svg
                       width="14"
