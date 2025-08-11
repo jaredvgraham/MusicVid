@@ -1,9 +1,11 @@
 "use client";
 
 import React, { useState, useEffect, useMemo, useCallback } from 'react'
+import { useRouter } from 'next/navigation';
 
 type ClientProject = {
     _id: string;
+    name?: string;
     song?: string;
     timeCreated: string | number | Date;
     failed?: boolean;
@@ -16,7 +18,7 @@ const Dashboard = (): React.ReactElement => {
     const [projects, setProjects] = useState<ClientProject[]>([]);
     const [query, setQuery] = useState<string>("");
     const [isRefreshing, setIsRefreshing] = useState<boolean>(false);
-
+    const router = useRouter();
     const loadProjects = useCallback(async () => {
         try {
             setError(null);
@@ -57,7 +59,7 @@ const Dashboard = (): React.ReactElement => {
     const filteredProjects = useMemo(() => {
         const q = query.trim().toLowerCase();
         if (!q) return projects;
-        return projects.filter(p => (p.song ?? "untitled").toLowerCase().includes(q));
+        return projects.filter(p => ((p.name ?? p.song ?? "untitled").toLowerCase().includes(q)));
     }, [projects, query]);
 
     const formatDate = (value: string | number | Date): string => {
@@ -77,6 +79,7 @@ const Dashboard = (): React.ReactElement => {
                     onRefresh={handleRefresh}
                     isRefreshing={true}
                     projectCount={0}
+                    router={router}
                 />
                 <SkeletonGrid />
             </div>
@@ -92,6 +95,7 @@ const Dashboard = (): React.ReactElement => {
                     onRefresh={handleRefresh}
                     isRefreshing={isRefreshing}
                     projectCount={projects.length}
+                    router={router}
                 />
                 <div className="mt-6 rounded-lg border border-red-500/20 bg-red-950/30 p-4 text-red-200">
                     Error: {error}
@@ -108,67 +112,75 @@ const Dashboard = (): React.ReactElement => {
                 onRefresh={handleRefresh}
                 isRefreshing={isRefreshing}
                 projectCount={projects.length}
+                router={router}
             />
 
             {filteredProjects.length === 0 ? (
                 <EmptyState hasProjects={projects.length > 0} />
             ) : (
                 <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-                    {filteredProjects.map((project) => (
-                        <article
-                            key={project._id}
-                            className="group relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4 transition hover:border-white/20 hover:bg-neutral-900/60"
-                        >
-                            <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
-                            {project.video && (
-                                <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
-                                    <video
-                                        src={project.video}
-                                        className="h-full w-full"
-                                        controls
-                                        playsInline
-                                        preload="metadata"
-                                    />
-                                </div>
-                            )}
-                            <div className="mt-3 flex items-start justify-between gap-3">
-                                <h3 className="text-base font-semibold text-white group-hover:text-white/90">
-                                    {project.song ?? "Untitled"}
-                                </h3>
-                                {project.failed ? (
-                                    <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-300 ring-1 ring-inset ring-red-500/20">
-                                        Failed
-                                    </span>
-                                ) : (
-                                    <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-500/20">
-                                        Ready
-                                    </span>
+                    {filteredProjects.map((project) => {
+                        const hasVideo = Boolean(project.video && String(project.video).trim().length > 0);
+                        return (
+                            <article
+                                key={project._id}
+                                className="group relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4 transition hover:border-white/20 hover:bg-neutral-900/60"
+                            >
+                                <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+                                {hasVideo && (
+                                    <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
+                                        <video
+                                            src={project.video}
+                                            className="h-full w-full"
+                                            controls
+                                            playsInline
+                                            preload="metadata"
+                                        />
+                                    </div>
                                 )}
-                            </div>
-                            <p className="mt-1 text-sm text-neutral-400">{formatDate(project.timeCreated)}</p>
+                                <div className="mt-3 flex items-start justify-between gap-3">
+                                    <h3 className="text-base font-semibold text-white group-hover:text-white/90">
+                                        {project.name ?? "Untitled"}
+                                    </h3>
+                                    {project.failed ? (
+                                        <span className="inline-flex items-center rounded-md bg-red-500/10 px-2 py-0.5 text-xs font-medium text-red-300 ring-1 ring-inset ring-red-500/20">
+                                            Failed
+                                        </span>
+                                    ) : hasVideo ? (
+                                        <span className="inline-flex items-center rounded-md bg-emerald-500/10 px-2 py-0.5 text-xs font-medium text-emerald-300 ring-1 ring-inset ring-emerald-500/20">
+                                            Ready
+                                        </span>
+                                    ) : (
+                                        <span className="inline-flex items-center rounded-md bg-amber-500/10 px-2 py-0.5 text-xs font-medium text-amber-300 ring-1 ring-inset ring-amber-500/20">
+                                            Processing
+                                        </span>
+                                    )}
+                                </div>
+                                <p className="mt-1 text-sm text-neutral-400">{formatDate(project.timeCreated)}</p>
 
-                            <div className="mt-4 flex items-center justify-between">
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
-                                        <path d="M3 7h18M3 12h18M3 17h18" />
-                                    </svg>
-                                    Open
-                                </button>
-                                <button
-                                    type="button"
-                                    className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
-                                >
-                                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                                        <path d="M12 5v14M5 12h14" />
-                                    </svg>
-                                    Export
-                                </button>
-                            </div>
-                        </article>
-                    ))}
+                                <div className="mt-4 flex items-center justify-between">
+                                    <button
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
+                                            <path d="M3 7h18M3 12h18M3 17h18" />
+                                        </svg>
+                                        Open
+                                    </button>
+                                    <button
+                                        type="button"
+                                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
+                                    >
+                                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                                            <path d="M12 5v14M5 12h14" />
+                                        </svg>
+                                        Export
+                                    </button>
+                                </div>
+                            </article>
+                        );
+                    })}
                 </div>
             )}
         </div>
@@ -181,12 +193,14 @@ function HeaderSection({
     onRefresh,
     isRefreshing,
     projectCount,
+    router,
 }: {
     query: string;
     setQuery: (v: string) => void;
     onRefresh: () => void | Promise<void>;
     isRefreshing: boolean;
     projectCount: number;
+    router: ReturnType<typeof useRouter>;
 }) {
     return (
         <div className="flex flex-col gap-4 sm:flex-row sm:items-end sm:justify-between">
@@ -234,6 +248,7 @@ function HeaderSection({
                     <button
                         type="button"
                         className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90"
+                        onClick={() => router.push('/upload')}
                     >
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
                             <path d="M12 5v14M5 12h14" />
