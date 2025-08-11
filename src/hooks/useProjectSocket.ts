@@ -31,6 +31,20 @@ export function useProjectSocket(projectId: string | null) {
     const sock = getSocket();
     if (!sock || !activeId) return;
 
+    // check if the project is already completed and do not join if it is
+    const checkCompleted = async () => {
+      const response = await fetch("/api/complete/" + activeId);
+      const data = await response.json();
+      if (data.completed) {
+        setFinished(true);
+        if (typeof window !== "undefined") {
+          try {
+            window.localStorage.removeItem("mv:projectId");
+          } catch {}
+        }
+      }
+    };
+
     const onConnect = () => {
       console.log("onConnect");
       setConnected(true);
@@ -71,6 +85,7 @@ export function useProjectSocket(projectId: string | null) {
       }
     };
 
+    checkCompleted();
     sock.on("connect", onConnect);
     sock.on("disconnect", onDisconnect);
     sock.on("project:joined", onJoined);
