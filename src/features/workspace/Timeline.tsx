@@ -2,6 +2,8 @@
 
 import React, { useEffect, useMemo, useRef, useState } from "react";
 import { useEditor, formatTime } from "./EditorContext";
+import type { Word } from "@/types";
+import { computeSegments } from "./visibility";
 
 export function Timeline(): React.ReactElement {
   const {
@@ -25,6 +27,7 @@ export function Timeline(): React.ReactElement {
     origEnd: number;
     origLane?: number;
   }>(null);
+  const MAX_TIMELINE_LANES = 10;
 
   useEffect(() => {
     const el = containerRef.current;
@@ -50,6 +53,17 @@ export function Timeline(): React.ReactElement {
   }, [transcript]);
 
   const widthMs = Math.max(totalMs, currentTimeMs + 2000);
+
+  const segments = useMemo(
+    () =>
+      computeSegments(transcript as Word[], {
+        gapMs: 1000,
+        maxLanes: MAX_TIMELINE_LANES,
+        dropAfter: 4,
+        alignSectionEnd: true,
+      }),
+    [transcript]
+  );
 
   const gridMarks = useMemo(() => {
     const seconds = Math.ceil(totalMs / 1000);
@@ -151,37 +165,38 @@ export function Timeline(): React.ReactElement {
           {/* Top ruler overlay for improved UX */}
           <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 bg-gradient-to-b from-black/30 to-transparent" />
 
-          {/* Clips (words) in lanes */}
-          {transcript.map((w, i) => {
-            const left = (w.start / 1000) * pixelsPerSecond;
+          {/* Clips rendered from layered visibility segments */}
+          {segments.map((seg) => {
+            const left = (seg.start / 1000) * pixelsPerSecond;
             const width = Math.max(
               2,
-              ((w.end - w.start) / 1000) * pixelsPerSecond
+              ((seg.end - seg.start) / 1000) * pixelsPerSecond
             );
-            const lane = Math.max(0, Math.min(3, Number(w.lane ?? 0)));
-            const laneTop = 24 + lane * 28;
-            const isSelected = selectedIndex === i;
+            const laneTop =
+              24 + Math.max(0, Math.min(MAX_TIMELINE_LANES - 1, seg.lane)) * 28;
+            const isSelected = selectedIndex === seg.index;
+            const w = transcript[seg.index];
             return (
               <div
-                key={i}
+                key={`${seg.index}-${seg.start}`}
                 className={`group absolute truncate rounded border text-xs ${
                   isSelected
                     ? "border-emerald-400 bg-emerald-500/20"
                     : "border-white/10 bg-white/5 hover:bg-white/10"
                 }`}
                 style={{ left, width, top: laneTop, height: 24 }}
-                title={`${w.text}`}
-                onClick={() => setSelectedIndex(i)}
-                onDoubleClick={() => setCurrentTimeMs(w.start)}
+                title={seg.text}
+                onClick={() => setSelectedIndex(seg.index)}
+                onDoubleClick={() => setCurrentTimeMs(seg.start)}
               >
-                {/* Trim start */}
+                {/* Trim start (affects base word bounds) */}
                 <div
                   className="absolute left-0 top-0 h-full w-2 cursor-ew-resize rounded-l bg-white/10 opacity-0 group-hover:opacity-100"
                   onMouseDown={(e) => {
                     e.preventDefault();
                     e.stopPropagation();
                     setDrag({
-                      index: i,
+                      index: seg.index,
                       mode: "trimStart",
                       startX: e.clientX,
                       origStart: w.start,
@@ -195,7 +210,7 @@ export function Timeline(): React.ReactElement {
                   onMouseDown={(e) => {
                     e.preventDefault();
                     setDrag({
-                      index: i,
+                      index: seg.index,
                       mode: e.shiftKey ? "lane" : "move",
                       startX: e.clientX,
                       startY: e.clientY,
@@ -206,7 +221,7 @@ export function Timeline(): React.ReactElement {
                   }}
                 >
                   <div className="line-clamp-1 leading-[24px] text-left">
-                    {w.text}
+                    {seg.text}
                   </div>
                 </div>
                 {/* Trim end */}
@@ -216,7 +231,7 @@ export function Timeline(): React.ReactElement {
                     e.preventDefault();
                     e.stopPropagation();
                     setDrag({
-                      index: i,
+                      index: seg.index,
                       mode: "trimEnd",
                       startX: e.clientX,
                       origStart: w.start,
@@ -228,7 +243,7 @@ export function Timeline(): React.ReactElement {
             );
           })}
           {/* Lane separators */}
-          {[0, 1, 2, 3].map((ln) => (
+          {Array.from({ length: MAX_TIMELINE_LANES }).map((_, ln) => (
             <div
               key={ln}
               className="pointer-events-none absolute left-0 right-0"

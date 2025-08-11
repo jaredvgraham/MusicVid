@@ -1,19 +1,11 @@
 "use client";
 
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import React, { useEffect } from "react";
 import { useEditor } from "./EditorContext";
 import { OverlayCanvas } from "./OverlayCanvas";
 
 export function VideoPanel(): React.ReactElement {
-  const { project, transcript, videoRef, setCurrentTimeMs, setPlaying } =
-    useEditor();
-  const [overlay, setOverlay] = useState("");
+  const { project, videoRef, setCurrentTimeMs, setPlaying } = useEditor();
 
   useEffect(() => {
     const v = videoRef.current;
@@ -31,19 +23,7 @@ export function VideoPanel(): React.ReactElement {
     };
   }, [videoRef, setCurrentTimeMs]);
 
-  const overlayText = useMemo(() => overlay, [overlay]);
-
-  useEffect(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    const onFrame = () => {
-      const now = Math.floor(v.currentTime * 1000);
-      const active = transcript.filter((w) => now >= w.start && now < w.end);
-      setOverlay(active.map((w) => w.text).join(" "));
-    };
-    const id = setInterval(onFrame, 50);
-    return () => clearInterval(id);
-  }, [videoRef, transcript]);
+  // OverlayCanvas derives its own view from currentTimeMs; avoid intervals here
 
   return (
     <div className="relative rounded border border-white/10 bg-black">
