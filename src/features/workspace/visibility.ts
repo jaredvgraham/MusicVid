@@ -1,4 +1,4 @@
-import type { Word } from "@/types";
+import type { Line, Word } from "@/types";
 
 export type Section = { startIdx: number; endIdx: number };
 export type Segment = {
@@ -9,56 +9,23 @@ export type Segment = {
   text: string;
 };
 
-export function computeSections(words: Word[], gapMs = 650): Section[] {
-  if (!words || words.length === 0) return [];
-  const sections: Section[] = [];
-  let s = 0;
-  for (let i = 1; i < words.length; i++) {
-    if (words[i].start - words[i - 1].end > gapMs) {
-      sections.push({ startIdx: s, endIdx: i - 1 });
-      s = i;
-    }
-  }
-  sections.push({ startIdx: s, endIdx: words.length - 1 });
-  return sections;
-}
-
-export function computeSegments(
-  words: Word[],
-  opts?: {
-    gapMs?: number;
-    maxLanes?: number;
-    dropAfter?: number;
-    alignSectionEnd?: boolean;
-  }
-): Segment[] {
-  const gapMs = opts?.gapMs ?? 650;
-  const maxLanes = Math.max(1, opts?.maxLanes ?? 10);
-  const dropAfter = Math.max(1, opts?.dropAfter ?? 4);
-  const alignSectionEnd = opts?.alignSectionEnd ?? false;
+export function buildWordSegmentsFromLines(lines: Line[]): Segment[] {
   const result: Segment[] = [];
-  if (!words || words.length === 0) return result;
-
-  const sections = computeSections(words, gapMs);
-  for (const sec of sections) {
-    const secStart = sec.startIdx;
-    const secEnd = sec.endIdx;
-    const secEndTime = words[secEnd].end;
-    for (let i = secStart; i <= secEnd; i++) {
-      const w = words[i];
-      const laneComputed = Math.min(maxLanes - 1, i - secStart);
-      const dropIdx = i + dropAfter;
-      const dropTime = dropIdx <= secEnd ? words[dropIdx].start : secEndTime;
+  if (!Array.isArray(lines) || lines.length === 0) return result;
+  let globalIndex = 0;
+  for (let lane = 0; lane < lines.length; lane++) {
+    const ln = lines[lane];
+    const wordsInLine = ln?.words || [];
+    for (let j = 0; j < wordsInLine.length; j++) {
+      const w = wordsInLine[j];
       result.push({
-        index: i,
+        index: globalIndex,
         start: w.start,
-        end: alignSectionEnd ? secEndTime : Math.max(w.end, dropTime),
-        lane:
-          typeof w.lane === "number"
-            ? Math.max(0, Math.min(maxLanes - 1, w.lane))
-            : laneComputed,
+        end: ln.end,
+        lane: j, // each word gets its own lane within the line
         text: w.text,
       });
+      globalIndex++;
     }
   }
   return result;

@@ -9,12 +9,12 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import type { Project, Word } from "@/types";
+import type { Line, Project, Word } from "@/types";
 
 type EditorState = {
   project: Project;
-  transcript: Word[];
-  setTranscript: React.Dispatch<React.SetStateAction<Word[]>>;
+  transcript: Line[];
+  setTranscript: React.Dispatch<React.SetStateAction<Line[]>>;
   selectedIndex: number | null;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
   currentTimeMs: number;
@@ -38,10 +38,10 @@ export function EditorProvider({
   children,
 }: {
   project: Project;
-  initialTranscript: Word[];
+  initialTranscript: Line[];
   children: React.ReactNode;
 }) {
-  const [transcript, setTranscript] = useState<Word[]>(initialTranscript);
+  const [transcript, setTranscript] = useState<Line[]>(initialTranscript);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [currentTimeMs, _setCurrentTimeMs] = useState(0);
   const [playing, setPlaying] = useState(false);
@@ -153,13 +153,49 @@ export function useEditorHotkeys() {
         e.preventDefault();
         const delta = e.code === "ArrowLeft" ? -fine : fine;
         setTranscript((prev) => {
+          // Map global word index to (lineIndex, wordIndex)
+          let acc = 0;
+          let foundLine = -1;
+          let foundWord = -1;
+          for (let li = 0; li < prev.length; li++) {
+            const count = prev[li]?.words?.length ?? 0;
+            if (idx < acc + count) {
+              foundLine = li;
+              foundWord = idx - acc;
+              break;
+            }
+            acc += count;
+          }
+          if (foundLine < 0 || foundWord < 0) return prev;
+
+          const line = prev[foundLine];
+          const words = line.words ?? [];
+          const current = words[foundWord];
+          if (!current) return prev;
+
+          const duration = Math.max(50, current.end - current.start);
+          const moved: Word = {
+            ...current,
+            start: Math.max(0, current.start + delta),
+          };
+          moved.end = Math.max(moved.start + 50, moved.start + duration);
+
+          const newWords = [...words];
+          newWords[foundWord] = moved;
+          const newStart = newWords.length
+            ? Math.min(...newWords.map((w) => w.start))
+            : line.start;
+          const newEnd = newWords.length
+            ? Math.max(...newWords.map((w) => w.end))
+            : line.end;
+
           const next = [...prev];
-          const w = { ...next[idx] };
-          if (!w) return prev;
-          const dur = Math.max(50, w.end - w.start);
-          w.start = Math.max(0, w.start + delta);
-          w.end = Math.max(w.start + 50, w.start + dur);
-          next[idx] = w;
+          next[foundLine] = {
+            ...line,
+            start: newStart,
+            end: newEnd,
+            words: newWords,
+          };
           return next;
         });
         return;
@@ -168,7 +204,39 @@ export function useEditorHotkeys() {
       // Delete selected word
       if (e.code === "Delete" || e.code === "Backspace") {
         e.preventDefault();
-        setTranscript((prev) => prev.filter((_, i) => i !== idx));
+        setTranscript((prev) => {
+          // Map global word index to (lineIndex, wordIndex)
+          let acc = 0;
+          let foundLine = -1;
+          let foundWord = -1;
+          for (let li = 0; li < prev.length; li++) {
+            const count = prev[li]?.words?.length ?? 0;
+            if (idx < acc + count) {
+              foundLine = li;
+              foundWord = idx - acc;
+              break;
+            }
+            acc += count;
+          }
+          if (foundLine < 0 || foundWord < 0) return prev;
+          const line = prev[foundLine];
+          const words = line.words ?? [];
+          const newWords = words.filter((_, i) => i !== foundWord);
+          const newStart = newWords.length
+            ? Math.min(...newWords.map((w) => w.start))
+            : line.start;
+          const newEnd = newWords.length
+            ? Math.max(...newWords.map((w) => w.end))
+            : line.end;
+          const next = [...prev];
+          next[foundLine] = {
+            ...line,
+            start: newStart,
+            end: newEnd,
+            words: newWords,
+          };
+          return next;
+        });
         return;
       }
     }

@@ -3,15 +3,16 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { Project, Word } from "@/types";
+import { Project, Word, Line } from "@/types";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
-import { EditorProvider } from "@/features/workspace/EditorContext";
-import { Timeline } from "@/features/workspace/Timeline";
+import { EditorProvider, useEditor } from "@/features/workspace/EditorContext";
+
 import { VideoPanel } from "@/features/workspace/VideoPanel";
 
 import { ControlsBar } from "@/features/workspace/ControlsBar";
 import { Toolbox } from "@/features/workspace/Toolbox";
 import { TextLayersPanel } from "@/features/workspace/TextLayersPanel";
+import { Timeline } from "@/features/workspace/Timeline";
 
 type WorkspaceResponse = { project: Project };
 
@@ -25,7 +26,8 @@ export default function WorkspacePage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
-  const [draft, setDraft] = useState<Word[]>([]);
+  const [serverLines, setServerLines] = useState<Line[]>([]);
+  const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Fetch workspace data
@@ -43,7 +45,6 @@ export default function WorkspacePage(): React.ReactElement {
         console.log("res.project.transcript", res.project.video);
         if (!mounted) return;
         setProject(res.project);
-        setDraft(res.project.transcript || []);
       } catch (e: any) {
         setError(e?.message || "Failed to load workspace");
       } finally {
@@ -60,12 +61,15 @@ export default function WorkspacePage(): React.ReactElement {
   useEffect(() => {
     if (socketProject && socketProject.id === projectId) {
       setProject((prev) => ({ ...(prev || socketProject), ...socketProject }));
+      const lines = (socketProject.transcript || []) as unknown as Line[];
+      setServerLines(lines);
+      setDraftWords(lines.flatMap((ln) => ln.words));
     }
   }, [socketProject, projectId]);
 
   const onChangeWord = useCallback(
     (index: number, field: keyof Word, value: string) => {
-      setDraft((prev) => {
+      setDraftWords((prev) => {
         const next = [...prev];
         const w = { ...next[index] };
         if (field === "text") w.text = value;
@@ -83,12 +87,38 @@ export default function WorkspacePage(): React.ReactElement {
     setSaving(true);
     setError(null);
     try {
+      // Rebuild Line[] from current edited words, preserving original line grouping
+      const template = serverLines;
+      const words = draftWords;
+      let cursor = 0;
+      const rebuilt: Line[] = template.map((ln) => {
+        const count = ln.words.length;
+        const slice = words.slice(cursor, cursor + count);
+        cursor += count;
+        const start = slice.length
+          ? Math.min(...slice.map((w) => w.start))
+          : ln.start;
+        const end = slice.length
+          ? Math.max(...slice.map((w) => w.end))
+          : ln.end;
+        return { start, end, words: slice.length ? slice : ln.words };
+      });
+      if (cursor < words.length && rebuilt.length > 0) {
+        const rest = words.slice(cursor);
+        const last = rebuilt[rebuilt.length - 1];
+        rebuilt[rebuilt.length - 1] = {
+          start: Math.min(last.start, ...rest.map((w) => w.start)),
+          end: Math.max(last.end, ...rest.map((w) => w.end)),
+          words: [...last.words, ...rest],
+        };
+      }
+
       const res = await authFetch<WorkspaceResponse>(`workspace/${projectId}`, {
         method: "PATCH",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ transcript: draft }),
+        body: JSON.stringify({ transcript: rebuilt }),
       });
 
       setProject(res.project);
@@ -97,7 +127,7 @@ export default function WorkspacePage(): React.ReactElement {
     } finally {
       setSaving(false);
     }
-  }, [projectId, draft, authFetch]);
+  }, [projectId, draftWords, serverLines, authFetch]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;
@@ -105,7 +135,7 @@ export default function WorkspacePage(): React.ReactElement {
   if (!project) return <div className="p-6">Not found</div>;
 
   return (
-    <EditorProvider project={project} initialTranscript={draft}>
+    <EditorProvider project={project} initialTranscript={project.transcript}>
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <div className="mx-auto max-w-7xl p-4 space-y-4">
           <ControlsBar />

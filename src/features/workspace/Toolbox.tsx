@@ -2,6 +2,7 @@
 
 import React, { useState } from "react";
 import { useEditor } from "./EditorContext";
+import { addWord as addWordOp } from "./actions/wordCrud";
 
 export function Toolbox(): React.ReactElement {
   const { setTranscript, setSelectedIndex, currentTimeMs } = useEditor();
@@ -12,12 +13,13 @@ export function Toolbox(): React.ReactElement {
     const start = Math.max(0, Math.floor(currentTimeMs));
     const end = start + 1500; // 1.5s default duration
     setTranscript((prev) => {
-      const next = [
-        ...prev,
-        { start, end, text: text || "New Text", confidence: 1 },
-      ];
-      // Select the new word (last index)
-      setSelectedIndex(next.length - 1);
+      const { next, newSelectedIndex } = addWordOp(
+        prev,
+        start,
+        null,
+        text || "New Text"
+      );
+      setSelectedIndex(newSelectedIndex);
       return next;
     });
     setText("");

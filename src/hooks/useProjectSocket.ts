@@ -3,7 +3,7 @@
 
 import { useEffect, useState } from "react";
 import { getSocket } from "../lib/socket";
-import { Project } from "../types";
+import { Project, Line, Word } from "../types";
 
 export function useProjectSocket(projectId: string | null) {
   const [connected, setConnected] = useState(false);
@@ -76,11 +76,33 @@ export function useProjectSocket(projectId: string | null) {
     };
     const onDisconnect = () => setConnected(false);
     const onJoined = () => {};
-    const onFinished = (payload: Project) => {
+    const onFinished = (payload: any) => {
       if (payload?.id === activeId) {
         setFinished(true);
-        console.log("onFinished", payload);
-        setProject(payload);
+        // Normalize transcript to Line[] regardless of server payload shape
+        const t = payload?.transcript as unknown;
+        let lines: Line[] = [];
+        if (
+          Array.isArray(t) &&
+          t.length > 0 &&
+          typeof t[0] === "object" &&
+          "words" in (t[0] as any)
+        ) {
+          lines = t as Line[];
+        } else if (Array.isArray(t)) {
+          const words = t as Word[];
+          const start = words.length
+            ? Math.min(...words.map((w) => w.start))
+            : 0;
+          const end = words.length ? Math.max(...words.map((w) => w.end)) : 0;
+          lines = [{ start, end, words }];
+        }
+        const normalized: Project = {
+          ...(payload as Project),
+          transcript: lines,
+        };
+        console.log("onFinished", normalized);
+        setProject(normalized);
         // Success: clear persisted id so we don't auto-join next load
         if (typeof window !== "undefined") {
           try {

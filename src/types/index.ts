@@ -6,12 +6,18 @@ export type Word = {
   lane?: number; // UI-only: which timeline row this word occupies
 };
 
+export type Line = {
+  start: number;
+  end: number;
+  words: Word[];
+};
+
 export type Project = {
   id: string;
   video: string; // final or base depending on server state
   videoBase?: string;
   videoFinal?: string;
-  transcript: Word[];
+  transcript: Line[];
   textClips?: TextClip[];
 };
 

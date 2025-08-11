@@ -2,8 +2,8 @@
 
 import React, { useMemo, useState } from "react";
 import { useEditor } from "./EditorContext";
-import type { TextClip, Word } from "@/types";
-import { computeSegments } from "./visibility";
+import type { TextClip } from "@/types";
+import { buildWordSegmentsFromLines } from "./visibility";
 
 export function OverlayCanvas(): React.ReactElement {
   const { transcript, project, currentTimeMs } = useEditor();
@@ -13,12 +13,7 @@ export function OverlayCanvas(): React.ReactElement {
   // Show the latest up to 4 lines (newest at bottom).
   const layeredLines = useMemo(() => {
     const MAX_WORDS_PER_LINE = 3;
-    const segs = computeSegments(transcript as Word[], {
-      gapMs: 1000,
-      maxLanes: 10,
-      dropAfter: 4,
-      alignSectionEnd: true,
-    })
+    const segs = buildWordSegmentsFromLines(transcript)
       .filter((s) => currentTimeMs >= s.start && currentTimeMs < s.end)
       .sort((a, b) => a.start - b.start);
     const texts = segs.map((s) => s.text);
