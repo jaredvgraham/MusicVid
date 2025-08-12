@@ -8,6 +8,24 @@ const client = new AssemblyAI({
 });
 
 export async function POST(req: NextRequest) {
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+  console.log("transcribe route");
+
   try {
     await dbConnect();
     const { id } = await req.json();
