@@ -2,12 +2,14 @@ import { auth } from "@clerk/nextjs/server";
 import { NextRequest, NextResponse } from "next/server";
 import WorkspaceClient from "@/backend/lib/workspaceClient";
 import { UpdateTranscriptResult } from "@/types";
+import dbConnect from "@/backend/lib/db";
 
 export async function PUT(
   req: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   const { userId } = await auth();
+  await dbConnect();
   if (!userId) {
     console.error("Unauthorized request");
     return NextResponse.json(

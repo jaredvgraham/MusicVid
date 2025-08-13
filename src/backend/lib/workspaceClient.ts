@@ -9,10 +9,7 @@ class WorkspaceClient {
     projectId: string,
     transcript: Line[]
   ): Promise<UpdateTranscriptResult> {
-    await dbConnect();
     try {
-      await dbConnect();
-
       const project: ProjectDocument | null = await Project.findById(projectId);
       if (!project) {
         console.error(`project not found for ID: ${projectId}`);
