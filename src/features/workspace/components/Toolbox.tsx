@@ -2,7 +2,7 @@
 
 import React, { useState } from "react";
 import { useEditor } from "./EditorContext";
-import { addWord as addWordOp } from "./actions/wordCrud";
+import { addWord as addWordOp } from "../actions/wordCrud";
 
 export function Toolbox(): React.ReactElement {
   const { setTranscript, setSelectedIndex, currentTimeMs } = useEditor();

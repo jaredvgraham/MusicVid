@@ -3,10 +3,12 @@
 import React, { useEffect, useMemo, useRef } from "react";
 import { useEditor, formatTime } from "./EditorContext";
 import type { Line } from "@/types";
-import { buildWordSegmentsFromLines } from "./visibility";
+import { buildWordSegmentsFromLines } from "../visibility";
+import { getEditorSocket } from "@/lib/editorSocket";
 
 export function Timeline(): React.ReactElement {
   const {
+    project,
     transcript,
     selectedIndex,
     setSelectedIndex,
@@ -71,6 +73,8 @@ export function Timeline(): React.ReactElement {
     lineIndex: number;
     wordIndex: number;
     globalIndex: number;
+    lastStart?: number;
+    lastEnd?: number;
   } | null>(null);
 
   function getPositionFromGlobalIndex(
@@ -142,12 +146,29 @@ export function Timeline(): React.ReactElement {
         });
         const next = [...prev];
         next[lineIndex] = { ...line, ...bounds, words: nextWords };
+        if (dragRef.current) {
+          dragRef.current.lastStart = newStart;
+          dragRef.current.lastEnd = newEnd;
+        }
         return next;
       });
     }
 
     function onUp() {
+      const d = dragRef.current;
       dragRef.current = null;
+      if (!d || !project?.id) return;
+      const sock = getEditorSocket();
+      if (!sock) return;
+      if (!sock.connected) sock.connect();
+      const payload = {
+        projectId: project.id,
+        lineIndex: d.lineIndex,
+        wordIndex: d.wordIndex,
+        start: d.lastStart ?? d.originalStart,
+        end: d.lastEnd ?? d.originalEnd,
+      };
+      sock.emit("workspace:word:update", payload);
     }
 
     window.addEventListener("mousemove", onMove);

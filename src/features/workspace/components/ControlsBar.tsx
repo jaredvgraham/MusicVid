@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { useEditor, formatTime, useEditorHotkeys } from "./EditorContext";
+import { useEditor, useEditorHotkeys, formatTime } from "./EditorContext";
 
 export function ControlsBar(): React.ReactElement {
   const {

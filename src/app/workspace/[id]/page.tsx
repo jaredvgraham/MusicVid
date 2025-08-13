@@ -5,14 +5,15 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Project, Word, Line } from "@/types";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
-import { EditorProvider, useEditor } from "@/features/workspace/EditorContext";
 
-import { VideoPanel } from "@/features/workspace/VideoPanel";
+import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 
-import { ControlsBar } from "@/features/workspace/ControlsBar";
-import { Toolbox } from "@/features/workspace/Toolbox";
-import { TextLayersPanel } from "@/features/workspace/TextLayersPanel";
-import { Timeline } from "@/features/workspace/Timeline";
+import { ControlsBar } from "@/features/workspace/components/ControlsBar";
+import { Toolbox } from "@/features/workspace/components/Toolbox";
+import { TextLayersPanel } from "@/features/workspace/components/TextLayersPanel";
+import { Timeline } from "@/features/workspace/components/Timeline";
+import { EditorProvider } from "@/features/workspace/components/EditorContext";
+import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
 
@@ -66,6 +67,20 @@ export default function WorkspacePage(): React.ReactElement {
       setDraftWords(lines.flatMap((ln) => ln.words));
     }
   }, [socketProject, projectId]);
+
+  // Join workspace-specific websocket room for word updates
+  useEffect(() => {
+    if (!project?.id) return;
+    const sock = getEditorSocket();
+    if (!sock) return;
+    if (!sock.connected) sock.connect();
+    sock.emit("workspace:join", { projectId: project.id });
+    return () => {
+      try {
+        sock.emit("workspace:leave", { projectId: project.id });
+      } catch {}
+    };
+  }, [project?.id]);
 
   const onChangeWord = useCallback(
     (index: number, field: keyof Word, value: string) => {
