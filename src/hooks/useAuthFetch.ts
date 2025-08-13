@@ -3,7 +3,6 @@
 import { useSession } from "@clerk/nextjs";
 
 export const useAuthFetch = () => {
-  console.log("useAuthFetch");
   const { session } = useSession();
 
   const authFetch = async <T = unknown>(

@@ -72,56 +72,56 @@ export default function WorkspacePage(): React.ReactElement {
     []
   );
 
-  const onRenderFinal = useCallback(async () => {
-    if (!projectId) return;
-    setSaving(true);
-    setError(null);
-    try {
-      // Rebuild Line[] from current edited words, preserving original line grouping
-      const template = serverLines;
-      const words = draftWords;
-      let cursor = 0;
-      const rebuilt: Line[] = template.map((ln) => {
-        const count = ln.words.length;
-        const slice = words.slice(cursor, cursor + count);
-        cursor += count;
-        const start = slice.length
-          ? Math.min(...slice.map((w) => w.start))
-          : ln.start;
-        const end = slice.length
-          ? Math.max(...slice.map((w) => w.end))
-          : ln.end;
-        return { start, end, words: slice.length ? slice : ln.words };
-      });
-      if (cursor < words.length && rebuilt.length > 0) {
-        const rest = words.slice(cursor);
-        const last = rebuilt[rebuilt.length - 1];
-        rebuilt[rebuilt.length - 1] = {
-          start: Math.min(last.start, ...rest.map((w) => w.start)),
-          end: Math.max(last.end, ...rest.map((w) => w.end)),
-          words: [...last.words, ...rest],
-        };
-      }
+  // const onRenderFinal = useCallback(async () => {
+  //   if (!projectId) return;
+  //   setSaving(true);
+  //   setError(null);
+  //   try {
+  //     // Rebuild Line[] from current edited words, preserving original line grouping
+  //     const template = serverLines;
+  //     const words = draftWords;
+  //     let cursor = 0;
+  //     const rebuilt: Line[] = template.map((ln) => {
+  //       const count = ln.words.length;
+  //       const slice = words.slice(cursor, cursor + count);
+  //       cursor += count;
+  //       const start = slice.length
+  //         ? Math.min(...slice.map((w) => w.start))
+  //         : ln.start;
+  //       const end = slice.length
+  //         ? Math.max(...slice.map((w) => w.end))
+  //         : ln.end;
+  //       return { start, end, words: slice.length ? slice : ln.words };
+  //     });
+  //     if (cursor < words.length && rebuilt.length > 0) {
+  //       const rest = words.slice(cursor);
+  //       const last = rebuilt[rebuilt.length - 1];
+  //       rebuilt[rebuilt.length - 1] = {
+  //         start: Math.min(last.start, ...rest.map((w) => w.start)),
+  //         end: Math.max(last.end, ...rest.map((w) => w.end)),
+  //         words: [...last.words, ...rest],
+  //       };
+  //     }
 
-      const res = await authFetch<WorkspaceResponse>(
-        "next",
-        `workspace/${projectId}`,
-        {
-          method: "PATCH",
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({ transcript: rebuilt }),
-        }
-      );
+  //     const res = await authFetch<WorkspaceResponse>(
+  //       "next",
+  //       `workspace/${projectId}`,
+  //       {
+  //         method: "PATCH",
+  //         headers: {
+  //           "Content-Type": "application/json",
+  //         },
+  //         body: JSON.stringify({ transcript: rebuilt }),
+  //       }
+  //     );
 
-      setProject(res.project);
-    } catch (e: any) {
-      setError(e?.message || "Failed to render final video");
-    } finally {
-      setSaving(false);
-    }
-  }, [projectId, draftWords, serverLines, authFetch]);
+  //     setProject(res.project);
+  //   } catch (e: any) {
+  //     setError(e?.message || "Failed to render final video");
+  //   } finally {
+  //     setSaving(false);
+  //   }
+  // }, [projectId, draftWords, serverLines, authFetch]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;
@@ -147,13 +147,13 @@ export default function WorkspacePage(): React.ReactElement {
                 transcript. Drag to adjust timings, then Save & Render.
               </div>
               <div className="mt-4 flex gap-2">
-                <button
+                {/* <button
                   disabled={saving}
                   onClick={onRenderFinal}
                   className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
                 >
                   {saving ? "Rendering…" : "Save & Render Final"}
-                </button>
+                </button> */}
                 <button
                   onClick={() => router.push("/")}
                   className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"

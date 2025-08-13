@@ -18,6 +18,11 @@ export function Timeline(): React.ReactElement {
     setTranscript,
   } = useEditor();
   const authFetch = useAuthFetch();
+  // Keep only the transcript in a ref so we send the latest on mouseup
+  const transcriptRef = useRef(transcript);
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -166,7 +171,8 @@ export function Timeline(): React.ReactElement {
           `api/workspace/${project.id}/edits/transcript`,
           {
             method: "PUT",
-            body: JSON.stringify({ transcript }),
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transcript: transcriptRef.current }),
           }
         );
         console.log(res);
@@ -183,7 +189,7 @@ export function Timeline(): React.ReactElement {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
     };
-  }, [pixelsPerSecond, setTranscript]);
+  }, [pixelsPerSecond, setTranscript, project?.id]);
 
   return (
     <div className="rounded border border-white/10 bg-neutral-950">
