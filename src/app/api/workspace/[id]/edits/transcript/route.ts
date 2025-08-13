@@ -3,7 +3,10 @@ import { NextRequest, NextResponse } from "next/server";
 import WorkspaceClient from "@/backend/lib/workspaceClient";
 import { UpdateTranscriptResult } from "@/types";
 
-export async function PUT(req: NextRequest, context: { params: any }) {
+export async function PUT(
+  req: NextRequest,
+  context: { params: Promise<{ id: string }> }
+) {
   const { userId } = await auth();
   if (!userId) {
     console.error("Unauthorized request");
@@ -12,7 +15,7 @@ export async function PUT(req: NextRequest, context: { params: any }) {
       { status: 401 }
     );
   }
-  const projectId = await context.params.id;
+  const { id: projectId } = await context.params;
   const { transcript } = await req.json();
   const resp: UpdateTranscriptResult = await WorkspaceClient.updateTranscript(
     userId,
