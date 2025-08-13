@@ -45,14 +45,14 @@ export function EditorProvider({
     if (!Array.isArray(lines)) return lines;
     return lines.map((ln) => {
       let normalized = 0;
-      let lineAlreadyNormalized = false;
+
       for (const w of ln.words ?? []) {
         if (w.end === ln.end) {
           normalized++;
         }
       }
       if (normalized >= 2) {
-        lineAlreadyNormalized = true;
+        normalized = 0;
         return ln;
       }
 
