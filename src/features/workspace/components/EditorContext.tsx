@@ -44,6 +44,18 @@ export function EditorProvider({
   function normalizeWordEndsToLineEnds(lines: Line[]): Line[] {
     if (!Array.isArray(lines)) return lines;
     return lines.map((ln) => {
+      let normalized = 0;
+      let lineAlreadyNormalized = false;
+      for (const w of ln.words ?? []) {
+        if (w.end === ln.end) {
+          normalized++;
+        }
+      }
+      if (normalized >= 2) {
+        lineAlreadyNormalized = true;
+        return ln;
+      }
+
       const words = Array.isArray(ln.words)
         ? ln.words.map((w) => ({ ...w, end: ln.end }))
         : [];
