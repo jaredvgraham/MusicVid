@@ -26,7 +26,7 @@ export function VideoPanel(): React.ReactElement {
   // OverlayCanvas derives its own view from currentTimeMs; avoid intervals here
 
   return (
-    <div className="relative rounded border border-white/10 bg-black">
+    <div className="relative mx-auto max-w-[400px] rounded border border-white/10 bg-black">
       <video ref={videoRef} src={project.video} controls className="w-full" />
       <OverlayCanvas />
       <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/80">

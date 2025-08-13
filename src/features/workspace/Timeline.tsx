@@ -13,6 +13,7 @@ export function Timeline(): React.ReactElement {
     currentTimeMs,
     pixelsPerSecond,
     seekToMs,
+    setTranscript,
   } = useEditor();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
@@ -61,6 +62,102 @@ export function Timeline(): React.ReactElement {
     return marks;
   }, [totalMs, pixelsPerSecond]);
 
+  // Drag state for moving/resizing a single word
+  const dragRef = useRef<{
+    mode: "move" | "resize-start" | "resize-end";
+    startX: number;
+    originalStart: number;
+    originalEnd: number;
+    lineIndex: number;
+    wordIndex: number;
+    globalIndex: number;
+  } | null>(null);
+
+  function getPositionFromGlobalIndex(
+    allLines: Line[],
+    globalIndex: number
+  ): { lineIndex: number; wordIndex: number } | null {
+    if (globalIndex == null || globalIndex < 0) return null;
+    let acc = 0;
+    for (let li = 0; li < allLines.length; li++) {
+      const count = allLines[li]?.words?.length ?? 0;
+      if (globalIndex < acc + count)
+        return { lineIndex: li, wordIndex: globalIndex - acc };
+      acc += count;
+    }
+    return null;
+  }
+
+  function recalcLineBounds(
+    words: Line["words"],
+    fallback: { start: number; end: number }
+  ) {
+    if (!words || words.length === 0)
+      return { start: fallback.start, end: fallback.end };
+    const starts = words.map((w) => w.start);
+    const ends = words.map((w) => w.end);
+    return { start: Math.min(...starts), end: Math.max(...ends) };
+  }
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      const d = dragRef.current;
+      if (!d) return;
+      const dx = e.clientX - d.startX;
+      const deltaMs = Math.round((dx / pixelsPerSecond) * 1000);
+      const minDur = 50;
+
+      setTranscript((prev) => {
+        const pos = getPositionFromGlobalIndex(prev, d.globalIndex);
+        if (!pos) return prev;
+        const { lineIndex, wordIndex } = pos;
+        const line = prev[lineIndex];
+        const words = line.words ?? [];
+        const w = words[wordIndex];
+        if (!w) return prev;
+
+        let newStart = w.start;
+        let newEnd = w.end;
+
+        if (d.mode === "move") {
+          const offset = deltaMs;
+          newStart = Math.max(0, d.originalStart + offset);
+          newEnd = Math.max(newStart + minDur, d.originalEnd + offset);
+        } else if (d.mode === "resize-start") {
+          newStart = Math.max(
+            0,
+            Math.min(d.originalEnd - minDur, d.originalStart + deltaMs)
+          );
+          newEnd = d.originalEnd;
+        } else if (d.mode === "resize-end") {
+          newStart = d.originalStart;
+          newEnd = Math.max(d.originalStart + minDur, d.originalEnd + deltaMs);
+        }
+
+        const nextWords = [...words];
+        nextWords[wordIndex] = { ...w, start: newStart, end: newEnd };
+        const bounds = recalcLineBounds(nextWords, {
+          start: line.start,
+          end: line.end,
+        });
+        const next = [...prev];
+        next[lineIndex] = { ...line, ...bounds, words: nextWords };
+        return next;
+      });
+    }
+
+    function onUp() {
+      dragRef.current = null;
+    }
+
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [pixelsPerSecond, setTranscript]);
+
   return (
     <div className="rounded border border-white/10 bg-neutral-950">
       <div className="flex items-center justify-between px-3 py-2 text-xs text-white/60">
@@ -104,14 +201,19 @@ export function Timeline(): React.ReactElement {
 
           {segments.map((seg) => {
             const left = (seg.start / 1000) * pixelsPerSecond;
+            // Compute width from the actual word's end time (without changing how segments are built)
+            const pos = getPositionFromGlobalIndex(lines, seg.index);
+            const w = pos ? lines[pos.lineIndex]?.words?.[pos.wordIndex] : null;
+            const realEnd = w ? w.end : seg.end;
+            const realStart = w ? w.start : seg.start;
             const width = Math.max(
               2,
-              ((seg.end - seg.start) / 1000) * pixelsPerSecond
+              ((realEnd - realStart) / 1000) * pixelsPerSecond
             );
             const isSelected = selectedIndex === seg.index;
 
             const isActive =
-              currentTimeMs >= seg.start && currentTimeMs < seg.end;
+              currentTimeMs >= realStart && currentTimeMs < realEnd;
             const top = TOP_PAD + seg.lane * ROW_HEIGHT;
             return (
               <div
@@ -125,7 +227,73 @@ export function Timeline(): React.ReactElement {
                 title={seg.text}
                 onClick={() => setSelectedIndex(seg.index)}
                 onDoubleClick={() => seekToMs(seg.start)}
+                onMouseDown={(e) => {
+                  // Begin move drag on body
+                  if ((e.target as HTMLElement).dataset.resizeHandle) return;
+                  const posInner = getPositionFromGlobalIndex(lines, seg.index);
+                  if (!posInner) return;
+                  const word =
+                    lines[posInner.lineIndex]?.words?.[posInner.wordIndex];
+                  if (!word) return;
+                  dragRef.current = {
+                    mode: "move",
+                    startX: e.clientX,
+                    originalStart: word.start,
+                    originalEnd: word.end,
+                    lineIndex: posInner.lineIndex,
+                    wordIndex: posInner.wordIndex,
+                    globalIndex: seg.index,
+                  };
+                }}
               >
+                <div
+                  data-resize-handle="start"
+                  className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent"
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    const posInner = getPositionFromGlobalIndex(
+                      lines,
+                      seg.index
+                    );
+                    if (!posInner) return;
+                    const word =
+                      lines[posInner.lineIndex]?.words?.[posInner.wordIndex];
+                    if (!word) return;
+                    dragRef.current = {
+                      mode: "resize-start",
+                      startX: e.clientX,
+                      originalStart: word.start,
+                      originalEnd: word.end,
+                      lineIndex: posInner.lineIndex,
+                      wordIndex: posInner.wordIndex,
+                      globalIndex: seg.index,
+                    };
+                  }}
+                />
+                <div
+                  data-resize-handle="end"
+                  className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent"
+                  onMouseDown={(e) => {
+                    e.stopPropagation();
+                    const posInner = getPositionFromGlobalIndex(
+                      lines,
+                      seg.index
+                    );
+                    if (!posInner) return;
+                    const word =
+                      lines[posInner.lineIndex]?.words?.[posInner.wordIndex];
+                    if (!word) return;
+                    dragRef.current = {
+                      mode: "resize-end",
+                      startX: e.clientX,
+                      originalStart: word.start,
+                      originalEnd: word.end,
+                      lineIndex: posInner.lineIndex,
+                      wordIndex: posInner.wordIndex,
+                      globalIndex: seg.index,
+                    };
+                  }}
+                />
                 <div className="h-full w-full px-2">
                   <div className="line-clamp-1 leading-[24px] text-left">
                     {seg.text}

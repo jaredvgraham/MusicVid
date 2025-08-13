@@ -1,4 +1,4 @@
-import type { Line, Word } from "@/types";
+import type { Line } from "@/types";
 
 export type Section = { startIdx: number; endIdx: number };
 export type Segment = {
