@@ -4,7 +4,6 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Project, Word, Line } from "@/types";
-import { useProjectSocket } from "@/hooks/useProjectSocket";
 
 import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 
@@ -22,7 +21,6 @@ export default function WorkspacePage(): React.ReactElement {
   const router = useRouter();
   const authFetch = useAuthFetch();
   const projectId = params?.id ?? null;
-  const { project: socketProject } = useProjectSocket(projectId);
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -40,6 +38,7 @@ export default function WorkspacePage(): React.ReactElement {
       setError(null);
       try {
         const res = await authFetch<WorkspaceResponse>(
+          "express",
           `workspace/${projectId}`
         );
         console.log("res", res.project);
@@ -57,30 +56,6 @@ export default function WorkspacePage(): React.ReactElement {
       mounted = false;
     };
   }, [projectId]);
-
-  // If socket notifies updated project (e.g., base or final render), reflect it
-  useEffect(() => {
-    if (socketProject && socketProject.id === projectId) {
-      setProject((prev) => ({ ...(prev || socketProject), ...socketProject }));
-      const lines = (socketProject.transcript || []) as unknown as Line[];
-      setServerLines(lines);
-      setDraftWords(lines.flatMap((ln) => ln.words));
-    }
-  }, [socketProject, projectId]);
-
-  // Join workspace-specific websocket room for word updates
-  useEffect(() => {
-    if (!project?.id) return;
-    const sock = getEditorSocket();
-    if (!sock) return;
-    if (!sock.connected) sock.connect();
-    sock.emit("workspace:join", { projectId: project.id });
-    return () => {
-      try {
-        sock.emit("workspace:leave", { projectId: project.id });
-      } catch {}
-    };
-  }, [project?.id]);
 
   const onChangeWord = useCallback(
     (index: number, field: keyof Word, value: string) => {
@@ -128,13 +103,17 @@ export default function WorkspacePage(): React.ReactElement {
         };
       }
 
-      const res = await authFetch<WorkspaceResponse>(`workspace/${projectId}`, {
-        method: "PATCH",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ transcript: rebuilt }),
-      });
+      const res = await authFetch<WorkspaceResponse>(
+        "next",
+        `workspace/${projectId}`,
+        {
+          method: "PATCH",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ transcript: rebuilt }),
+        }
+      );
 
       setProject(res.project);
     } catch (e: any) {

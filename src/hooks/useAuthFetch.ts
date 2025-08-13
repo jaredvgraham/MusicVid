@@ -7,10 +7,14 @@ export const useAuthFetch = () => {
   const { session } = useSession();
 
   const authFetch = async <T = unknown>(
+    whichUrl: "next" | "express",
     endpoint: string,
     options: RequestInit = {}
   ): Promise<T> => {
-    const baseUrl = process.env.NEXT_PUBLIC_API_URL ?? "";
+    const baseUrl =
+      whichUrl === "next"
+        ? process.env.NEXT_PUBLIC_API_URL ?? ""
+        : process.env.NEXT_PUBLIC_EXPRESS_URL ?? "";
     const url = `${baseUrl}${endpoint.replace(/^\//, "")}`;
 
     const headers = new Headers(options.headers ?? {});

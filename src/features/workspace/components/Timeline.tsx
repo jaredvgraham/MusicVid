@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { useEditor, formatTime } from "./EditorContext";
 import type { Line } from "@/types";
 import { buildWordSegmentsFromLines } from "../visibility";
-import { getEditorSocket } from "@/lib/editorSocket";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function Timeline(): React.ReactElement {
   const {
@@ -17,6 +17,7 @@ export function Timeline(): React.ReactElement {
     seekToMs,
     setTranscript,
   } = useEditor();
+  const authFetch = useAuthFetch();
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -51,7 +52,7 @@ export function Timeline(): React.ReactElement {
   // Simple segments: words rendered one-by-one within each line; global index across all words
   const segments = useMemo(() => buildWordSegmentsFromLines(lines), [lines]);
   // Show all lines as static rows so clips flow in/out as time moves
-  const lanesToShow = Math.max(1, lines.length);
+  const lanesToShow = 10;
 
   const gridMarks = useMemo(() => {
     const seconds = Math.ceil(totalMs / 1000);
@@ -154,21 +155,26 @@ export function Timeline(): React.ReactElement {
       });
     }
 
-    function onUp() {
+    async function onUp() {
       const d = dragRef.current;
       dragRef.current = null;
       if (!d || !project?.id) return;
-      const sock = getEditorSocket();
-      if (!sock) return;
-      if (!sock.connected) sock.connect();
-      const payload = {
-        projectId: project.id,
-        lineIndex: d.lineIndex,
-        wordIndex: d.wordIndex,
-        start: d.lastStart ?? d.originalStart,
-        end: d.lastEnd ?? d.originalEnd,
-      };
-      sock.emit("workspace:word:update", payload);
+
+      try {
+        const res = await authFetch(
+          "next",
+          `api/workspace/${project.id}/edits/transcript`,
+          {
+            method: "PUT",
+            body: JSON.stringify({ transcript }),
+          }
+        );
+        console.log(res);
+      } catch (error) {
+        console.log("error updating transcript");
+
+        console.error(error);
+      }
     }
 
     window.addEventListener("mousemove", onMove);
