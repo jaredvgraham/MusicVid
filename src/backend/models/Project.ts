@@ -7,34 +7,53 @@ export interface Word {
   confidence: number;
 }
 
+export interface TextClip {
+  start: number;
+  end: number;
+  text: string;
+  xPct: number; // 0-100
+  yPct: number; // 0-100
+}
+
+export interface Line {
+  start: number;
+  end: number;
+  words: Word[];
+}
+
 export interface ProjectDocument extends Document {
   _id: mongoose.Types.ObjectId;
-  userId: string;
-  timeCreated: Date;
+  user_id: string;
+  time_created: Date;
+  name: string;
   failed: boolean;
   s3_url?: string;
-  transcript?: Word[];
-  video?: string;
+  transcript?: Line[];
+  textClips?: TextClip[];
+  video?: string; // deprecated: presigned URL or public URL
+  videoKey?: string; // canonical S3 object key
   song?: string;
-  name?: string;
   lyrics?: string;
-  callbackStatus?: number;
+  callback_status?: number;
   createdAt: Date;
   updatedAt: Date;
+  length: number;
 }
 
 const ProjectSchema = new Schema<ProjectDocument>(
   {
-    userId: { type: String, required: true, index: true },
-    timeCreated: { type: Date, required: true, default: Date.now },
+    user_id: { type: String, required: true, index: true },
+    time_created: { type: Date, required: true, default: Date.now },
+    name: { type: String, required: true},
     failed: { type: Boolean, required: true, default: false },
     s3_url: { type: String },
-    callbackStatus: { type: Number },
-    transcript: { type: Array },
-    name: { type: String },
-    lyrics: { type: String },
+    callback_status: { type: Number },
+    transcript: { type: Array<Line> },
+    textClips: { type: Array },
     video: { type: String },
+    videoKey: { type: String },
     song: { type: String },
+    lyrics: { type: String },
   },
   { timestamps: true }
 );
