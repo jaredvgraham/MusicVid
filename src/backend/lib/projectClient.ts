@@ -1,6 +1,7 @@
-import { ApiError } from "@/types/ApiError";
+import { ApiError } from "@/types";
 import { ProjectDocument, Project } from "../models/Project";
 import dbConnect from "./db";
+import Utils from "@/utils/utils";
 
 class ProjectClient {
   static async getProjects(
@@ -13,8 +14,8 @@ class ProjectClient {
       });
       console.log(JSON.stringify(projects, null, 2));
       return projects;
-    } catch (err: unknown) {
-      return this.handleCatch(err);
+    } catch (err) {
+      return Utils.handleApiError(err);
     }
   }
 
@@ -33,20 +34,9 @@ class ProjectClient {
         return error;
       }
       return project;
-    } catch (err: unknown) {
-      return this.handleCatch(err);
+    } catch (err) {
+      return Utils.handleApiError(err);
     }
-  }
-
-  private static handleCatch(err: unknown): ApiError {
-    const message = err instanceof Error ? err.message : String(err);
-    console.error("Error fetching projects from database", message);
-    const apiError: ApiError = {
-      _error: "Internal Server Error",
-      message: "An error occurred while fetching projects from database",
-      statusCode: 500,
-    };
-    return apiError;
   }
 }
 
