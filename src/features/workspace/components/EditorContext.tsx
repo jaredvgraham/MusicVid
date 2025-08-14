@@ -11,6 +11,7 @@ import React, {
 } from "react";
 import type { Line, Project, Word } from "@/types";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { deleteWord as deleteWordOp } from "../actions/wordCrud";
 
 type EditorState = {
   project: Project;
@@ -189,7 +190,15 @@ export function formatTime(ms: number): string {
 
 // Global keyboard controls (MVP): play/pause, nudge selection, delete
 export function useEditorHotkeys() {
-  const { playing, togglePlay, setTranscript, selectedIndex } = useEditor();
+  const {
+    playing,
+    togglePlay,
+    transcript,
+    setTranscript,
+    selectedIndex,
+    setSelectedIndex,
+    saveTranscript,
+  } = useEditor();
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
@@ -259,43 +268,22 @@ export function useEditorHotkeys() {
       // Delete selected word
       if (e.code === "Delete" || e.code === "Backspace") {
         e.preventDefault();
-        setTranscript((prev) => {
-          // Map global word index to (lineIndex, wordIndex)
-          let acc = 0;
-          let foundLine = -1;
-          let foundWord = -1;
-          for (let li = 0; li < prev.length; li++) {
-            const count = prev[li]?.words?.length ?? 0;
-            if (idx < acc + count) {
-              foundLine = li;
-              foundWord = idx - acc;
-              break;
-            }
-            acc += count;
-          }
-          if (foundLine < 0 || foundWord < 0) return prev;
-          const line = prev[foundLine];
-          const words = line.words ?? [];
-          const newWords = words.filter((_, i) => i !== foundWord);
-          const newStart = newWords.length
-            ? Math.min(...newWords.map((w) => w.start))
-            : line.start;
-          const newEnd = newWords.length
-            ? Math.max(...newWords.map((w) => w.end))
-            : line.end;
-          const next = [...prev];
-          next[foundLine] = {
-            ...line,
-            start: newStart,
-            end: newEnd,
-            words: newWords,
-          };
-          return next;
-        });
+        const { next, newSelectedIndex } = deleteWordOp(transcript, idx);
+        setTranscript(next);
+        setSelectedIndex(newSelectedIndex);
+        saveTranscript(next);
         return;
       }
     }
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [playing, togglePlay, setTranscript, selectedIndex]);
+  }, [
+    playing,
+    togglePlay,
+    transcript,
+    setTranscript,
+    selectedIndex,
+    setSelectedIndex,
+    saveTranscript,
+  ]);
 }

@@ -4,7 +4,7 @@ import React, { useEffect, useMemo, useRef } from "react";
 import { useEditor, formatTime } from "./EditorContext";
 import type { Line } from "@/types";
 import { buildWordSegmentsFromLines } from "../visibility";
-import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { deleteWord as deleteWordOp } from "../actions/wordCrud";
 
 export function Timeline(): React.ReactElement {
   const {
@@ -18,12 +18,20 @@ export function Timeline(): React.ReactElement {
     setTranscript,
     saveTranscript,
   } = useEditor();
-  const authFetch = useAuthFetch();
   // Keep only the transcript in a ref so we send the latest on mouseup
   const transcriptRef = useRef(transcript);
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
+
+  const canDelete = selectedIndex != null && selectedIndex >= 0;
+  const onDeleteSelected = async () => {
+    if (!canDelete) return;
+    const { next, newSelectedIndex } = deleteWordOp(transcript, selectedIndex);
+    setTranscript(next);
+    setSelectedIndex(newSelectedIndex);
+    await saveTranscript(next);
+  };
 
   const containerRef = useRef<HTMLDivElement | null>(null);
 
@@ -186,7 +194,16 @@ export function Timeline(): React.ReactElement {
     <div className="rounded border border-white/10 bg-neutral-950">
       <div className="flex items-center justify-between px-3 py-2 text-xs text-white/60">
         <span>Timeline</span>
-        <span>{formatTime(currentTimeMs)}</span>
+        <div className="flex items-center gap-2">
+          <span>{formatTime(currentTimeMs)}</span>
+          <button
+            onClick={onDeleteSelected}
+            disabled={!canDelete}
+            className="rounded border border-red-500/20 bg-red-500/10 px-2 py-1 text-[11px] text-red-200 hover:bg-red-500/20 disabled:opacity-40"
+          >
+            Delete
+          </button>
+        </div>
       </div>
       <div
         ref={containerRef}
