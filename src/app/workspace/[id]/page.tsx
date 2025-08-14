@@ -3,7 +3,7 @@
 import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { Project, Word, Line } from "@/types";
+import { Project } from "@/types";
 
 import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 
@@ -12,7 +12,7 @@ import { Toolbox } from "@/features/workspace/components/Toolbox";
 import { TextLayersPanel } from "@/features/workspace/components/TextLayersPanel";
 import { Timeline } from "@/features/workspace/components/Timeline";
 import { EditorProvider } from "@/features/workspace/components/EditorContext";
-import { getEditorSocket } from "@/lib/editorSocket";
+// import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
 
@@ -25,8 +25,8 @@ export default function WorkspacePage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
-  const [serverLines, setServerLines] = useState<Line[]>([]);
-  const [draftWords, setDraftWords] = useState<Word[]>([]);
+  // const [serverLines, setServerLines] = useState<Line[]>([]);
+  // const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
 
   // Fetch workspace data
@@ -57,20 +57,20 @@ export default function WorkspacePage(): React.ReactElement {
     };
   }, [projectId]);
 
-  const onChangeWord = useCallback(
-    (index: number, field: keyof Word, value: string) => {
-      setDraftWords((prev) => {
-        const next = [...prev];
-        const w = { ...next[index] };
-        if (field === "text") w.text = value;
-        if (field === "start") w.start = Number(value);
-        if (field === "end") w.end = Number(value);
-        next[index] = w;
-        return next;
-      });
-    },
-    []
-  );
+  // const onChangeWord = useCallback(
+  //   (index: number, field: keyof Word, value: string) => {
+  //     setDraftWords((prev) => {
+  //       const next = [...prev];
+  //       const w = { ...next[index] };
+  //       if (field === "text") w.text = value;
+  //       if (field === "start") w.start = Number(value);
+  //       if (field === "end") w.end = Number(value);
+  //       next[index] = w;
+  //       return next;
+  //     });
+  //   },
+  //   []
+  // );
 
   // const onRenderFinal = useCallback(async () => {
   //   if (!projectId) return;
@@ -123,6 +123,30 @@ export default function WorkspacePage(): React.ReactElement {
   //   }
   // }, [projectId, draftWords, serverLines, authFetch]);
 
+  const onFinalRender = useCallback(async () => {
+    if (!projectId) return;
+    setSaving(true);
+    setError(null);
+    try {
+      const res = await authFetch<{ id: string; video: string }>(
+        "express",
+        `render/finalRender`,
+        {
+          method: "POST",
+          body: JSON.stringify({ id: projectId as string }),
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+      console.log("res", res);
+      console.log("res.detail", (res as any).detail);
+      router.push(`/result/${res.id}?video=${encodeURIComponent(res.video)}`);
+    } catch (e: any) {
+      setError(e?.message || "Failed to render final video");
+    } finally {
+      setSaving(false);
+    }
+  }, [projectId, authFetch, router]);
+
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;
   if (error) return <div className="p-6 text-red-400">{error}</div>;
@@ -147,13 +171,13 @@ export default function WorkspacePage(): React.ReactElement {
                 transcript. Drag to adjust timings, then Save & Render.
               </div>
               <div className="mt-4 flex gap-2">
-                {/* <button
+                <button
                   disabled={saving}
-                  onClick={onRenderFinal}
+                  onClick={onFinalRender}
                   className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
                 >
-                  {saving ? "Rendering…" : "Save & Render Final"}
-                </button> */}
+                  {saving ? "Rendering…" : "Render Final Video"}
+                </button>
                 <button
                   onClick={() => router.push("/")}
                   className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
