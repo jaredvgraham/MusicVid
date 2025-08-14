@@ -3,10 +3,17 @@
 import React, { useMemo, useState } from "react";
 import { useEditor } from "./EditorContext";
 import type { TextClip } from "@/types";
+import {
+  DEFAULT_LYRIC_PRESET_ID,
+  LYRIC_PRESETS,
+  LyricPreset,
+} from "../styles/lyricPresets";
 
 export function OverlayCanvas(): React.ReactElement {
-  const { transcript, project, currentTimeMs } = useEditor();
+  const { transcript, project, currentTimeMs, lyricPresetId } = useEditor();
   const [clips] = useState<TextClip[]>(project.textClips ?? []);
+  const preset: LyricPreset =
+    LYRIC_PRESETS[lyricPresetId] ?? LYRIC_PRESETS[DEFAULT_LYRIC_PRESET_ID];
 
   // Build lines of up to 3 words that persist within the current section.
   // Show the latest up to 4 lines (newest at bottom).
@@ -68,7 +75,30 @@ export function OverlayCanvas(): React.ReactElement {
             {layeredLines.map((line, idx) => (
               <div
                 key={`${idx}-${line}`}
-                className="rounded bg-black/35 px-4 py-1 text-center text-2xl font-semibold tracking-wide"
+                style={{
+                  padding: `${preset.paddingY ?? 6}px ${
+                    preset.paddingX ?? 16
+                  }px`,
+                  borderRadius: `${preset.borderRadiusPx ?? 8}px`,
+                  background: preset.backgroundColor,
+                  color: preset.gradientText
+                    ? "transparent"
+                    : preset.color ?? "#fff",
+                  fontWeight: preset.fontWeight ?? 700,
+                  fontSize: `${preset.fontSizePx ?? 24}px`,
+                  letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
+                  textTransform: preset.textTransform ?? "none",
+                  textAlign: preset.textAlign ?? "center",
+                  textShadow: preset.textShadow,
+                  WebkitTextStroke: preset.gradientText ? undefined : undefined,
+                  WebkitBackgroundClip: preset.gradientText
+                    ? "text"
+                    : undefined,
+                  backgroundImage: preset.gradientText
+                    ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
+                    : undefined,
+                }}
+                className="text-center font-semibold tracking-wide"
               >
                 {line}
               </div>

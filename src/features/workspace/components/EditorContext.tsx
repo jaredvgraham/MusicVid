@@ -19,6 +19,8 @@ type EditorState = {
   setTranscript: React.Dispatch<React.SetStateAction<Line[]>>;
   selectedIndex: number | null;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
+  lyricPresetId: string;
+  setLyricPresetId: React.Dispatch<React.SetStateAction<string>>;
   currentTimeMs: number;
   setCurrentTimeMs: (ms: number) => void; // internal playhead update (no seek)
   seekToMs: (ms: number) => void; // user-initiated seek
@@ -31,6 +33,7 @@ type EditorState = {
   setPixelsPerSecond: (pps: number) => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
   saveTranscript: (override?: Line[]) => Promise<void>;
+  saveLyricPreset: (presetId: string) => Promise<void>;
 };
 
 const Ctx = createContext<EditorState | null>(null);
@@ -76,6 +79,9 @@ export function EditorProvider({
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const authFetch = useAuthFetch();
   const transcriptRef = useRef<Line[]>(initialTranscript);
+  const [lyricPresetId, setLyricPresetId] = useState<string>(
+    (project as any)?.lyricPresetId || "classic"
+  );
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
@@ -133,6 +139,27 @@ export function EditorProvider({
     [authFetch, project?.id]
   );
 
+  const saveLyricPreset = useCallback(
+    async (presetId: string) => {
+      try {
+        if (!project?.id) return;
+        await authFetch(
+          "next",
+          `/api/workspace/${project.id}/edits/lyric-preset`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ presetId }),
+          }
+        );
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to save lyric preset", e);
+      }
+    },
+    [authFetch, project?.id]
+  );
+
   const value = useMemo<EditorState>(
     () => ({
       project,
@@ -140,6 +167,8 @@ export function EditorProvider({
       setTranscript,
       selectedIndex,
       setSelectedIndex,
+      lyricPresetId,
+      setLyricPresetId,
       currentTimeMs,
       setCurrentTimeMs,
       seekToMs,
@@ -152,11 +181,13 @@ export function EditorProvider({
       setPixelsPerSecond,
       videoRef,
       saveTranscript,
+      saveLyricPreset,
     }),
     [
       project,
       transcript,
       selectedIndex,
+      lyricPresetId,
       currentTimeMs,
       playing,
       pixelsPerSecond,
@@ -164,6 +195,7 @@ export function EditorProvider({
       pause,
       togglePlay,
       saveTranscript,
+      saveLyricPreset,
     ]
   );
 

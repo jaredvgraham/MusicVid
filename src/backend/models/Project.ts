@@ -34,6 +34,7 @@ export interface ProjectDocument extends Document {
   videoKey?: string; // canonical S3 object key
   song?: string;
   lyrics?: string;
+  lyricPresetId?: string;
   callback_status?: number;
   createdAt: Date;
   updatedAt: Date;
@@ -44,7 +45,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
   {
     user_id: { type: String, required: true, index: true },
     time_created: { type: Date, required: true, default: Date.now },
-    name: { type: String, required: true},
+    name: { type: String, required: true },
     failed: { type: Boolean, required: true, default: false },
     s3_url: { type: String },
     callback_status: { type: Number },
@@ -54,6 +55,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
     videoKey: { type: String },
     song: { type: String },
     lyrics: { type: String },
+    lyricPresetId: { type: String },
   },
   { timestamps: true }
 );
