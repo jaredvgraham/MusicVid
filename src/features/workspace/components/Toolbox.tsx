@@ -5,23 +5,28 @@ import { useEditor } from "./EditorContext";
 import { addWord as addWordOp } from "../actions/wordCrud";
 
 export function Toolbox(): React.ReactElement {
-  const { setTranscript, setSelectedIndex, currentTimeMs } = useEditor();
+  const {
+    transcript,
+    setTranscript,
+    setSelectedIndex,
+    currentTimeMs,
+    saveTranscript,
+  } = useEditor();
   const [text, setText] = useState("");
 
-  function addTextClip() {
+  async function addTextClip() {
     // Insert a word at current playhead time
     const start = Math.max(0, Math.floor(currentTimeMs));
     const end = start + 1500; // 1.5s default duration
-    setTranscript((prev) => {
-      const { next, newSelectedIndex } = addWordOp(
-        prev,
-        start,
-        null,
-        text || "New Text"
-      );
-      setSelectedIndex(newSelectedIndex);
-      return next;
-    });
+    const { next, newSelectedIndex } = addWordOp(
+      transcript,
+      start,
+      null,
+      text || "New Text"
+    );
+    setTranscript(next);
+    setSelectedIndex(newSelectedIndex);
+    await saveTranscript(next);
     setText("");
   }
 

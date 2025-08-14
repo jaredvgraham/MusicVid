@@ -49,41 +49,61 @@ export function addWord(
   const start = Math.max(0, currentTimeMs);
   const end = start + defaultDur;
 
-  const pos =
-    selectedIndex != null
-      ? getPositionFromGlobalIndex(lines, selectedIndex)
-      : null;
-
   // If there are no lines yet, create the first line with the new word
   if (!lines || lines.length === 0) {
     const firstLine: Line = { start, end, words: [{ start, end, text }] };
     return { next: [firstLine], newSelectedIndex: 0 };
   }
 
-  const targetLineIndex =
-    pos?.lineIndex != null ? pos.lineIndex : Math.max(0, lines.length - 1);
-  const insertWordIndex =
-    pos?.wordIndex != null
-      ? pos.wordIndex + 1
-      : lines[targetLineIndex]?.words?.length ?? 0;
+  // Prefer placing by time: if the start falls within an existing line range, add to that line
+  let lineIndex = lines.findIndex((ln) => start >= ln.start && start <= ln.end);
 
-  const next: Line[] = lines.map((ln, li) => {
-    if (li !== targetLineIndex) return ln;
-    const newWord: Word = { start, end, text };
-    const words = ln.words ?? [];
-    const newWords = [
-      ...words.slice(0, insertWordIndex),
-      newWord,
-      ...words.slice(insertWordIndex),
-    ];
-    const bounds = recalcLineBounds(newWords, { start: ln.start, end: ln.end });
-    return { ...ln, ...bounds, words: newWords };
-  });
+  // If not inside an existing line, decide where to insert a new line based on time
+  let willInsertNewLine = false;
+  if (lineIndex === -1) {
+    willInsertNewLine = true;
+    lineIndex = lines.findIndex((ln) => start < ln.start);
+    if (lineIndex === -1) lineIndex = lines.length; // append at end
+  }
+
+  let next: Line[];
+  let insertWordIndex: number;
+
+  if (willInsertNewLine) {
+    // Insert a brand new line in time order
+    const newLine: Line = { start, end, words: [{ start, end, text }] };
+    next = [...lines.slice(0, lineIndex), newLine, ...lines.slice(lineIndex)];
+    insertWordIndex = 0;
+  } else {
+    // Insert within existing line, keeping words ordered by start time
+    next = lines.map((ln, li) => {
+      if (li !== lineIndex) return ln;
+      const newWord: Word = { start, end, text };
+      const words = ln.words ?? [];
+      const orderIndex = (() => {
+        for (let i = 0; i < words.length; i++) {
+          if (start < words[i].start) return i;
+        }
+        return words.length;
+      })();
+      const newWords = [
+        ...words.slice(0, orderIndex),
+        newWord,
+        ...words.slice(orderIndex),
+      ];
+      insertWordIndex = orderIndex;
+      const bounds = recalcLineBounds(newWords, {
+        start: ln.start,
+        end: ln.end,
+      });
+      return { ...ln, ...bounds, words: newWords };
+    });
+  }
 
   const newSelectedIndex = computeGlobalIndex(
     next,
-    targetLineIndex,
-    insertWordIndex
+    lineIndex,
+    insertWordIndex!
   );
   return { next, newSelectedIndex };
 }

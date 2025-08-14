@@ -16,6 +16,7 @@ export function Timeline(): React.ReactElement {
     pixelsPerSecond,
     seekToMs,
     setTranscript,
+    saveTranscript,
   } = useEditor();
   const authFetch = useAuthFetch();
   // Keep only the transcript in a ref so we send the latest on mouseup
@@ -166,20 +167,10 @@ export function Timeline(): React.ReactElement {
       if (!d || !project?.id) return;
 
       try {
-        const res = await authFetch(
-          "next",
-          `api/workspace/${project.id}/edits/transcript`,
-          {
-            method: "PUT",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ transcript: transcriptRef.current }),
-          }
-        );
-        console.log(res);
+        // Single save path shared with other components
+        await saveTranscript(transcriptRef.current);
       } catch (error) {
-        console.log("error updating transcript");
-
-        console.error(error);
+        console.error("error updating transcript", error);
       }
     }
 

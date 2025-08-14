@@ -7,44 +7,48 @@ import {
   duplicateWord as duplicateWordOp,
   deleteWord as deleteWordOp,
 } from "../actions/wordCrud";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 export function WordCrudBar(): React.ReactElement {
   const {
+    project,
     transcript,
     setTranscript,
     selectedIndex,
     setSelectedIndex,
     currentTimeMs,
   } = useEditor();
+  const authFetch = useAuthFetch();
+  const { saveTranscript } = useEditor();
 
-  const handleAdd = () => {
-    setTranscript((prev) => {
-      const { next, newSelectedIndex } = addWordOp(
-        prev,
-        currentTimeMs,
-        selectedIndex
-      );
-      setSelectedIndex(newSelectedIndex);
-      return next;
-    });
+  const handleAdd = async () => {
+    const { next, newSelectedIndex } = addWordOp(
+      transcript,
+      currentTimeMs,
+      selectedIndex
+    );
+    setTranscript(next);
+    setSelectedIndex(newSelectedIndex);
+    await saveTranscript(next);
   };
 
-  const handleDuplicate = () => {
+  const handleDuplicate = async () => {
     if (selectedIndex == null) return;
-    setTranscript((prev) => {
-      const { next, newSelectedIndex } = duplicateWordOp(prev, selectedIndex);
-      setSelectedIndex(newSelectedIndex);
-      return next;
-    });
+    const { next, newSelectedIndex } = duplicateWordOp(
+      transcript,
+      selectedIndex
+    );
+    setTranscript(next);
+    setSelectedIndex(newSelectedIndex);
+    await saveTranscript(next);
   };
 
-  const handleDelete = () => {
+  const handleDelete = async () => {
     if (selectedIndex == null) return;
-    setTranscript((prev) => {
-      const { next, newSelectedIndex } = deleteWordOp(prev, selectedIndex);
-      setSelectedIndex(newSelectedIndex);
-      return next;
-    });
+    const { next, newSelectedIndex } = deleteWordOp(transcript, selectedIndex);
+    setTranscript(next);
+    setSelectedIndex(newSelectedIndex);
+    await saveTranscript(next);
   };
 
   const disabled =

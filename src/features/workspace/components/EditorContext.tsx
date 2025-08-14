@@ -10,6 +10,7 @@ import React, {
   useEffect,
 } from "react";
 import type { Line, Project, Word } from "@/types";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 type EditorState = {
   project: Project;
@@ -28,6 +29,7 @@ type EditorState = {
   pixelsPerSecond: number;
   setPixelsPerSecond: (pps: number) => void;
   videoRef: React.RefObject<HTMLVideoElement | null>;
+  saveTranscript: (override?: Line[]) => Promise<void>;
 };
 
 const Ctx = createContext<EditorState | null>(null);
@@ -71,6 +73,11 @@ export function EditorProvider({
   const [playing, setPlaying] = useState(false);
   const [pixelsPerSecond, setPixelsPerSecond] = useState(100); // zoom level
   const videoRef = useRef<HTMLVideoElement | null>(null);
+  const authFetch = useAuthFetch();
+  const transcriptRef = useRef<Line[]>(initialTranscript);
+  useEffect(() => {
+    transcriptRef.current = transcript;
+  }, [transcript]);
 
   const setCurrentTimeMs = useCallback((ms: number) => {
     _setCurrentTimeMs(ms);
@@ -103,6 +110,28 @@ export function EditorProvider({
     else play();
   }, [playing, play, pause]);
 
+  const saveTranscript = useCallback(
+    async (override?: Line[]) => {
+      try {
+        const payload = override ?? transcriptRef.current;
+        if (!project?.id) return;
+        await authFetch(
+          "next",
+          `/api/workspace/${project.id}/edits/transcript`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ transcript: payload }),
+          }
+        );
+      } catch (e) {
+        // eslint-disable-next-line no-console
+        console.error("Failed to save transcript", e);
+      }
+    },
+    [authFetch, project?.id]
+  );
+
   const value = useMemo<EditorState>(
     () => ({
       project,
@@ -121,6 +150,7 @@ export function EditorProvider({
       pixelsPerSecond,
       setPixelsPerSecond,
       videoRef,
+      saveTranscript,
     }),
     [
       project,
@@ -132,6 +162,7 @@ export function EditorProvider({
       play,
       pause,
       togglePlay,
+      saveTranscript,
     ]
   );
 
