@@ -4,6 +4,7 @@
 import { useEffect, useState } from "react";
 import { getSocket } from "../lib/socket";
 import { Project, Line, Word } from "../types";
+import { useRouter } from "next/navigation";
 
 export function useProjectSocket(projectId: string | null) {
   const [connected, setConnected] = useState(false);
@@ -11,7 +12,7 @@ export function useProjectSocket(projectId: string | null) {
   const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [persistedId, setPersistedId] = useState<string | null>(null);
-
+  const router = useRouter();
   // Load persisted project id on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -102,13 +103,14 @@ export function useProjectSocket(projectId: string | null) {
           transcript: lines,
         };
         console.log("onFinished", normalized);
-        setProject(normalized);
+        // setProject(normalized);
         // Success: clear persisted id so we don't auto-join next load
         if (typeof window !== "undefined") {
           try {
             window.localStorage.removeItem("mv:projectId");
           } catch {}
         }
+        router.push(`/workspace/${activeId}`);
       }
     };
 

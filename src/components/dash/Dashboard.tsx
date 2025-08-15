@@ -190,7 +190,7 @@ const Dashboard = (): React.ReactElement => {
                     >
                       <path d="M3 7h18M3 12h18M3 17h18" />
                     </svg>
-                    Open
+                    Open Workspace
                   </button>
                   <button
                     type="button"

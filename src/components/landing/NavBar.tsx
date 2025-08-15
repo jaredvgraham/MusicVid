@@ -48,6 +48,13 @@ export default function NavBar(): React.ReactElement {
             >
               Dashboard
             </Link>
+            <Link
+              key="Upload"
+              href="/upload"
+              className="text-sm text-white/70 transition hover:text-white"
+            >
+              Upload
+            </Link>
           </SignedIn>
         </nav>
 
@@ -121,6 +128,14 @@ export default function NavBar(): React.ReactElement {
                   onClick={() => setOpen(false)}
                 >
                   Dashboard
+                </Link>
+                <Link
+                  key="Upload"
+                  href="/upload"
+                  className="rounded-md px-2 py-2 text-sm text-white/80 hover:bg-white/10"
+                  onClick={() => setOpen(false)}
+                >
+                  Upload
                 </Link>
               </SignedIn>
             </nav>

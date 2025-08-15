@@ -12,7 +12,6 @@ class ProjectClient {
       const projects = await Project.find({ user_id: clerkId }).sort({
         timeCreated: -1,
       });
-      console.log(JSON.stringify(projects, null, 2));
       return projects;
     } catch (err) {
       return Utils.handleApiError(err);
