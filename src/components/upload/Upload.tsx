@@ -9,38 +9,77 @@ function Animations(): React.ReactElement {
   return (
     <style jsx global>{`
       /* Subtle one-time entry animation */
-      .enter { animation: fadeInUp 600ms ease-out both; }
+      .enter {
+        animation: fadeInUp 600ms ease-out both;
+      }
       @keyframes fadeInUp {
-        0% { opacity: 0; transform: translateY(8px); }
-        100% { opacity: 1; transform: translateY(0); }
+        0% {
+          opacity: 0;
+          transform: translateY(8px);
+        }
+        100% {
+          opacity: 1;
+          transform: translateY(0);
+        }
       }
 
       /* Ongoing equalizer animation */
-      .eq { display: inline-flex; align-items: flex-end; gap: 4px; height: 14px; }
+      .eq {
+        display: inline-flex;
+        align-items: flex-end;
+        gap: 4px;
+        height: 14px;
+      }
       .eq-bar {
         width: 3px;
         height: 10px;
         border-radius: 9999px;
-        background: linear-gradient(180deg, rgba(240,171,252,.9), rgba(129,140,248,.9));
+        background: linear-gradient(
+          180deg,
+          rgba(240, 171, 252, 0.9),
+          rgba(129, 140, 248, 0.9)
+        );
         transform-origin: bottom;
         animation: equalize 1.4s ease-in-out infinite;
       }
-      .eq-bar:nth-child(2) { animation-delay: 0.15s; }
-      .eq-bar:nth-child(3) { animation-delay: 0.3s; }
-      .eq-bar:nth-child(4) { animation-delay: 0.45s; }
-      .eq-bar:nth-child(5) { animation-delay: 0.6s; }
+      .eq-bar:nth-child(2) {
+        animation-delay: 0.15s;
+      }
+      .eq-bar:nth-child(3) {
+        animation-delay: 0.3s;
+      }
+      .eq-bar:nth-child(4) {
+        animation-delay: 0.45s;
+      }
+      .eq-bar:nth-child(5) {
+        animation-delay: 0.6s;
+      }
       @keyframes equalize {
-        0% { transform: scaleY(0.5); }
-        25% { transform: scaleY(1); }
-        50% { transform: scaleY(0.6); }
-        75% { transform: scaleY(0.9); }
-        100% { transform: scaleY(0.5); }
+        0% {
+          transform: scaleY(0.5);
+        }
+        25% {
+          transform: scaleY(1);
+        }
+        50% {
+          transform: scaleY(0.6);
+        }
+        75% {
+          transform: scaleY(0.9);
+        }
+        100% {
+          transform: scaleY(0.5);
+        }
       }
 
       /* Respect reduced motion */
       @media (prefers-reduced-motion: reduce) {
-        .enter { animation: none; }
-        .eq-bar { animation: none; }
+        .enter {
+          animation: none;
+        }
+        .eq-bar {
+          animation: none;
+        }
       }
     `}</style>
   );
@@ -68,7 +107,11 @@ export default function Upload(): React.ReactElement {
   const fetchVideos = useCallback(async (q: string) => {
     try {
       setVideosLoading(true);
-      const response = await fetch(`https://pixabay.com/api/videos/?key=${process.env.NEXT_PUBLIC_PIXELBAY_API_KEY}&q=${encodeURIComponent(q)}&video_type=film&per_page=21`);
+      const response = await fetch(
+        `https://pixabay.com/api/videos/?key=${
+          process.env.NEXT_PUBLIC_PIXELBAY_API_KEY
+        }&q=${encodeURIComponent(q)}&video_type=film&per_page=21`
+      );
       if (!response.ok) {
         console.error("Failed to fetch videos");
         console.error(response);
@@ -223,7 +266,9 @@ export default function Upload(): React.ReactElement {
             <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
               <div className="h-full w-1/2 animate-pulse bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
             </div>
-            <div className="mt-3 text-xs text-white/50">This can take a minute. You can leave this page open.</div>
+            <div className="mt-3 text-xs text-white/50">
+              This can take a minute. You can leave this page open.
+            </div>
           </div>
         </div>
       </div>
@@ -254,19 +299,32 @@ export default function Upload(): React.ReactElement {
         <div className="p-6 sm:p-8">
           <div className="flex items-end justify-between">
             <div>
-              <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">New Project</h1>
-              <p className="mt-1 text-sm text-white/60">Name it, optionally add lyrics, then upload your song.</p>
+              <h1 className="text-xl font-semibold tracking-tight text-white sm:text-2xl">
+                New Project
+              </h1>
+              <p className="mt-1 text-sm text-white/60">
+                Name it, optionally add lyrics, then upload your song.
+              </p>
             </div>
             <div className="hidden items-center gap-2 sm:flex">
-              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">Secure</span>
-              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">Lossless</span>
+              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">
+                Secure
+              </span>
+              <span className="rounded-md border border-white/10 bg-white/5 px-2 py-1 text-xs text-white/60">
+                Lossless
+              </span>
             </div>
           </div>
 
           {/* Fields */}
           <div className="mt-6 grid gap-4">
             <div>
-              <label htmlFor="project-name" className="block text-sm font-medium text-white">Project Name</label>
+              <label
+                htmlFor="project-name"
+                className="block text-sm font-medium text-white"
+              >
+                Project Name
+              </label>
               <input
                 id="project-name"
                 type="text"
@@ -283,7 +341,17 @@ export default function Upload(): React.ReactElement {
                 onClick={() => setShowLyrics((v) => !v)}
                 className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/10"
               >
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="opacity-80">
+                <svg
+                  width="14"
+                  height="14"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  className="opacity-80"
+                >
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 {showLyrics ? "Hide lyrics" : "Add lyrics (optional)"}
@@ -317,11 +385,22 @@ export default function Upload(): React.ReactElement {
             >
               <div className="grid place-items-center text-white px-6">
                 <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
-                  <svg viewBox="0 0 24 24" fill="none" width="20" height="20" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">
+                  <svg
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    width="20"
+                    height="20"
+                    stroke="currentColor"
+                    strokeWidth="1.6"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
                     <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" />
                   </svg>
                 </div>
-                <p className="mt-2 text-sm text-white/80">Drop audio here or click to browse</p>
+                <p className="mt-2 text-sm text-white/80">
+                  Drop audio here or click to browse
+                </p>
                 <div className="mt-2 eq" aria-hidden>
                   <span className="eq-bar" />
                   <span className="eq-bar" />
@@ -340,7 +419,9 @@ export default function Upload(): React.ReactElement {
               />
             </label>
             {lastFileName && (
-              <p className="mt-3 max-w-[28rem] truncate text-xs text-white/60">Selected: {lastFileName}</p>
+              <p className="mt-3 max-w-[28rem] truncate text-xs text-white/60">
+                Selected: {lastFileName}
+              </p>
             )}
 
             <div className="mt-6 flex items-center gap-3">
@@ -350,7 +431,16 @@ export default function Upload(): React.ReactElement {
                 disabled={isUploading}
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <svg
+                  width="16"
+                  height="16"
+                  viewBox="0 0 24 24"
+                  fill="none"
+                  stroke="currentColor"
+                  strokeWidth="2"
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                >
                   <path d="M12 5v14M5 12h14" />
                 </svg>
                 Get started
@@ -369,11 +459,13 @@ export default function Upload(): React.ReactElement {
                 {uploadError}
               </p>
             )}
- 
+
             {/* Background video selector */}
             <div className="mt-10 w-full">
               <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-                <h2 className="text-sm font-medium text-white/90">Select a background video (optional)</h2>
+                <h2 className="text-sm font-medium text-white/90">
+                  Select a background video (optional)
+                </h2>
                 <form
                   className="flex w-full items-center gap-2 sm:w-auto"
                   onSubmit={(e) => {
@@ -411,14 +503,20 @@ export default function Upload(): React.ReactElement {
                     <button
                       key={`${idx}-${url}`}
                       type="button"
-                      onClick={() => setSelectedVideo((prev) => (prev === url ? null : url))}
+                      onClick={() =>
+                        setSelectedVideo((prev) => (prev === url ? null : url))
+                      }
                       aria-selected={selectedVideo === url}
                       role="option"
                       className={`relative overflow-hidden rounded-md border transition ${
                         selectedVideo === url
                           ? "border-purple-400/70 ring-2 ring-purple-400 shadow-[0_0_0_3px_rgba(168,85,247,0.35)]"
                           : "border-white/10 hover:border-white/20"
-                      } ${selectedVideo && selectedVideo !== url ? "opacity-60" : ""}`}
+                      } ${
+                        selectedVideo && selectedVideo !== url
+                          ? "opacity-60"
+                          : ""
+                      }`}
                       title={url}
                     >
                       <video
@@ -434,8 +532,20 @@ export default function Upload(): React.ReactElement {
                         <>
                           <div className="pointer-events-none absolute inset-0 bg-purple-500/10" />
                           <div className="pointer-events-none absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-purple-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
-                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="-mt-[1px]">
-                              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            <svg
+                              width="10"
+                              height="10"
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              className="-mt-[1px]"
+                            >
+                              <path
+                                d="M20 6L9 17l-5-5"
+                                stroke="currentColor"
+                                strokeWidth="3"
+                                strokeLinecap="round"
+                                strokeLinejoin="round"
+                              />
                             </svg>
                             Selected
                           </div>

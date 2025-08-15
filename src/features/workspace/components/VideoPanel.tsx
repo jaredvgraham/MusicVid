@@ -8,6 +8,9 @@ export function VideoPanel(): React.ReactElement {
   const { project, videoRef, setCurrentTimeMs, setPlaying, setRenderScale } =
     useEditor();
 
+  const baseW = (project as any)?.width || 1080;
+  const baseH = (project as any)?.height || 1920;
+
   useEffect(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -28,13 +31,14 @@ export function VideoPanel(): React.ReactElement {
 
   return (
     <div
-      className="relative mx-auto w-full max-w-[400px] aspect-[9/16] rounded border border-white/10 bg-black"
+      className="relative mx-auto w-full max-w-[400px] rounded border border-white/10 bg-black"
       ref={(el) => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
-        const scale = rect.width / 1080;
+        const scale = rect.width / baseW;
         setRenderScale(scale);
       }}
+      style={{ aspectRatio: `${baseW} / ${baseH}` } as any}
     >
       <video
         ref={videoRef}

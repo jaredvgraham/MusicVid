@@ -25,6 +25,7 @@ export type Project = {
   videoFinal?: string;
   transcript: Line[];
   textClips?: TextClip[];
+  lyricPresetId: string;
 };
 
 export type TextClip = {
