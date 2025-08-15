@@ -171,3 +171,24 @@ export function deleteWord(
     flatCount === 0 ? null : Math.min(selectedIndex, flatCount - 1);
   return { next, newSelectedIndex };
 }
+
+export function updateWordText(
+  lines: Line[],
+  selectedIndex: number | null,
+  newText: string
+): Line[] {
+  if (selectedIndex == null) return lines;
+  const pos = getPositionFromGlobalIndex(lines, selectedIndex);
+  if (!pos) return lines;
+  const { lineIndex, wordIndex } = pos;
+  const next: Line[] = lines.map((ln, li) => {
+    if (li !== lineIndex) return ln;
+    const words = ln.words ?? [];
+    const w = words[wordIndex];
+    if (!w) return ln;
+    const newWords = [...words];
+    newWords[wordIndex] = { ...w, text: newText };
+    return { ...ln, words: newWords };
+  });
+  return next;
+}

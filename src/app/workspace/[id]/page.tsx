@@ -12,6 +12,7 @@ import { Toolbox } from "@/features/workspace/components/Toolbox";
 import { TextLayersPanel } from "@/features/workspace/components/TextLayersPanel";
 import { Timeline } from "@/features/workspace/components/Timeline";
 import { EditorProvider } from "@/features/workspace/components/EditorContext";
+import { WordCrudBar } from "@/features/workspace/components/WordCrudBar";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
@@ -160,6 +161,7 @@ export default function WorkspacePage(): React.ReactElement {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2 space-y-4">
               <VideoPanel />
+
               <Timeline />
             </div>
             <div className="hidden md:block space-y-4">

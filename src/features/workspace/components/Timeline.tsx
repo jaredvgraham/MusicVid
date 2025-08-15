@@ -5,6 +5,7 @@ import { useEditor, formatTime } from "./EditorContext";
 import type { Line } from "@/types";
 import { buildWordSegmentsFromLines } from "../visibility";
 import { deleteWord as deleteWordOp } from "../actions/wordCrud";
+import { WordCrudBar } from "./WordCrudBar";
 
 export function Timeline(): React.ReactElement {
   const {
@@ -173,6 +174,10 @@ export function Timeline(): React.ReactElement {
       const d = dragRef.current;
       dragRef.current = null;
       if (!d || !project?.id) return;
+      try {
+        document.body.style.userSelect = "";
+        (document.body.style as any).webkitUserSelect = "";
+      } catch {}
 
       try {
         // Single save path shared with other components
@@ -193,24 +198,14 @@ export function Timeline(): React.ReactElement {
   return (
     <div className="rounded border border-white/10 bg-neutral-950">
       <div className="flex items-center justify-between px-3 py-2 text-xs text-white/60">
-        <span>Timeline</span>
-        <div className="flex items-center gap-2">
-          <span>{formatTime(currentTimeMs)}</span>
-          <button
-            onClick={onDeleteSelected}
-            disabled={!canDelete}
-            className="rounded border border-red-500/20 bg-red-500/10 px-2 py-1 text-[11px] text-red-200 hover:bg-red-500/20 disabled:opacity-40"
-          >
-            Delete
-          </button>
-        </div>
+        <WordCrudBar />
       </div>
       <div
         ref={containerRef}
-        className="relative h-72 overflow-x-auto overflow-y-auto border-t border-white/10"
+        className="relative h-72 overflow-x-auto overflow-y-auto border-t border-white/10 select-none"
       >
         <div
-          className="relative h-full"
+          className="relative h-full select-none"
           style={{
             width: `${(widthMs / 1000) * pixelsPerSecond}px`,
             height: `${TOP_PAD + lanesToShow * ROW_HEIGHT}px`,
@@ -259,11 +254,16 @@ export function Timeline(): React.ReactElement {
             return (
               <div
                 key={`${seg.index}-${seg.start}`}
-                className={`absolute truncate rounded border text-xs ${
-                  isSelected || isActive
-                    ? "border-emerald-400 bg-emerald-500/25"
-                    : "border-white/10 bg-white/5 hover:bg-white/10"
+                className={`absolute truncate rounded border text-xs cursor-grab active:cursor-grabbing ${
+                  isActive ? "border-emerald-400" : "border-white/10"
+                } ${
+                  isSelected
+                    ? "bg-yellow-500/25 border-gray-200"
+                    : isActive
+                    ? "bg-emerald-500/25"
+                    : "bg-white/5 hover:bg-white/10"
                 }`}
+                draggable={false}
                 style={{ left, width, top, height: CLIP_HEIGHT }}
                 title={seg.text}
                 onClick={() => setSelectedIndex(seg.index)}
@@ -271,6 +271,11 @@ export function Timeline(): React.ReactElement {
                 onMouseDown={(e) => {
                   // Begin move drag on body
                   if ((e.target as HTMLElement).dataset.resizeHandle) return;
+                  e.preventDefault();
+                  try {
+                    document.body.style.userSelect = "none";
+                    (document.body.style as any).webkitUserSelect = "none";
+                  } catch {}
                   const posInner = getPositionFromGlobalIndex(lines, seg.index);
                   if (!posInner) return;
                   const word =
@@ -289,9 +294,14 @@ export function Timeline(): React.ReactElement {
               >
                 <div
                   data-resize-handle="start"
-                  className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent"
+                  className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent flex items-center"
                   onMouseDown={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
+                    try {
+                      document.body.style.userSelect = "none";
+                      (document.body.style as any).webkitUserSelect = "none";
+                    } catch {}
                     const posInner = getPositionFromGlobalIndex(
                       lines,
                       seg.index
@@ -310,12 +320,19 @@ export function Timeline(): React.ReactElement {
                       globalIndex: seg.index,
                     };
                   }}
-                />
+                >
+                  <div className="mx-auto h-2/3 w-0.5 rounded bg-white/60" />
+                </div>
                 <div
                   data-resize-handle="end"
-                  className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent"
+                  className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent flex items-center"
                   onMouseDown={(e) => {
                     e.stopPropagation();
+                    e.preventDefault();
+                    try {
+                      document.body.style.userSelect = "none";
+                      (document.body.style as any).webkitUserSelect = "none";
+                    } catch {}
                     const posInner = getPositionFromGlobalIndex(
                       lines,
                       seg.index
@@ -334,7 +351,9 @@ export function Timeline(): React.ReactElement {
                       globalIndex: seg.index,
                     };
                   }}
-                />
+                >
+                  <div className="mx-auto h-2/3 w-0.5 rounded bg-white/60" />
+                </div>
                 <div className="h-full w-full px-2">
                   <div className="line-clamp-1 leading-[24px] text-left">
                     {seg.text}
