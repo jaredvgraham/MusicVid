@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, useCallback } from "react";
 import { useAuth } from "@clerk/nextjs";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
@@ -60,13 +60,38 @@ export default function Upload(): React.ReactElement {
   const { userId } = useAuth();
   const [hasId, setHasId] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const [videos, setVideos] = useState<string[]>([]);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [videoQuery, setVideoQuery] = useState<string>("cinematic");
+  const [videosLoading, setVideosLoading] = useState<boolean>(false);
+
+  const fetchVideos = useCallback(async (q: string) => {
+    try {
+      setVideosLoading(true);
+      const response = await fetch(`https://pixabay.com/api/videos/?key=${process.env.NEXT_PUBLIC_PIXELBAY_API_KEY}&q=${encodeURIComponent(q)}&video_type=film&per_page=21`);
+      if (!response.ok) {
+        console.error("Failed to fetch videos");
+        console.error(response);
+        setVideos([]);
+        return;
+      }
+      const data = await response.json();
+      setVideos(data.hits.map((hit: any) => hit.videos.medium.url));
+    } catch (e) {
+      console.error(e);
+      setVideos([]);
+    } finally {
+      setVideosLoading(false);
+    }
+  }, []);
 
   // Preserve spinner on refresh if a pending project id exists in localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     const persisted = window.localStorage.getItem("mv:projectId");
     if (persisted) setHasId(true);
-  }, []);
+    fetchVideos(videoQuery);
+  }, [fetchVideos, videoQuery]);
 
   const processFile = async (file: File) => {
     const allowed = [
@@ -101,6 +126,7 @@ export default function Upload(): React.ReactElement {
       formData.append("model", "htdemucs"); // kept for compatibility per API
       formData.append("user_id", userId || "");
       formData.append("name", projectName.trim());
+      if (selectedVideo) formData.append("video", selectedVideo);
       if (lyrics.trim()) formData.append("lyrics", lyrics.trim());
 
       const response = await fetch(
@@ -343,6 +369,83 @@ export default function Upload(): React.ReactElement {
                 {uploadError}
               </p>
             )}
+ 
+            {/* Background video selector */}
+            <div className="mt-10 w-full">
+              <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+                <h2 className="text-sm font-medium text-white/90">Select a background video (optional)</h2>
+                <form
+                  className="flex w-full items-center gap-2 sm:w-auto"
+                  onSubmit={(e) => {
+                    e.preventDefault();
+                    fetchVideos(videoQuery);
+                  }}
+                >
+                  <input
+                    type="search"
+                    placeholder="Search videos (e.g., cinematic, nature)"
+                    className="w-full rounded-md border border-white/10 bg-neutral-900/60 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none ring-0 transition focus:border-white/20 focus:bg-neutral-900/70 sm:w-64"
+                    value={videoQuery}
+                    onChange={(e) => setVideoQuery(e.target.value)}
+                  />
+                  <button
+                    type="submit"
+                    className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/10 disabled:opacity-50"
+                    disabled={videosLoading}
+                  >
+                    {videosLoading ? "Searching…" : "Search"}
+                  </button>
+                </form>
+              </div>
+              {videosLoading ? (
+                <div className="rounded-md border border-white/10 bg-white/5 p-3 text-xs text-white/60">
+                  Searching videos…
+                </div>
+              ) : videos.length === 0 ? (
+                <div className="rounded-md border border-white/10 bg-white/5 p-3 text-xs text-white/60">
+                  Loading sample videos…
+                </div>
+              ) : (
+                <div className="grid w-full grid-cols-2 gap-3 sm:grid-cols-3">
+                  {videos.map((url, idx) => (
+                    <button
+                      key={`${idx}-${url}`}
+                      type="button"
+                      onClick={() => setSelectedVideo((prev) => (prev === url ? null : url))}
+                      aria-selected={selectedVideo === url}
+                      role="option"
+                      className={`relative overflow-hidden rounded-md border transition ${
+                        selectedVideo === url
+                          ? "border-purple-400/70 ring-2 ring-purple-400 shadow-[0_0_0_3px_rgba(168,85,247,0.35)]"
+                          : "border-white/10 hover:border-white/20"
+                      } ${selectedVideo && selectedVideo !== url ? "opacity-60" : ""}`}
+                      title={url}
+                    >
+                      <video
+                        src={url}
+                        muted
+                        loop
+                        playsInline
+                        autoPlay
+                        preload="metadata"
+                        className="aspect-video w-full object-cover"
+                      />
+                      {selectedVideo === url && (
+                        <>
+                          <div className="pointer-events-none absolute inset-0 bg-purple-500/10" />
+                          <div className="pointer-events-none absolute right-1.5 top-1.5 inline-flex items-center gap-1 rounded-full bg-purple-600 px-1.5 py-0.5 text-[10px] font-semibold text-white">
+                            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" className="-mt-[1px]">
+                              <path d="M20 6L9 17l-5-5" stroke="currentColor" strokeWidth="3" strokeLinecap="round" strokeLinejoin="round" />
+                            </svg>
+                            Selected
+                          </div>
+                        </>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
         </div>
       </div>
