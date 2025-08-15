@@ -10,7 +10,8 @@ import {
 } from "../styles/lyricPresets";
 
 export function OverlayCanvas(): React.ReactElement {
-  const { transcript, project, currentTimeMs, lyricPresetId } = useEditor();
+  const { transcript, project, currentTimeMs, lyricPresetId, renderScale } =
+    useEditor();
   const [clips] = useState<TextClip[]>(project.textClips ?? []);
   const preset: LyricPreset =
     LYRIC_PRESETS[lyricPresetId] ?? LYRIC_PRESETS[DEFAULT_LYRIC_PRESET_ID];
@@ -66,7 +67,7 @@ export function OverlayCanvas(): React.ReactElement {
                 ? "transparent"
                 : preset.color ?? "#fff",
               fontWeight: preset.fontWeight ?? 700,
-              fontSize: `${(preset.fontSizePx ?? 24) + 2}px`,
+              fontSize: `${((preset.fontSizePx ?? 24) + 2) * renderScale}px`,
               letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
               textTransform: preset.textTransform ?? "none",
               textAlign: preset.textAlign ?? "center",
@@ -93,7 +94,7 @@ export function OverlayCanvas(): React.ReactElement {
                     ? "transparent"
                     : preset.color ?? "#fff",
                   fontWeight: preset.fontWeight ?? 700,
-                  fontSize: `${preset.fontSizePx ?? 24}px`,
+                  fontSize: `${(preset.fontSizePx ?? 24) * renderScale}px`,
                   letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
                   textTransform: preset.textTransform ?? "none",
                   textAlign: preset.textAlign ?? "center",

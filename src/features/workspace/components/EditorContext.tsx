@@ -34,6 +34,8 @@ type EditorState = {
   videoRef: React.RefObject<HTMLVideoElement | null>;
   saveTranscript: (override?: Line[]) => Promise<void>;
   saveLyricPreset: (presetId: string) => Promise<void>;
+  renderScale: number; // container width relative to 1080 base
+  setRenderScale: (s: number) => void;
 };
 
 const Ctx = createContext<EditorState | null>(null);
@@ -82,6 +84,7 @@ export function EditorProvider({
   const [lyricPresetId, setLyricPresetId] = useState<string>(
     (project as any)?.lyricPresetId || "classic"
   );
+  const [renderScale, setRenderScale] = useState<number>(1);
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
@@ -180,6 +183,8 @@ export function EditorProvider({
       videoRef,
       saveTranscript,
       saveLyricPreset,
+      renderScale,
+      setRenderScale,
     }),
     [
       project,
@@ -194,6 +199,7 @@ export function EditorProvider({
       togglePlay,
       saveTranscript,
       saveLyricPreset,
+      renderScale,
     ]
   );
 

@@ -5,7 +5,8 @@ import { useEditor } from "./EditorContext";
 import { OverlayCanvas } from "./OverlayCanvas";
 
 export function VideoPanel(): React.ReactElement {
-  const { project, videoRef, setCurrentTimeMs, setPlaying } = useEditor();
+  const { project, videoRef, setCurrentTimeMs, setPlaying, setRenderScale } =
+    useEditor();
 
   useEffect(() => {
     const v = videoRef.current;
@@ -26,8 +27,21 @@ export function VideoPanel(): React.ReactElement {
   // OverlayCanvas derives its own view from currentTimeMs; avoid intervals here
 
   return (
-    <div className="relative mx-auto max-w-[400px] rounded border border-white/10 bg-black">
-      <video ref={videoRef} src={project.video} controls className="w-full" />
+    <div
+      className="relative mx-auto w-full max-w-[400px] aspect-[9/16] rounded border border-white/10 bg-black"
+      ref={(el) => {
+        if (!el) return;
+        const rect = el.getBoundingClientRect();
+        const scale = rect.width / 1080;
+        setRenderScale(scale);
+      }}
+    >
+      <video
+        ref={videoRef}
+        src={project.video}
+        controls
+        className="absolute inset-0 h-full w-full object-cover"
+      />
       <OverlayCanvas />
       <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/80">
         Preview
