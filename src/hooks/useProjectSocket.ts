@@ -6,9 +6,20 @@ import { getSocket } from "../lib/socket";
 import { Project, Line, Word } from "../types";
 import { useRouter } from "next/navigation";
 
+interface Status {
+  id: string;
+  status: string;
+  progress: number;
+}
+
 export function useProjectSocket(projectId: string | null) {
   const [connected, setConnected] = useState(false);
   const [finished, setFinished] = useState(false);
+  const [status, setStatus] = useState<Status>({
+    id: projectId ?? "",
+    status: "isolating vocals",
+    progress: 0,
+  });
   const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [persistedId, setPersistedId] = useState<string | null>(null);
@@ -113,6 +124,11 @@ export function useProjectSocket(projectId: string | null) {
         router.push(`/workspace/${activeId}`);
       }
     };
+    const onStatus = (payload: any) => {
+      if (payload?.id === activeId) {
+        setStatus(payload);
+      }
+    };
 
     checkCompleted();
     sock.on("connect", onConnect);
@@ -120,6 +136,7 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("project:joined", onJoined);
     sock.on("project:finished", onFinished);
     sock.on("project:error", onProjectError);
+    sock.on("project:status", onStatus);
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
     if (!sock.connected) sock.connect();
@@ -130,11 +147,12 @@ export function useProjectSocket(projectId: string | null) {
       sock.off("project:joined", onJoined);
       sock.off("project:finished", onFinished);
       sock.off("project:error", onProjectError);
+      sock.off("project:status", onStatus);
       sock.off("connect_error", onConnectError);
       sock.off("error", onConnectError);
       // do not disconnect here; keep singleton alive for other pages
     };
   }, [activeId]);
 
-  return { connected, finished, project, error };
+  return { connected, finished, project, error, status };
 }

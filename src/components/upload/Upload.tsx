@@ -87,7 +87,7 @@ function Animations(): React.ReactElement {
 
 export default function Upload(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const { finished, project, error } = useProjectSocket(projectId);
+  const { finished, project, error, status } = useProjectSocket(projectId);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -277,14 +277,17 @@ export default function Upload(): React.ReactElement {
         <div className="overflow-hidden rounded-2xl border border-white/10 bg-white/5 shadow-xl ring-1 ring-white/10 backdrop-blur">
           <div className="p-6">
             <div className="flex items-center gap-3">
-              <LoadingSpinner />
+              <LoadingSpinner>{`${Math.round(status?.progress ?? 0)}%`}</LoadingSpinner>
               <div>
-                <p className="font-medium text-white">Processing your audio…</p>
+                <p className="font-medium text-white">{status?.status ?? "Processing your audio…"}</p>
                 <p className="text-sm text-white/60">{lastFileName ?? ""}</p>
               </div>
             </div>
             <div className="mt-4 h-1.5 w-full overflow-hidden rounded-full bg-white/10">
-              <div className="h-full w-1/2 animate-pulse bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600 transition-all"
+                style={{ width: `${Math.min(100, Math.max(0, Math.round(status?.progress ?? 0)))}%` }}
+              />
             </div>
             <div className="mt-3 text-xs text-white/50">
               This can take a minute. You can leave this page open.
