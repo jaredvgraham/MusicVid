@@ -17,7 +17,6 @@ export async function GET() {
   const result = await ProjectClient.getProjects(userId);
 
   if (Array.isArray(result)) {
-    console.log(result);
     const projects = result.map((doc) => ({
       _id: doc._id.toString(),
       song: doc.song,
@@ -26,9 +25,8 @@ export async function GET() {
         doc.time_created instanceof Date
           ? doc.time_created.toISOString()
           : (doc.time_created as any),
-      video: doc.video ?? (doc as any).s3_url,
+      video: doc.video,
     }));
-    console.log(JSON.stringify(projects, null, 2));
     return NextResponse.json({ projects });
   } else {
     const status = result.statusCode ?? 500;
