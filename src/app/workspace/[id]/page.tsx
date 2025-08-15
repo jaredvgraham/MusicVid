@@ -166,7 +166,6 @@ export default function WorkspacePage(): React.ReactElement {
             </div>
             <div className="hidden md:block space-y-4">
               <Toolbox />
-              <TextLayersPanel />
 
               <div className="mt-4 rounded border border-white/10 p-3 text-sm text-white/50">
                 Final render is produced server-side from the sanitized

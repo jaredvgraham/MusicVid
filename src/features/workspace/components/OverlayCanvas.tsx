@@ -62,8 +62,21 @@ export function OverlayCanvas(): React.ReactElement {
               left: `${c.xPct}%`,
               top: `${c.yPct}%`,
               transform: "translate(-50%, -50%)",
+              color: preset.gradientText
+                ? "transparent"
+                : preset.color ?? "#fff",
+              fontWeight: preset.fontWeight ?? 700,
+              fontSize: `${(preset.fontSizePx ?? 24) + 2}px`,
+              letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
+              textTransform: preset.textTransform ?? "none",
+              textAlign: preset.textAlign ?? "center",
+              textShadow: preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
+              WebkitBackgroundClip: preset.gradientText ? "text" : undefined,
+              backgroundImage: preset.gradientText
+                ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
+                : undefined,
             }}
-            className="absolute select-none rounded bg-black/35 px-3 py-1 text-2xl font-semibold tracking-wide"
+            className="absolute select-none text-2xl font-semibold tracking-wide"
           >
             {c.text}
           </div>
@@ -76,11 +89,6 @@ export function OverlayCanvas(): React.ReactElement {
               <div
                 key={`${idx}-${line}`}
                 style={{
-                  padding: `${preset.paddingY ?? 6}px ${
-                    preset.paddingX ?? 16
-                  }px`,
-                  borderRadius: `${preset.borderRadiusPx ?? 8}px`,
-                  background: preset.backgroundColor,
                   color: preset.gradientText
                     ? "transparent"
                     : preset.color ?? "#fff",
@@ -89,8 +97,8 @@ export function OverlayCanvas(): React.ReactElement {
                   letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
                   textTransform: preset.textTransform ?? "none",
                   textAlign: preset.textAlign ?? "center",
-                  textShadow: preset.textShadow,
-                  WebkitTextStroke: preset.gradientText ? undefined : undefined,
+                  textShadow:
+                    preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
                   WebkitBackgroundClip: preset.gradientText
                     ? "text"
                     : undefined,

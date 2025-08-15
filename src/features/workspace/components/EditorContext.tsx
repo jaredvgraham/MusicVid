@@ -132,7 +132,6 @@ export function EditorProvider({
           }
         );
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error("Failed to save transcript", e);
       }
     },
@@ -153,7 +152,6 @@ export function EditorProvider({
           }
         );
       } catch (e) {
-        // eslint-disable-next-line no-console
         console.error("Failed to save lyric preset", e);
       }
     },
@@ -234,6 +232,20 @@ export function useEditorHotkeys() {
 
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
+      // Do not handle hotkeys while typing in inputs/textareas/contenteditable
+      const target =
+        (e.target as HTMLElement) ||
+        (document.activeElement as HTMLElement | null);
+      const tag = target?.tagName?.toLowerCase();
+      const isTyping = !!(
+        target &&
+        (tag === "input" ||
+          tag === "textarea" ||
+          target.isContentEditable ||
+          target.getAttribute("role") === "textbox")
+      );
+      if (isTyping || e.metaKey || e.ctrlKey || e.altKey) return;
+
       // Space toggles play/pause
       if (e.code === "Space") {
         e.preventDefault();

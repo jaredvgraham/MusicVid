@@ -196,7 +196,7 @@ export function Timeline(): React.ReactElement {
   }, [pixelsPerSecond, setTranscript, project?.id]);
 
   return (
-    <div className="rounded border border-white/10 bg-neutral-950">
+    <div className="rounded border border-white/10 bg-neutral-950 w-full">
       <div className="flex items-center justify-between px-3 py-2 text-xs text-white/60">
         <WordCrudBar />
       </div>
