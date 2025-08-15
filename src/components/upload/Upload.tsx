@@ -126,7 +126,7 @@ export default function Upload(): React.ReactElement {
       formData.append("model", "htdemucs"); // kept for compatibility per API
       formData.append("user_id", userId || "");
       formData.append("name", projectName.trim());
-      if (selectedVideo) formData.append("video", selectedVideo);
+      if (selectedVideo) formData.append("video_url", selectedVideo);
       if (lyrics.trim()) formData.append("lyrics", lyrics.trim());
 
       const response = await fetch(
