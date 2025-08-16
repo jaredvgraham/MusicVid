@@ -139,86 +139,119 @@ export function WordCrudBar(): React.ReactElement {
   };
 
   return (
-    <div className="flex items-center justify-between w-full">
-      <div className="flex items-center gap-2">
-        <button
-          className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10"
-          onClick={handleAdd}
-        >
-          Add
-        </button>
-        <button
-          className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10 disabled:opacity-40"
-          onClick={handleDuplicate}
-          disabled={disabled}
-        >
-          Duplicate
-        </button>
-        <button
-          className="rounded border border-red-500/20 bg-red-500/10 px-2 py-1 hover:bg-red-500/20 disabled:opacity-40"
-          onClick={handleDelete}
-          disabled={disabled}
-        >
-          Delete
-        </button>
+    <div className="w-full rounded-lg border border-white/10 bg-white/[0.03] p-3">
+      <div className="flex items-center justify-between gap-3 w-full">
+        <div className="flex items-center gap-2">
+          <button
+            className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10"
+            onClick={handleAdd}
+          >
+            Add
+          </button>
+          <button
+            className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10 disabled:opacity-40"
+            onClick={handleDuplicate}
+            disabled={disabled}
+          >
+            Duplicate
+          </button>
+          <button
+            className="rounded border border-red-500/20 bg-red-500/10 px-2 py-1 hover:bg-red-500/20 disabled:opacity-40"
+            onClick={handleDelete}
+            disabled={disabled}
+          >
+            Delete
+          </button>
+        </div>
+        <div className="ml-2 flex items-center gap-2">
+          <span className="hidden sm:inline text-[11px] text-white/50">
+            Text
+          </span>
+          <input
+            className="w-56 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            type="text"
+            placeholder="Edit selected word text"
+            value={editText}
+            onChange={(e) => setEditText(e.target.value)}
+            disabled={disabled}
+          />
+          <button
+            className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-40"
+            onClick={handleSaveText}
+            disabled={disabled}
+          >
+            Save Text
+          </button>
+        </div>
       </div>
-      <div className="ml-2 flex items-center gap-2">
-        <input
-          className="w-56 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-          type="text"
-          placeholder="Edit selected word text"
-          value={editText}
-          onChange={(e) => setEditText(e.target.value)}
-          disabled={disabled}
-        />
-        <button
-          className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-40"
-          onClick={handleSaveText}
-          disabled={disabled}
-        >
-          Save Text
-        </button>
-      </div>
-      <div className="ml-4 flex items-center gap-2">
-        <input
-          className="w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-          type="number"
-          placeholder="x%"
-          value={xPct}
-          onChange={(e) => setXPct(e.target.value)}
-          disabled={disabled}
-        />
-        <input
-          className="w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-          type="number"
-          placeholder="y%"
-          value={yPct}
-          onChange={(e) => setYPct(e.target.value)}
-          disabled={disabled}
-        />
-        <input
-          className="w-24 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-          type="number"
-          placeholder="font px"
-          value={fontSizePx}
-          onChange={(e) => setFontSizePx(e.target.value)}
-          disabled={disabled}
-        />
-        <input
-          className="w-28 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-          type="text"
-          placeholder="#ffffff"
-          value={color}
-          onChange={(e) => setColor(e.target.value)}
-          disabled={disabled}
-        />
-        <button
-          className="rounded border border-emerald-500/30 bg-emerald-500/10 px-2 py-1 text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-40"
-          onClick={handleSaveStyle}
-          disabled={disabled}
-        >
-          Save Style/Pos
-        </button>
+
+      <div className="mt-3 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 items-end">
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] text-white/50">X (%)</span>
+          <input
+            className="w-full rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            type="number"
+            placeholder="x%"
+            value={xPct}
+            onChange={(e) => setXPct(e.target.value)}
+            disabled={disabled}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] text-white/50">Y (%)</span>
+          <input
+            className="w-full rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            type="number"
+            placeholder="y%"
+            value={yPct}
+            onChange={(e) => setYPct(e.target.value)}
+            disabled={disabled}
+          />
+        </label>
+        <label className="flex flex-col gap-1">
+          <span className="text-[11px] text-white/50">Font (px)</span>
+          <input
+            className="w-full rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            type="number"
+            placeholder="font px"
+            value={fontSizePx}
+            onChange={(e) => setFontSizePx(e.target.value)}
+            disabled={disabled}
+          />
+        </label>
+        <label className="flex items-end gap-2">
+          <div className="flex flex-col gap-1 w-full">
+            <span className="text-[11px] text-white/50">Color</span>
+            <input
+              className="w-full rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+              type="text"
+              placeholder="#ffffff"
+              value={color}
+              onChange={(e) => setColor(e.target.value)}
+              disabled={disabled}
+            />
+          </div>
+          <input
+            className="h-9 w-9 rounded border border-white/10 bg-transparent p-0"
+            type="color"
+            value={
+              color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)
+                ? color
+                : "#ffffff"
+            }
+            onChange={(e) => setColor(e.target.value)}
+            disabled={disabled}
+          />
+        </label>
+        <div className="flex md:justify-end">
+          <button
+            className="w-full md:w-auto rounded border border-emerald-500/30 bg-emerald-500/10 px-3 py-2 text-sm text-emerald-200 hover:bg-emerald-500/20 disabled:opacity-40"
+            onClick={handleSaveStyle}
+            disabled={disabled}
+          >
+            Save Style/Pos
+          </button>
+        </div>
       </div>
     </div>
   );
