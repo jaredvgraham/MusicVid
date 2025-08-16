@@ -50,6 +50,7 @@ export function VideoPanel(): React.ReactElement {
     >
       <video
         ref={videoRef}
+        key={project.video}
         src={project.video}
         controls
         className="absolute inset-0 h-full w-full object-cover"

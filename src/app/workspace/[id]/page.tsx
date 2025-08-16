@@ -9,10 +9,10 @@ import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 
 import { ControlsBar } from "@/features/workspace/components/ControlsBar";
 import { Toolbox } from "@/features/workspace/components/Toolbox";
-import { TextLayersPanel } from "@/features/workspace/components/TextLayersPanel";
 import { Timeline } from "@/features/workspace/components/Timeline";
 import { EditorProvider } from "@/features/workspace/components/EditorContext";
-import { WordCrudBar } from "@/features/workspace/components/WordCrudBar";
+
+import { VideoPicker } from "@/components/upload/VideoPicker";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
@@ -29,6 +29,7 @@ export default function WorkspacePage(): React.ReactElement {
   // const [serverLines, setServerLines] = useState<Line[]>([]);
   // const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
+  const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
 
   // Fetch workspace data
   useEffect(() => {
@@ -57,6 +58,30 @@ export default function WorkspacePage(): React.ReactElement {
       mounted = false;
     };
   }, [projectId]);
+
+  const onPickVideo = async (url: string | null) => {
+    if (!projectId || !url) return;
+    setSelectedVideo(url);
+    try {
+      const res = await authFetch<{ video: string }>(
+        "express",
+        `render/${projectId}`,
+        {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ video_url: url }),
+        }
+      );
+      console.log("res", res);
+
+      const busted = `${res.video}${
+        res.video.includes("?") ? "&" : "?"
+      }t=${Date.now()}`;
+      setProject((prev) => (prev ? { ...prev, video: busted } : prev));
+    } catch (e: any) {
+      setError(e?.message || "Failed to update video");
+    }
+  };
 
   // const onChangeWord = useCallback(
   //   (index: number, field: keyof Word, value: string) => {
@@ -166,6 +191,11 @@ export default function WorkspacePage(): React.ReactElement {
             </div>
             <div className="hidden md:block space-y-4">
               <Toolbox />
+              <VideoPicker
+                selectedVideo={selectedVideo}
+                onChange={onPickVideo}
+                isWorkspace={true}
+              />
 
               <div className="mt-4 rounded border border-white/10 p-3 text-sm text-white/50">
                 Final render is produced server-side from the sanitized
