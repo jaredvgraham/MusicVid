@@ -31,7 +31,15 @@ export function VideoPanel(): React.ReactElement {
 
   return (
     <div
-      className="relative mx-auto w-full max-w-[400px] rounded border border-white/10 bg-black"
+      className={`relative mx-auto w-full ${
+        (project as any)?.width > (project as any)?.height
+          ? "max-w-[800px]"
+          : "max-h-[400px]"
+      } rounded border border-white/10 bg-black ${
+        (project as any)?.orientation === "landscape"
+          ? "aspect-[16/9]"
+          : "aspect-[9/16]"
+      }`}
       ref={(el) => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
