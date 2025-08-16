@@ -232,7 +232,7 @@ export function Timeline(): React.ReactElement {
             width: `${(widthMs / 1000) * pixelsPerSecond}px`,
             height: `${TOP_PAD + lanesToShow * ROW_HEIGHT}px`,
           }}
-          onDoubleClick={(e) => {
+          onClick={(e) => {
             const el = e.currentTarget as HTMLDivElement;
             const rect = el.getBoundingClientRect();
             const x = e.clientX - rect.left;
