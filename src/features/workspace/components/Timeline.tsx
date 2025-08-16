@@ -25,16 +25,17 @@ export function Timeline(): React.ReactElement {
     transcriptRef.current = transcript;
   }, [transcript]);
 
-  const canDelete = selectedIndex != null && selectedIndex >= 0;
-  const onDeleteSelected = async () => {
-    if (!canDelete) return;
-    const { next, newSelectedIndex } = deleteWordOp(transcript, selectedIndex);
-    setTranscript(next);
-    setSelectedIndex(newSelectedIndex);
-    await saveTranscript(next);
-  };
-
   const containerRef = useRef<HTMLDivElement | null>(null);
+  const draggingPlayheadRef = useRef(false);
+
+  const clientXToMs = (clientX: number) => {
+    const el = containerRef.current;
+    if (!el) return currentTimeMs;
+    const rect = el.getBoundingClientRect();
+    const x = clientX - rect.left + el.scrollLeft;
+    const ms = Math.max(0, Math.round((x / pixelsPerSecond) * 1000));
+    return Math.min(Math.max(0, ms), widthMs);
+  };
 
   // Layout constants (one row per line)
   const CLIP_HEIGHT = 24;
@@ -54,6 +55,27 @@ export function Timeline(): React.ReactElement {
       el.scrollLeft = targetLeft;
     }
   }, [currentTimeMs, pixelsPerSecond]);
+
+  useEffect(() => {
+    function onMove(e: MouseEvent) {
+      if (!draggingPlayheadRef.current) return;
+      seekToMs(clientXToMs(e.clientX));
+    }
+    function onUp() {
+      if (!draggingPlayheadRef.current) return;
+      draggingPlayheadRef.current = false;
+      try {
+        document.body.style.userSelect = "";
+        (document.body.style as any).webkitUserSelect = "";
+      } catch {}
+    }
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", onUp);
+    return () => {
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", onUp);
+    };
+  }, [pixelsPerSecond]);
 
   // Use Line[] directly; handle words inside each line when rendering/aggregating
   const lines = transcript as Line[];
@@ -229,8 +251,21 @@ export function Timeline(): React.ReactElement {
           ))}
 
           <div
-            className="absolute top-0 h-full w-px bg-emerald-400"
-            style={{ left: `${(currentTimeMs / 1000) * pixelsPerSecond}px` }}
+            className="absolute top-0 h-full bg-emerald-400/80"
+            style={{
+              left: `${(currentTimeMs / 1000) * pixelsPerSecond}px`,
+              width: 2,
+              cursor: "ew-resize",
+            }}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              draggingPlayheadRef.current = true;
+              try {
+                document.body.style.userSelect = "none";
+                (document.body.style as any).webkitUserSelect = "none";
+              } catch {}
+              seekToMs(clientXToMs(e.clientX));
+            }}
           />
 
           <div className="pointer-events-none absolute left-0 right-0 top-0 h-6 bg-gradient-to-b from-black/30 to-transparent" />
