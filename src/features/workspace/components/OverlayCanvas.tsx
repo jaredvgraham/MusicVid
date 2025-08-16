@@ -350,9 +350,12 @@ export function OverlayCanvas(): React.ReactElement {
                     <span
                       key={`tok-${gi}`}
                       style={{
-                        color: preset.gradientText
-                          ? "transparent"
-                          : preset.color ?? "#fff",
+                        color:
+                          (w as any)?.style?.color && !preset.gradientText
+                            ? (w as any).style.color
+                            : preset.gradientText
+                            ? "transparent"
+                            : preset.color ?? "#fff",
                         fontWeight: preset.fontWeight ?? 700,
                         fontSize: `${preset.fontSizePx ?? 24}px`,
                         letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
