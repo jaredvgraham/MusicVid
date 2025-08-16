@@ -20,6 +20,11 @@ export type LyricPreset = {
     from: string;
     to: string;
   };
+  // Optional cinematic beams behind center text
+  fxBeams?: boolean;
+  // Optional directional god-rays (striped light) behind center text
+  fxGodRays?: boolean;
+  fxRayAngleDeg?: number; // default 0 = horizontal
 };
 
 export const LYRIC_PRESETS: Record<string, LyricPreset> = {
@@ -222,6 +227,51 @@ export const LYRIC_PRESETS: Record<string, LyricPreset> = {
     backgroundColor: "transparent",
     textShadow: "0 0 12px rgba(14,165,233,0.7)",
     textAlign: "center",
+  },
+  hologram: {
+    id: "hologram",
+    name: "Hologram",
+    fontFamily: "Audiowide, sans-serif",
+    fontWeight: 900,
+    fontSizePx: 72,
+    color: "#ffffff",
+    backgroundColor: "transparent",
+    gradientText: { from: "#a78bfa", to: "#22d3ee" },
+    textShadow:
+      "0 0 8px rgba(167,139,250,0.85), 0 0 16px rgba(34,211,238,0.75), 0 0 26px rgba(99,102,241,0.6)",
+    textAlign: "center",
+  },
+
+  lightRays: {
+    id: "lightRays",
+    name: "Light Rays",
+    fontFamily: "Audiowide, sans-serif",
+    fontWeight: 900,
+    fontSizePx: 88,
+    color: "#f8fafc",
+    backgroundColor: "transparent",
+    textShadow:
+      "0 0 8px rgba(248,250,252,0.95), 0 0 18px rgba(255,255,255,0.85), 0 0 30px rgba(255,255,255,0.6)",
+    textAlign: "center",
+    fxBeams: true,
+    fxGodRays: true,
+    fxRayAngleDeg: 0,
+  },
+  cathedral: {
+    id: "cathedral",
+    name: "Cathedral",
+    fontFamily: "Cinzel, serif",
+    fontWeight: 900,
+    fontSizePx: 110,
+    letterSpacingPx: 3,
+    color: "#ffffff",
+    backgroundColor: "transparent",
+    textShadow:
+      "0 0 16px rgba(255,255,255,0.95), 0 0 34px rgba(255,255,255,0.75), 0 0 64px rgba(255,255,255,0.5)",
+    textAlign: "center",
+    fxBeams: true,
+    fxGodRays: true,
+    fxRayAngleDeg: 0,
   },
 };
 
