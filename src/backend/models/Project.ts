@@ -5,6 +5,28 @@ export interface Word {
   end: number;
   text: string;
   confidence: number;
+  // Optional per-word styling and placement overrides
+  xPct?: number; // 0-100
+  yPct?: number; // 0-100
+  rotationDeg?: number;
+  scale?: number;
+  zIndex?: number;
+  opacity?: number;
+  style?: {
+    color?: string;
+    fontSizePx?: number;
+    fontFamily?: string;
+    letterSpacingPx?: number;
+    textShadow?: string;
+    textTransform?: "none" | "uppercase" | "lowercase" | "capitalize";
+    textAlign?: "left" | "center" | "right";
+    fontWeight?: number | string;
+    backgroundColor?: string;
+    borderRadiusPx?: number;
+    paddingX?: number;
+    paddingY?: number;
+    gradientText?: { from: string; to: string };
+  };
 }
 
 export interface TextClip {
