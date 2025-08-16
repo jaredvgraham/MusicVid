@@ -36,6 +36,7 @@ export function OverlayCanvas(): React.ReactElement {
     return {
       color: preset.gradientText ? "transparent" : preset.color ?? "#fff",
       fontWeight: preset.fontWeight ?? 700,
+      fontFamily: preset.fontFamily,
       fontSize: `${(preset.fontSizePx ?? 24) + fontSizeBump}px`,
       letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
       textTransform: (preset.textTransform as any) ?? "none",
@@ -265,6 +266,7 @@ export function OverlayCanvas(): React.ReactElement {
                 textTransform: preset.textTransform ?? "none",
                 textAlign: preset.textAlign ?? "center",
                 textShadow: preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
+                fontFamily: preset.fontFamily,
                 WebkitBackgroundClip: preset.gradientText ? "text" : undefined,
                 backgroundImage: preset.gradientText
                   ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
@@ -358,6 +360,7 @@ export function OverlayCanvas(): React.ReactElement {
                         textAlign: preset.textAlign ?? "center",
                         textShadow:
                           preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
+                        fontFamily: preset.fontFamily,
                         WebkitBackgroundClip: preset.gradientText
                           ? "text"
                           : undefined,
