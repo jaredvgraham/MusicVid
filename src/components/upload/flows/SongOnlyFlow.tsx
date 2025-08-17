@@ -1,4 +1,5 @@
 import React, { useEffect, useRef, useState } from "react";
+import { FileAudio } from "lucide-react";
 import { VideoPicker } from "../VideoPicker";
 
 type Props = {
@@ -190,18 +191,10 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
         >
           <div className="grid place-items-center text-white px-6">
             <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
-              <svg
-                viewBox="0 0 24 24"
-                fill="none"
-                width="20"
-                height="20"
-                stroke="currentColor"
-                strokeWidth="1.6"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M12 16V4m0 0l-4 4m4-4l4 4M4 16v2a2 2 0 0 0 002 2h12a2 2 0 0 0 002-2v-2" />
-              </svg>
+              <FileAudio
+                className="h-5 w-5 text-purple-300"
+                strokeWidth={1.8}
+              />
             </div>
             <p className="mt-2 text-sm text-white/80">
               Drop <span className="font-semibold text-purple-400">audio</span>{" "}

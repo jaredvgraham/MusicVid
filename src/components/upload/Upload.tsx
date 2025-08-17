@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import { Film, Music2 } from "lucide-react";
 import { useAuth } from "@clerk/nextjs";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
@@ -315,21 +316,12 @@ export default function Upload(): React.ReactElement {
                             : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex flex-col items-center gap-3">
                           <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              width="18"
-                              height="18"
-                              stroke="currentColor"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M9 18V5l10-2v8" />
-                              <circle cx="6" cy="18" r="3" />
-                            </svg>
+                            <Music2
+                              className="h-[18px] w-[18px] text-purple-300"
+                              strokeWidth={1.8}
+                            />
                           </div>
                           <div>
                             <div className="font-medium text-white">
@@ -365,21 +357,20 @@ export default function Upload(): React.ReactElement {
                             : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
-                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              width="18"
-                              height="18"
-                              stroke="currentColor"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <path d="M9 18V5l12-2v13" />
-                              <rect x="3" y="9" width="6" height="10" rx="1" />
-                            </svg>
+                        <div className="flex flex-col items-center gap-3">
+                          <div className="flex items-center gap-2">
+                            <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
+                              <Film
+                                className="h-4 w-4 text-purple-300"
+                                strokeWidth={1.8}
+                              />
+                            </div>
+                            <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
+                              <Music2
+                                className="h-4 w-4 text-purple-300"
+                                strokeWidth={1.8}
+                              />
+                            </div>
                           </div>
                           <div>
                             <div className="font-medium text-white">
@@ -415,21 +406,12 @@ export default function Upload(): React.ReactElement {
                             : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
                         }`}
                       >
-                        <div className="flex items-start gap-3">
+                        <div className="flex flex-col items-center gap-3">
                           <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
-                            <svg
-                              viewBox="0 0 24 24"
-                              fill="none"
-                              width="18"
-                              height="18"
-                              stroke="currentColor"
-                              strokeWidth="1.6"
-                              strokeLinecap="round"
-                              strokeLinejoin="round"
-                            >
-                              <rect x="3" y="5" width="18" height="14" rx="2" />
-                              <path d="M8 13.5l2-2 2 2 2-2 2 2" />
-                            </svg>
+                            <Film
+                              className="h-[18px] w-[18px] text-purple-300"
+                              strokeWidth={1.8}
+                            />
                           </div>
                           <div>
                             <div className="font-medium text-white">
