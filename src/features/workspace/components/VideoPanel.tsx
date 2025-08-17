@@ -2,7 +2,7 @@
 
 import React, { useEffect } from "react";
 import { useEditor } from "./EditorContext";
-import { OverlayCanvas } from "./OverlayCanvas";
+import { OverlayCanvas } from "./overlayCanvas/index";
 
 export function VideoPanel(): React.ReactElement {
   const { project, videoRef, setCurrentTimeMs, setPlaying, setRenderScale } =

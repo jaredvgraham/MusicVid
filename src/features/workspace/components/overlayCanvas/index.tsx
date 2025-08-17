@@ -1,13 +1,16 @@
 "use client";
-
 import React, { useMemo, useState, useRef } from "react";
-import { useEditor } from "./EditorContext";
 import type { TextClip } from "@/types";
+import { useEditor } from "../EditorContext";
 import {
   DEFAULT_LYRIC_PRESET_ID,
   LYRIC_PRESETS,
   LyricPreset,
-} from "../styles/lyricPresets";
+} from "../../styles/lyricPresets";
+import CenterLines from "./CenterLines";
+import { buildPresetTextStyle, mergeWordStyle } from "./utils/style";
+import GodRays from "./fx/GodRays";
+import FxBeams from "./fx/FxBeams";
 
 export function OverlayCanvas(): React.ReactElement {
   const {
@@ -32,50 +35,7 @@ export function OverlayCanvas(): React.ReactElement {
   const designH = isLandscape ? 1080 : 1920;
   const finalScale = (renderScale || 1) * (baseW / designW);
 
-  function buildPresetTextStyle(fontSizeBump = 0): React.CSSProperties {
-    return {
-      color: preset.gradientText ? "transparent" : preset.color ?? "#fff",
-      fontWeight: preset.fontWeight ?? 700,
-      fontFamily: preset.fontFamily,
-      fontSize: `${(preset.fontSizePx ?? 24) + fontSizeBump}px`,
-      letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
-      textTransform: (preset.textTransform as any) ?? "none",
-      textAlign: (preset.textAlign as any) ?? "center",
-      textShadow: preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
-      WebkitBackgroundClip: preset.gradientText ? "text" : undefined,
-      backgroundImage: preset.gradientText
-        ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
-        : undefined,
-    } as React.CSSProperties;
-  }
-
-  function mergeWordStyle(
-    base: React.CSSProperties,
-    override?: any
-  ): React.CSSProperties {
-    if (!override) return base;
-    const o = override || {};
-    const merged: React.CSSProperties = {
-      ...base,
-      color: o.gradientText ? "transparent" : o.color ?? base.color,
-      fontFamily: o.fontFamily ?? base.fontFamily,
-      fontWeight: (o.fontWeight as any) ?? base.fontWeight,
-      fontSize:
-        typeof o.fontSizePx === "number" ? `${o.fontSizePx}px` : base.fontSize,
-      letterSpacing:
-        typeof o.letterSpacingPx === "number"
-          ? `${o.letterSpacingPx}px`
-          : base.letterSpacing,
-      textTransform: (o.textTransform as any) ?? base.textTransform,
-      textAlign: (o.textAlign as any) ?? base.textAlign,
-      textShadow: o.textShadow ?? base.textShadow,
-      WebkitBackgroundClip: o.gradientText ? "text" : base.WebkitBackgroundClip,
-      backgroundImage: o.gradientText
-        ? `linear-gradient(90deg, ${o.gradientText.from}, ${o.gradientText.to})`
-        : base.backgroundImage,
-    };
-    return merged;
-  }
+  // Style helpers now shared with backend-like utils/style
 
   // Helper: update a word position by its global word index
   function updateWordByGlobalIndex(
@@ -212,71 +172,10 @@ export function OverlayCanvas(): React.ReactElement {
         }}
       >
         {/* Optional cinematic beams behind center lyrics */}
-        {(preset.fxBeams || preset.fxGodRays) && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: "translate(-50%, -50%)",
-              width: `${designW * 0.9}px`,
-              height: `${designH * 0.35}px`,
-              background:
-                "radial-gradient(ellipse at center, rgba(255,255,255,0.35) 0%, rgba(255,255,255,0.08) 40%, rgba(0,0,0,0) 70%)",
-              filter: "blur(18px)",
-              opacity: 0.9,
-            }}
-          />
-        )}
+        {preset.fxBeams && <FxBeams designW={designW} designH={designH} />}
         {preset.fxGodRays && (
-          <div
-            style={{
-              position: "absolute",
-              left: "50%",
-              top: "50%",
-              transform: `translate(-50%, -50%) rotate(${
-                preset.fxRayAngleDeg ?? 0
-              }deg)`,
-              width: `${designW}px`,
-              height: `${designH * 0.5}px`,
-              background:
-                "repeating-linear-gradient(0deg, rgba(255,255,255,0.22) 0%, rgba(255,255,255,0.22) 6%, rgba(255,255,255,0.00) 10%, rgba(255,255,255,0.00) 18%)",
-              filter: "blur(24px)",
-              opacity: 0.85,
-              pointerEvents: "none",
-            }}
-          />
+          <GodRays preset={preset} designW={designW} designH={designH} />
         )}
-        {/* Custom placed text clips */}
-        {clips
-          .filter((c) => currentTimeMs >= c.start && currentTimeMs < c.end)
-          .map((c, i) => (
-            <div
-              key={i}
-              style={{
-                left: `${c.xPct}%`,
-                top: `${c.yPct}%`,
-                transform: "translate(-50%, -50%)",
-                color: preset.gradientText
-                  ? "transparent"
-                  : preset.color ?? "#fff",
-                fontWeight: preset.fontWeight ?? 700,
-                fontSize: `${(preset.fontSizePx ?? 24) + 2}px`,
-                letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
-                textTransform: preset.textTransform ?? "none",
-                textAlign: preset.textAlign ?? "center",
-                textShadow: preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
-                fontFamily: preset.fontFamily,
-                WebkitBackgroundClip: preset.gradientText ? "text" : undefined,
-                backgroundImage: preset.gradientText
-                  ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
-                  : undefined,
-              }}
-              className="absolute select-none font-semibold tracking-wide"
-            >
-              {c.text}
-            </div>
-          ))}
 
         {/* Per-word placements from transcript (xPct/yPct) */}
         {(() => {
@@ -308,7 +207,7 @@ export function OverlayCanvas(): React.ReactElement {
                 : 1;
             const transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scl})`;
             const textStyle = mergeWordStyle(
-              buildPresetTextStyle(2),
+              buildPresetTextStyle(preset, 2),
               (w as any).style
             );
             return (
@@ -339,55 +238,15 @@ export function OverlayCanvas(): React.ReactElement {
         })()}
         {/* Default lyrics center overlay: group active unplaced words into lines */}
         {groupedUnplacedWords.length > 0 && (
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
-            <div className="flex flex-col items-center gap-1">
-              {groupedUnplacedWords.map((lineRefs, idx) => (
-                <div
-                  key={`line-${idx}`}
-                  className="text-center font-semibold tracking-wide"
-                >
-                  {lineRefs.map(({ w, gi }, wi) => (
-                    <span
-                      key={`tok-${gi}`}
-                      style={{
-                        color:
-                          (w as any)?.style?.color && !preset.gradientText
-                            ? (w as any).style.color
-                            : preset.gradientText
-                            ? "transparent"
-                            : preset.color ?? "#fff",
-                        fontWeight: preset.fontWeight ?? 700,
-                        fontSize: `${preset.fontSizePx ?? 24}px`,
-                        letterSpacing: `${preset.letterSpacingPx ?? 0}px`,
-                        textTransform: preset.textTransform ?? "none",
-                        textAlign: preset.textAlign ?? "center",
-                        textShadow:
-                          preset.textShadow ?? "0 2px 12px rgba(0,0,0,0.55)",
-                        fontFamily: preset.fontFamily,
-                        WebkitBackgroundClip: preset.gradientText
-                          ? "text"
-                          : undefined,
-                        backgroundImage: preset.gradientText
-                          ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
-                          : undefined,
-                        marginRight: wi < lineRefs.length - 1 ? 16 : 0,
-                        cursor: "grab",
-                      }}
-                      onPointerDown={(e) => {
-                        e.preventDefault();
-                        e.stopPropagation();
-                        setSelectedIndex(gi);
-                        setDraggingIdx(gi);
-                        setIsDragging(true);
-                      }}
-                    >
-                      {w.text}
-                    </span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <CenterLines
+            preset={preset}
+            lines={groupedUnplacedWords as any}
+            onPointerDown={(gi) => {
+              setSelectedIndex(gi);
+              setDraggingIdx(gi);
+              setIsDragging(true);
+            }}
+          />
         )}
       </div>
     </div>
