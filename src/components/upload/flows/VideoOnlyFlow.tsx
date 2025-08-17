@@ -197,7 +197,8 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
               </svg>
             </div>
             <p className="mt-2 text-sm text-white/80">
-              Drop video here or click to browse
+              Drop <span className="font-semibold text-purple-400">video</span>{" "}
+              here or click to browse
             </p>
             <div className="mt-2 eq" aria-hidden>
               <span className="eq-bar" />
