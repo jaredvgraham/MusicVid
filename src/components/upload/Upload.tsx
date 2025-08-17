@@ -256,7 +256,7 @@ export default function Upload(): React.ReactElement {
   }
 
   return (
-    <div className="relative mx-auto mt-12 max-w-3xl px-4 enter">
+    <div className="relative mx-auto mt-12 max-w-6xl px-4 enter">
       <Animations />
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-1/3 left-1/2 h-[50rem] w-[50rem] -translate-x-1/2 rounded-full opacity-30 blur-3xl bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-fuchsia-500 via-purple-500 to-indigo-600" />
@@ -324,10 +324,10 @@ export default function Upload(): React.ReactElement {
                             />
                           </div>
                           <div>
-                            <div className="font-medium text-white">
-                              Just a song (choose a video)
+                            <div className="font-medium text-white text-center">
+                              {`Song (choose a video)`}
                             </div>
-                            <div className="mt-0.5 text-xs text-white/60">
+                            <div className="mt-0.5 text-xs text-white/60 text-center">
                               Upload a song and pick a background video.
                             </div>
                           </div>
@@ -373,11 +373,11 @@ export default function Upload(): React.ReactElement {
                             </div>
                           </div>
                           <div>
-                            <div className="font-medium text-white">
-                              A video and a song
+                            <div className="font-medium text-white text-center">
+                              Video & Audio
                             </div>
-                            <div className="mt-0.5 text-xs text-white/60">
-                              Upload both files and we’ll sync them.
+                            <div className="mt-0.5 text-xs text-white/60 text-center">
+                              {`Upload both files and we’ll sync them.`}
                             </div>
                           </div>
                         </div>
@@ -414,10 +414,10 @@ export default function Upload(): React.ReactElement {
                             />
                           </div>
                           <div>
-                            <div className="font-medium text-white">
-                              A video that contains a song or words
+                            <div className="font-medium text-white text-center">
+                              Video with Audio
                             </div>
-                            <div className="mt-0.5 text-xs text-white/60">
+                            <div className="mt-0.5 text-xs text-white/60 text-center">
                               Upload your own video containing the audio.
                             </div>
                           </div>
