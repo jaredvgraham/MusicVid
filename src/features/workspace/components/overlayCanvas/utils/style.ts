@@ -59,5 +59,12 @@ export function mergeWordStyle(base: React.CSSProperties, override?: any) {
       ? `linear-gradient(90deg, ${o.gradientText.from}, ${o.gradientText.to})`
       : base.backgroundImage,
   };
+  // If a solid color override is provided and no word-level gradient, disable preset gradient props
+  if (typeof o.color === "string" && !o.gradientText) {
+    (merged as any).WebkitBackgroundClip = undefined;
+    (merged as any).backgroundClip = undefined;
+    (merged as any).WebkitTextFillColor = undefined;
+    merged.backgroundImage = undefined as any;
+  }
   return merged;
 }
