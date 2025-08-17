@@ -370,7 +370,7 @@ export function OverlayCanvas(): React.ReactElement {
                         backgroundImage: preset.gradientText
                           ? `linear-gradient(90deg, ${preset.gradientText.from}, ${preset.gradientText.to})`
                           : undefined,
-                        marginRight: wi < lineRefs.length - 1 ? 8 : 0,
+                        marginRight: wi < lineRefs.length - 1 ? 16 : 0,
                         cursor: "grab",
                       }}
                       onPointerDown={(e) => {
