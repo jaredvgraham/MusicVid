@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { VideoPicker } from "../VideoPicker";
 
 type Props = {
@@ -38,6 +38,7 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const allowed = [
@@ -109,6 +110,17 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
       setPendingFile(file);
     }
   };
+
+  // Create/revoke object URL for audio preview
+  useEffect(() => {
+    if (!pendingFile) {
+      setAudioUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(pendingFile);
+    setAudioUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [pendingFile]);
 
   return (
     <div className="grid gap-4">
@@ -212,24 +224,35 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
           />
         </label>
         {pendingFile && (
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => pendingFile && startUpload(pendingFile)}
-              disabled={isUploading}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              Upload file
-            </button>
-            <button
-              type="button"
-              onClick={() => setPendingFile(null)}
-              disabled={isUploading}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              Clear
-            </button>
-          </div>
+          <>
+            <div className="mt-4 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
+              <audio src={audioUrl ?? undefined} controls className="w-full" />
+              <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
+                <span className="truncate" title={pendingFile.name}>
+                  {pendingFile.name}
+                </span>
+                <span>{(pendingFile.size / 1024 / 1024).toFixed(1)} MB</span>
+              </div>
+            </div>
+            <div className="mt-3 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => pendingFile && startUpload(pendingFile)}
+                disabled={isUploading}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Upload file
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingFile(null)}
+                disabled={isUploading}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Clear
+              </button>
+            </div>
+          </>
         )}
       </div>
 

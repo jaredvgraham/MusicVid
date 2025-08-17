@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type Props = {
   projectName: string;
@@ -33,6 +33,7 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingVideo, setPendingVideo] = useState<File | null>(null);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
   const allowedVideo = [
@@ -97,6 +98,22 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
       setPendingVideo(file);
     }
   };
+
+  // Create/revoke preview URL for selected video
+  useEffect(() => {
+    if (!pendingVideo) {
+      if (previewUrl) {
+        URL.revokeObjectURL(previewUrl);
+        setPreviewUrl(null);
+      }
+      return;
+    }
+    const url = URL.createObjectURL(pendingVideo);
+    setPreviewUrl(url);
+    return () => {
+      URL.revokeObjectURL(url);
+    };
+  }, [pendingVideo]);
 
   return (
     <div className="grid gap-4">
@@ -200,24 +217,42 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
           />
         </label>
         {pendingVideo && (
-          <div className="mt-4 flex items-center gap-3">
-            <button
-              type="button"
-              onClick={() => pendingVideo && start(pendingVideo)}
-              disabled={isUploading}
-              className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              Use this video
-            </button>
-            <button
-              type="button"
-              onClick={() => setPendingVideo(null)}
-              disabled={isUploading}
-              className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
-            >
-              Clear
-            </button>
-          </div>
+          <>
+            {previewUrl && (
+              <div className="mt-4 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
+                <video
+                  src={previewUrl}
+                  controls
+                  preload="metadata"
+                  className="w-full"
+                />
+                <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
+                  <span className="truncate" title={pendingVideo.name}>
+                    {pendingVideo.name}
+                  </span>
+                  <span>{(pendingVideo.size / 1024 / 1024).toFixed(1)} MB</span>
+                </div>
+              </div>
+            )}
+            <div className="mt-3 flex items-center gap-3">
+              <button
+                type="button"
+                onClick={() => pendingVideo && start(pendingVideo)}
+                disabled={isUploading}
+                className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Use this video
+              </button>
+              <button
+                type="button"
+                onClick={() => setPendingVideo(null)}
+                disabled={isUploading}
+                className="inline-flex items-center justify-center gap-2 rounded-md border border-white/10 bg-white/5 px-4 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 disabled:cursor-not-allowed disabled:opacity-70"
+              >
+                Clear
+              </button>
+            </div>
+          </>
         )}
       </div>
 

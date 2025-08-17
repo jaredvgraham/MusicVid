@@ -1,4 +1,4 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 type Props = {
   projectName: string;
@@ -37,6 +37,8 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
   const videoInputRef = useRef<HTMLInputElement | null>(null);
   const [pendingAudio, setPendingAudio] = useState<File | null>(null);
   const [pendingVideo, setPendingVideo] = useState<File | null>(null);
+  const [audioUrl, setAudioUrl] = useState<string | null>(null);
+  const [videoUrl, setVideoUrl] = useState<string | null>(null);
   const [isDraggingAudio, setIsDraggingAudio] = useState(false);
   const [isDraggingVideo, setIsDraggingVideo] = useState(false);
 
@@ -145,6 +147,26 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
     }
   };
 
+  // Create object URLs for previews and clean up
+  useEffect(() => {
+    if (pendingAudio) {
+      const url = URL.createObjectURL(pendingAudio);
+      setAudioUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setAudioUrl(null);
+    }
+  }, [pendingAudio]);
+  useEffect(() => {
+    if (pendingVideo) {
+      const url = URL.createObjectURL(pendingVideo);
+      setVideoUrl(url);
+      return () => URL.revokeObjectURL(url);
+    } else {
+      setVideoUrl(null);
+    }
+  }, [pendingVideo]);
+
   return (
     <div className="grid gap-6">
       <div>
@@ -246,6 +268,17 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             className="sr-only"
           />
         </label>
+        {pendingAudio && (
+          <div className="mt-3 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
+            <audio src={audioUrl ?? undefined} controls className="w-full" />
+            <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
+              <span className="truncate" title={pendingAudio.name}>
+                {pendingAudio.name}
+              </span>
+              <span>{(pendingAudio.size / 1024 / 1024).toFixed(1)} MB</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Video uploader */}
@@ -297,6 +330,22 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             className="sr-only"
           />
         </label>
+        {pendingVideo && (
+          <div className="mt-3 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
+            <video
+              src={videoUrl ?? undefined}
+              controls
+              preload="metadata"
+              className="w-full"
+            />
+            <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
+              <span className="truncate" title={pendingVideo.name}>
+                {pendingVideo.name}
+              </span>
+              <span>{(pendingVideo.size / 1024 / 1024).toFixed(1)} MB</span>
+            </div>
+          </div>
+        )}
       </div>
 
       {uploadError && (

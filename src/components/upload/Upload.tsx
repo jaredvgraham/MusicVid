@@ -146,8 +146,8 @@ export default function Upload(): React.ReactElement {
   const { userId } = useAuth();
   const [hasId, setHasId] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-  const [mode, setMode] = useState<"video-only" | "both" | "song-only" | null>(
-    null
+  const [mode, setMode] = useState<"video-only" | "both" | "song-only">(
+    "song-only"
   );
 
   // Preserve spinner on refresh if a pending project id exists in localStorage
@@ -180,6 +180,7 @@ export default function Upload(): React.ReactElement {
         throw new Error(message);
       }
       const data = await response.json();
+      console.log("data", data);
       setHasId(true);
       setProjectId(data.id || data);
     } catch (e: unknown) {
@@ -296,21 +297,21 @@ export default function Upload(): React.ReactElement {
                   {/* Card 1 */}
                   <button
                     type="button"
-                    onClick={() => setMode("video-only")}
+                    onClick={() => setMode("song-only")}
                     className="group relative rounded-xl p-[1px] text-left"
-                    aria-pressed={mode === "video-only"}
+                    aria-pressed={mode === "song-only"}
                   >
                     <div
                       className={`rounded-xl bg-gradient-to-r ${
-                        mode === "video-only"
-                          ? "from-fuchsia-500/30 via-purple-500/30 to-indigo-500/30"
+                        mode === "song-only"
+                          ? "from-indigo-500/30 via-violet-500/30 to-fuchsia-500/30"
                           : "from-white/10 via-white/5 to-white/10"
                       }`}
                     >
                       <div
                         className={`relative rounded-[11px] bg-neutral-900/60 p-4 transition ${
-                          mode === "video-only"
-                            ? "ring-1 ring-fuchsia-400/30"
+                          mode === "song-only"
+                            ? "ring-1 ring-indigo-300/30"
                             : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
                         }`}
                       >
@@ -326,16 +327,16 @@ export default function Upload(): React.ReactElement {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             >
-                              <rect x="3" y="5" width="18" height="14" rx="2" />
-                              <path d="M8 13.5l2-2 2 2 2-2 2 2" />
+                              <path d="M9 18V5l10-2v8" />
+                              <circle cx="6" cy="18" r="3" />
                             </svg>
                           </div>
                           <div>
                             <div className="font-medium text-white">
-                              A video that contains a song or words
+                              Just a song (choose a video)
                             </div>
                             <div className="mt-0.5 text-xs text-white/60">
-                              Upload your own video containing the audio.
+                              Upload a song and pick a background video.
                             </div>
                           </div>
                         </div>
@@ -396,21 +397,21 @@ export default function Upload(): React.ReactElement {
                   {/* Card 3 */}
                   <button
                     type="button"
-                    onClick={() => setMode("song-only")}
+                    onClick={() => setMode("video-only")}
                     className="group relative rounded-xl p-[1px] text-left"
-                    aria-pressed={mode === "song-only"}
+                    aria-pressed={mode === "video-only"}
                   >
                     <div
                       className={`rounded-xl bg-gradient-to-r ${
-                        mode === "song-only"
-                          ? "from-indigo-500/30 via-violet-500/30 to-fuchsia-500/30"
+                        mode === "video-only"
+                          ? "from-fuchsia-500/30 via-purple-500/30 to-indigo-500/30"
                           : "from-white/10 via-white/5 to-white/10"
                       }`}
                     >
                       <div
                         className={`relative rounded-[11px] bg-neutral-900/60 p-4 transition ${
-                          mode === "song-only"
-                            ? "ring-1 ring-indigo-300/30"
+                          mode === "video-only"
+                            ? "ring-1 ring-fuchsia-400/30"
                             : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
                         }`}
                       >
@@ -426,16 +427,16 @@ export default function Upload(): React.ReactElement {
                               strokeLinecap="round"
                               strokeLinejoin="round"
                             >
-                              <path d="M9 18V5l10-2v8" />
-                              <circle cx="6" cy="18" r="3" />
+                              <rect x="3" y="5" width="18" height="14" rx="2" />
+                              <path d="M8 13.5l2-2 2 2 2-2 2 2" />
                             </svg>
                           </div>
                           <div>
                             <div className="font-medium text-white">
-                              Just a song (choose a video)
+                              A video that contains a song or words
                             </div>
                             <div className="mt-0.5 text-xs text-white/60">
-                              Upload a song and pick a background video.
+                              Upload your own video containing the audio.
                             </div>
                           </div>
                         </div>
