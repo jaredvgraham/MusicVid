@@ -73,6 +73,53 @@ function Animations(): React.ReactElement {
         }
       }
 
+      /* Futuristic card shimmer + glow (not used now) */
+      .option-shine {
+        position: absolute;
+        inset: -1px;
+        background: linear-gradient(
+          120deg,
+          transparent 0%,
+          rgba(255, 255, 255, 0.22) 50%,
+          transparent 100%
+        );
+        transform: translateX(-100%);
+        pointer-events: none;
+        border-radius: 0.75rem; /* match rounded-xl */
+        opacity: 0.4;
+      }
+      .glow-pulse {
+      }
+
+      /* Animated gradient frame for option cards (disabled motion) */
+      .animated-gradient {
+        background-size: 200% 200% !important;
+      }
+
+      /* Soft grid background behind selector */
+      .grid-bg {
+        position: absolute;
+        inset: 0;
+        background-image: linear-gradient(
+            to right,
+            rgba(255, 255, 255, 0.06) 1px,
+            transparent 1px
+          ),
+          linear-gradient(
+            to bottom,
+            rgba(255, 255, 255, 0.06) 1px,
+            transparent 1px
+          );
+        background-size: 40px 40px;
+        mask-image: radial-gradient(
+          ellipse at center,
+          black 40%,
+          transparent 70%
+        );
+        opacity: 0.4;
+        pointer-events: none;
+      }
+
       /* Respect reduced motion */
       @media (prefers-reduced-motion: reduce) {
         .enter {
@@ -242,40 +289,160 @@ export default function Upload(): React.ReactElement {
               <label className="block text-sm font-medium text-white">
                 What are you uploading?
               </label>
-              <div className="mt-2 grid grid-cols-1 gap-2 sm:grid-cols-3">
-                <button
-                  type="button"
-                  onClick={() => setMode("video-only")}
-                  className={`rounded-md border px-3 py-2 text-sm transition ${
-                    mode === "video-only"
-                      ? "border-white/30 bg-white/10 text-white"
-                      : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                  }`}
-                >
-                  A video that contains a song or words
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("both")}
-                  className={`rounded-md border px-3 py-2 text-sm transition ${
-                    mode === "both"
-                      ? "border-white/30 bg-white/10 text-white"
-                      : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                  }`}
-                >
-                  A video and a song
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setMode("song-only")}
-                  className={`rounded-md border px-3 py-2 text-sm transition ${
-                    mode === "song-only"
-                      ? "border-white/30 bg-white/10 text-white"
-                      : "border-white/10 bg-white/5 text-white/70 hover:bg-white/10"
-                  }`}
-                >
-                  Just a song (choose a video)
-                </button>
+              <div className="mt-1 h-0.5 w-16 rounded-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-500 shadow-[0_0_12px_rgba(168,85,247,0.6)]" />
+              <div className="relative mt-4">
+                <div className="grid-bg" />
+                <div className="relative grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  {/* Card 1 */}
+                  <button
+                    type="button"
+                    onClick={() => setMode("video-only")}
+                    className="group relative rounded-xl p-[1px] text-left"
+                    aria-pressed={mode === "video-only"}
+                  >
+                    <div
+                      className={`rounded-xl bg-gradient-to-r ${
+                        mode === "video-only"
+                          ? "from-fuchsia-500/30 via-purple-500/30 to-indigo-500/30"
+                          : "from-white/10 via-white/5 to-white/10"
+                      }`}
+                    >
+                      <div
+                        className={`relative rounded-[11px] bg-neutral-900/60 p-4 transition ${
+                          mode === "video-only"
+                            ? "ring-1 ring-fuchsia-400/30"
+                            : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              width="18"
+                              height="18"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <rect x="3" y="5" width="18" height="14" rx="2" />
+                              <path d="M8 13.5l2-2 2 2 2-2 2 2" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="font-medium text-white">
+                              A video that contains a song or words
+                            </div>
+                            <div className="mt-0.5 text-xs text-white/60">
+                              Upload your own video containing the audio.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Card 2 */}
+                  <button
+                    type="button"
+                    onClick={() => setMode("both")}
+                    className="group relative rounded-xl p-[1px] text-left"
+                    aria-pressed={mode === "both"}
+                  >
+                    <div
+                      className={`rounded-xl bg-gradient-to-r ${
+                        mode === "both"
+                          ? "from-cyan-500/30 via-teal-500/30 to-emerald-500/30"
+                          : "from-white/10 via-white/5 to-white/10"
+                      }`}
+                    >
+                      <div
+                        className={`relative rounded-[11px] bg-neutral-900/60 p-4 transition ${
+                          mode === "both"
+                            ? "ring-1 ring-cyan-300/30"
+                            : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              width="18"
+                              height="18"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M9 18V5l12-2v13" />
+                              <rect x="3" y="9" width="6" height="10" rx="1" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="font-medium text-white">
+                              A video and a song
+                            </div>
+                            <div className="mt-0.5 text-xs text-white/60">
+                              Upload both files and we’ll sync them.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+
+                  {/* Card 3 */}
+                  <button
+                    type="button"
+                    onClick={() => setMode("song-only")}
+                    className="group relative rounded-xl p-[1px] text-left"
+                    aria-pressed={mode === "song-only"}
+                  >
+                    <div
+                      className={`rounded-xl bg-gradient-to-r ${
+                        mode === "song-only"
+                          ? "from-indigo-500/30 via-violet-500/30 to-fuchsia-500/30"
+                          : "from-white/10 via-white/5 to-white/10"
+                      }`}
+                    >
+                      <div
+                        className={`relative rounded-[11px] bg-neutral-900/60 p-4 transition ${
+                          mode === "song-only"
+                            ? "ring-1 ring-indigo-300/30"
+                            : "hover:bg-neutral-900/70 hover:ring-1 hover:ring-white/10"
+                        }`}
+                      >
+                        <div className="flex items-start gap-3">
+                          <div className="grid h-9 w-9 place-items-center rounded-lg bg-white/5 text-white/80">
+                            <svg
+                              viewBox="0 0 24 24"
+                              fill="none"
+                              width="18"
+                              height="18"
+                              stroke="currentColor"
+                              strokeWidth="1.6"
+                              strokeLinecap="round"
+                              strokeLinejoin="round"
+                            >
+                              <path d="M9 18V5l10-2v8" />
+                              <circle cx="6" cy="18" r="3" />
+                            </svg>
+                          </div>
+                          <div>
+                            <div className="font-medium text-white">
+                              Just a song (choose a video)
+                            </div>
+                            <div className="mt-0.5 text-xs text-white/60">
+                              Upload a song and pick a background video.
+                            </div>
+                          </div>
+                        </div>
+                      </div>
+                    </div>
+                  </button>
+                </div>
               </div>
             </div>
 
