@@ -54,6 +54,7 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
   ];
 
   const validate = (file: File): string | null => {
+    if (!file) return "Please upload an audio file.";
     if (!allowed.includes(file.type)) {
       return "Unsupported file format. Please upload WAV, MP3, FLAC, M4A, AAC or OGG.";
     }
@@ -262,11 +263,6 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
           selectedVideo={selectedVideo}
           onChange={setSelectedVideo}
         />
-        {!selectedVideo && (
-          <p className="mt-2 text-xs text-red-300/80">
-            Please select a video to continue.
-          </p>
-        )}
       </div>
     </div>
   );

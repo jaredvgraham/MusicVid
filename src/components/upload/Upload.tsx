@@ -162,6 +162,7 @@ export default function Upload(): React.ReactElement {
     try {
       setIsUploading(true);
       setUploadError(null);
+
       const response = await fetch(
         "https://extractor-production-721a.up.railway.app/split",
         {
