@@ -18,7 +18,7 @@ export async function GET(_req: Request, context: { params: Promise<{ projectId:
     }
 
     const rawVideo = (doc as any).video as string | undefined;
-    const completed = typeof rawVideo === "string" && rawVideo.trim().length > 0;
+    const completed = (typeof rawVideo === "string" && rawVideo.trim().length > 0) && (doc as any).transcript;
     const failed = (doc as any).failed === true;
 
     return NextResponse.json({ completed, failed });
