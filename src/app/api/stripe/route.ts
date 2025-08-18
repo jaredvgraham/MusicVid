@@ -7,32 +7,6 @@ import dbConnect from "@/backend/lib/db";
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.split("/api")[0];
 
-// CORS: allow marketing domain to call this API in production
-const ALLOWED_ORIGINS = (process.env.CORS_ALLOWED_ORIGINS || "")
-  .split(",")
-  .map((s) => s.trim())
-  .filter(Boolean);
-
-function buildCorsHeaders(req: NextRequest): HeadersInit {
-  const origin = req.headers.get("origin") || "";
-  const allowOrigin =
-    (ALLOWED_ORIGINS.length === 0 && origin) ||
-    (ALLOWED_ORIGINS.includes(origin) ? origin : (ALLOWED_ORIGINS[0] as string) || "*");
-  const headers: HeadersInit = {
-    "Access-Control-Allow-Origin": allowOrigin,
-    "Access-Control-Allow-Methods": "OPTIONS, POST, PUT",
-    "Access-Control-Allow-Headers": "Content-Type, Authorization",
-    Vary: "Origin",
-  };
-  if (allowOrigin !== "*") (headers as any)["Access-Control-Allow-Credentials"] = "true";
-  return headers;
-}
-
-export async function OPTIONS(req: NextRequest) {
-  return new NextResponse(null, { status: 204, headers: buildCorsHeaders(req) });
-}
-
-// Map your plan keys to Stripe Price IDs from your dashboard
 const PRICE_IDS: Record<string, string> = {
   basic: process.env.STRIPE_BASIC_PRICE_ID as string,
   standard: process.env.STRIPE_STANDARD_PRICE_ID as string,
@@ -93,16 +67,10 @@ export async function POST(req: NextRequest) {
       success_url: `${BASE_URL}/`,
       cancel_url: `${BASE_URL}/pricing`,
     });
-    return NextResponse.json(
-      { url: session.url },
-      { headers: buildCorsHeaders(req) }
-    );
+    return NextResponse.json({ url: session.url });
   } catch (error: any) {
     console.log("Error creating checkout session", error);
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500, headers: buildCorsHeaders(req) }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
 
@@ -112,10 +80,7 @@ export async function PUT(req: NextRequest) {
     const { userId } = await auth();
     const user = await User.findOne({ clerkId: userId });
     if (!user) {
-      return NextResponse.json(
-        { message: "User not found" },
-        { status: 404, headers: buildCorsHeaders(req) }
-      );
+      return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
     const { newPlan } = await req.json();
     if (user.plan === newPlan) {
@@ -130,7 +95,7 @@ export async function PUT(req: NextRequest) {
     if (!user.subscriptionId) {
       return NextResponse.json(
         { message: "No active subscription" },
-        { status: 400, headers: buildCorsHeaders(req) }
+        { status: 400 }
       );
     }
     const subscription = await stripe.subscriptions.retrieve(
@@ -138,10 +103,7 @@ export async function PUT(req: NextRequest) {
     );
     const priceId = PRICE_IDS[newPlan];
     if (!priceId) {
-      return NextResponse.json(
-        { message: "Invalid plan" },
-        { status: 400, headers: buildCorsHeaders(req) }
-      );
+      return NextResponse.json({ message: "Invalid plan" }, { status: 400 });
     }
     const updatedSubscription = await stripe.subscriptions.update(
       user.subscriptionId,
@@ -157,14 +119,8 @@ export async function PUT(req: NextRequest) {
       }
     );
 
-    return NextResponse.json(
-      { status: 200, message: "Subscription updated" },
-      { headers: buildCorsHeaders(req) }
-    );
+    return NextResponse.json({ status: 200, message: "Subscription updated" });
   } catch (error: any) {
-    return NextResponse.json(
-      { error: error.message },
-      { status: 500, headers: buildCorsHeaders(req) }
-    );
+    return NextResponse.json({ error: error.message }, { status: 500 });
   }
 }
