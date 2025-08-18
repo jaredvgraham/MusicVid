@@ -18,7 +18,17 @@ export async function GET(_req: Request, context: { params: Promise<{ projectId:
     }
 
     const rawVideo = (doc as any).video as string | undefined;
-    const completed = (typeof rawVideo === "string" && rawVideo.trim().length > 0) && (doc as any).transcript;
+    const hasVideo = typeof rawVideo === "string" && rawVideo.trim().length > 0;
+
+    const transcript = (doc as any).transcript as unknown;
+    const hasTranscript = Array.isArray(transcript) && transcript.length > 0 && (
+      // Either at least one line has words
+      (transcript as any[]).some((ln) => Array.isArray(ln?.words) && ln.words.length > 0) ||
+      // Or at least one line has a valid time span
+      (transcript as any[]).some((ln) => typeof ln?.start === "number" && typeof ln?.end === "number" && ln.end > ln.start)
+    );
+
+    const completed = hasVideo && hasTranscript;
     const failed = (doc as any).failed === true;
 
     return NextResponse.json({ completed, failed });
