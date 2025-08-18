@@ -61,6 +61,7 @@ export interface ProjectDocument extends Document {
   createdAt: Date;
   updatedAt: Date;
   length: number;
+  finalRender?: string;
 }
 
 const ProjectSchema = new Schema<ProjectDocument>(
@@ -78,6 +79,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
     song: { type: String },
     lyrics: { type: String },
     lyricPresetId: { type: String },
+    finalRender: { type: String },
   },
   { timestamps: true }
 );
