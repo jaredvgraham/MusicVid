@@ -7,11 +7,13 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/clerk",
   "/api/webhooks/stripe",
   "/api/transcribe",
+  "/pricing",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
   if (!isPublicRoute(req)) {
-    await auth.protect();
+    const signInUrl = new URL("/sign-in", req.url).toString();
+    await auth.protect({ unauthenticatedUrl: signInUrl });
   }
 });
 
