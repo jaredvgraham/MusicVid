@@ -4,6 +4,7 @@ import React from "react";
 import Link from "next/link";
 import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
+import Image from "next/image";
 
 type NavItem = { label: string; href: string };
 
@@ -12,6 +13,7 @@ const navItems: NavItem[] = [
   { label: "Templates", href: "/#templates" },
   { label: "Pricing", href: "/pricing" },
   { label: "Docs", href: "/#docs" },
+  { label: "Settings", href: "/settings" },
 ];
 
 export default function NavBar(): React.ReactElement {
@@ -23,24 +25,28 @@ export default function NavBar(): React.ReactElement {
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-2">
-            <div className="grid h-7 w-7 place-items-center rounded-md bg-gradient-to-br from-fuchsia-500 via-purple-500 to-indigo-600" />
+            {/* logo */}
+            <Image src="/logo.png" alt="Sonexa-Logo" width={32} height={32} />
             <span className="text-sm font-semibold tracking-wide text-white">
-              MusicVid
+              Sonexa
             </span>
           </Link>
         </div>
 
         {/* Center: Nav (desktop) */}
         <nav className="hidden gap-6 lg:flex">
-          {navItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="text-sm text-white/70 transition hover:text-white"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {navItems.map(
+            (item) =>
+              item.label !== "Settings" && (
+                <Link
+                  key={item.label}
+                  href={item.href}
+                  className="text-sm text-white/70 transition hover:text-white"
+                >
+                  {item.label}
+                </Link>
+              )
+          )}
           <SignedIn>
             <Link
               href="/dashboard"
@@ -54,6 +60,13 @@ export default function NavBar(): React.ReactElement {
               className="text-sm text-white/70 transition hover:text-white"
             >
               Upload
+            </Link>
+            <Link
+              key="Settings"
+              href="/settings"
+              className="text-sm text-white/70 transition hover:text-white"
+            >
+              Settings
             </Link>
           </SignedIn>
         </nav>

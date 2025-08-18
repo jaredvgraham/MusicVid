@@ -1,32 +1,34 @@
-import React from "react";
-import Link from "next/link";
+"use client";
+
+import React, { useState } from "react";
+import { useRouter } from "next/navigation";
+import { useUser } from "@clerk/nextjs";
+import { useAuthFetch } from "@/hooks/useAuthFetch";
 
 type Plan = {
-  name: string;
-  price: string;
+  name: "Basic" | "Standard" | "Pro";
+  price: number;
   description: string;
   features: string[];
-  ctaLabel: string;
-  ctaHref: string;
+  planKey: "basic" | "standard" | "pro";
   highlight?: boolean;
 };
 
 const plans: Plan[] = [
   {
     name: "Basic",
-    price: "$9",
-    description: "Great to try out AI‑timed lyrics and export simple videos.",
+    price: 9.99,
+    description: "Great to try out AI-timed lyrics and export simple videos.",
     features: [
       "Up to 3 renders/month",
       "1080p exports",
       "Core lyric templates",
     ],
-    ctaLabel: "Get Basic",
-    ctaHref: "/sign-up?plan=basic",
+    planKey: "basic",
   },
   {
     name: "Standard",
-    price: "$19",
+    price: 19.99,
     description: "Most popular: more styles, faster renders, custom branding.",
     features: [
       "Up to 15 renders/month",
@@ -35,14 +37,13 @@ const plans: Plan[] = [
       "Brand colors & fonts",
       "Priority rendering",
     ],
-    ctaLabel: "Choose Standard",
-    ctaHref: "/sign-up?plan=standard",
+    planKey: "standard",
     highlight: true,
   },
   {
     name: "Pro",
-    price: "$39",
-    description: "For creators and teams shipping high‑volume social content.",
+    price: 39.99,
+    description: "For creators and teams shipping high-volume social content.",
     features: [
       "Unlimited renders",
       "4K exports + alpha",
@@ -50,12 +51,87 @@ const plans: Plan[] = [
       "Template overrides",
       "Priority support",
     ],
-    ctaLabel: "Go Pro",
-    ctaHref: "/sign-up?plan=pro",
+    planKey: "pro",
   },
 ];
 
 export default function PricingPage(): React.ReactElement {
+  const router = useRouter();
+  const { user } = useUser();
+  const authFetch = useAuthFetch();
+
+  const currentPlan =
+    (user?.publicMetadata?.plan as string | undefined)?.toLowerCase?.() ??
+    "none";
+
+  const [loading, setLoading] = useState<string | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [success, setSuccess] = useState<string | null>(null);
+
+  const handleUpgrade = async (planKey: Plan["planKey"]) => {
+    setLoading("upgrade");
+    setError(null);
+    try {
+      const res = await authFetch("next", "api/stripe", {
+        method: "PUT",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ newPlan: planKey }),
+      });
+      console.log("res", res);
+      setSuccess("Upgrade successful. Redirecting to dashboard...");
+      router.push("/");
+    } catch (e) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
+  const handleSubscribe = async (planKey: Plan["planKey"]) => {
+    // Not signed in → go sign in
+    if (!user) {
+      router.push("/sign-in");
+      return;
+    }
+
+    // Already on this plan → manage
+    if (currentPlan === planKey) {
+      router.push("/settings");
+      return;
+    }
+
+    // Switching from an active plan → upgrade path
+    if (currentPlan !== "none") {
+      await handleUpgrade(planKey);
+      return;
+    }
+
+    // New checkout
+    setLoading(planKey);
+    setError(null);
+    try {
+      const res = await authFetch("next", "api/stripe", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ plan: planKey }),
+      });
+      console.log("res", res);
+      const data = await res;
+      console.log("data", data);
+      if ((data as any)?.url && typeof (data as any).url === "string") {
+        window.location.href = (data as any).url;
+      } else {
+        throw new Error(
+          (data as any)?.message || "Failed to create checkout session."
+        );
+      }
+    } catch {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(null);
+    }
+  };
+
   return (
     <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
       {/* Ambient background */}
@@ -76,69 +152,115 @@ export default function PricingPage(): React.ReactElement {
           </p>
         </section>
 
+        {/* Error / Success banners */}
+        {error && (
+          <div className="mx-auto mb-6 max-w-3xl rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+            {error}
+          </div>
+        )}
+        {success && (
+          <div className="mx-auto mb-6 max-w-3xl rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+            {success}
+          </div>
+        )}
+
         <section className="grid gap-6 pb-20 sm:grid-cols-2 lg:grid-cols-3">
-          {plans.map((plan) => (
-            <div
-              key={plan.name}
-              className={[
-                "relative rounded-2xl border p-6 shadow-lg",
-                plan.highlight
-                  ? "border-white/15 bg-white/10 ring-1 ring-white/20"
-                  : "border-white/10 bg-white/5 ring-1 ring-white/10",
-              ].join(" ")}
-            >
-              {plan.highlight && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/80">
-                  Most Popular
-                </div>
-              )}
-              <div className="flex items-baseline justify-between">
-                <h3 className="text-lg font-semibold">{plan.name}</h3>
-                <div className="text-right">
-                  <span className="text-3xl font-semibold">{plan.price}</span>
-                  <span className="ml-1 text-sm text-white/60">/mo</span>
-                </div>
-              </div>
-              <p className="mt-2 text-sm text-white/70">{plan.description}</p>
+          {plans.map((plan) => {
+            const isCurrent = currentPlan === plan.planKey;
+            const isLoading = loading === plan.planKey || loading === "upgrade";
 
-              <ul className="mt-5 space-y-2 text-sm">
-                {plan.features.map((feature) => (
-                  <li
-                    key={feature}
-                    className="flex items-center gap-2 text-white/80"
-                  >
-                    <svg
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="1.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                      className="h-4 w-4 text-emerald-400"
-                      aria-hidden
+            const buttonLabel = isLoading
+              ? "Redirecting..."
+              : isCurrent
+              ? "Manage Subscription"
+              : currentPlan !== "none"
+              ? `Upgrade to ${plan.name}`
+              : `Get ${plan.name}`;
+
+            return (
+              <div
+                key={plan.name}
+                className={[
+                  "relative rounded-2xl border p-6 shadow-lg",
+                  plan.highlight
+                    ? "border-white/15 bg-white/10 ring-1 ring-white/20"
+                    : "border-white/10 bg-white/5 ring-1 ring-white/10",
+                ].join(" ")}
+              >
+                {/* Popular badge */}
+                {plan.highlight && (
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/80">
+                    Most Popular
+                  </div>
+                )}
+
+                {/* Current plan badge */}
+                {isCurrent && (
+                  <div className="absolute -top-3 right-3 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-200">
+                    Current Plan
+                  </div>
+                )}
+
+                <div className="flex items-baseline justify-between">
+                  <h3 className="text-lg font-semibold">{plan.name}</h3>
+                  <div className="text-right">
+                    <span className="text-3xl font-semibold">
+                      ${plan.price}
+                    </span>
+                    <span className="ml-1 text-sm text-white/60">/mo</span>
+                  </div>
+                </div>
+
+                <p className="mt-2 text-sm text-white/70">{plan.description}</p>
+
+                <ul className="mt-5 space-y-2 text-sm">
+                  {plan.features.map((feature) => (
+                    <li
+                      key={feature}
+                      className="flex items-center gap-2 text-white/80"
                     >
-                      <path d="M20 6L9 17l-5-5" />
-                    </svg>
-                    <span>{feature}</span>
-                  </li>
-                ))}
-              </ul>
+                      <svg
+                        viewBox="0 0 24 24"
+                        fill="none"
+                        stroke="currentColor"
+                        strokeWidth="1.5"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        className="h-4 w-4 text-emerald-400"
+                        aria-hidden
+                      >
+                        <path d="M20 6L9 17l-5-5" />
+                      </svg>
+                      <span>{feature}</span>
+                    </li>
+                  ))}
+                </ul>
 
-              <div className="mt-6">
-                <Link
-                  href={plan.ctaHref}
-                  className={[
-                    "inline-flex w-full items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition",
-                    plan.highlight
-                      ? "bg-white text-neutral-900 hover:bg-white/90"
-                      : "border border-white/15 bg-transparent text-white hover:bg-white/10",
-                  ].join(" ")}
-                >
-                  {plan.ctaLabel}
-                </Link>
+                <div className="mt-6">
+                  <button
+                    onClick={() => handleSubscribe(plan.planKey)}
+                    disabled={isLoading}
+                    className={[
+                      "inline-flex w-full items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition",
+                      plan.highlight
+                        ? "bg-white text-neutral-900 hover:bg-white/90"
+                        : "border border-white/15 bg-transparent text-white hover:bg-white/10",
+                      isLoading ? "opacity-70 cursor-not-allowed" : "",
+                    ].join(" ")}
+                  >
+                    {buttonLabel}
+                  </button>
+
+                  {/* Nudge under Basic like in old app */}
+                  {plan.planKey === "basic" && (
+                    <p className="mt-3 text-center text-xs text-white/60">
+                      Need more? Upgrade to Standard or Pro anytime.
+                    </p>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </section>
       </div>
 

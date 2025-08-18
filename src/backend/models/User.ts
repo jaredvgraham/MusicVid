@@ -5,6 +5,9 @@ export interface UserDocument extends Document {
   name?: string;
   email: string;
   image?: string;
+  customerId?: string;
+  subscriptionId?: string;
+  plan?: string;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -21,6 +24,13 @@ const UserSchema = new Schema<UserDocument>(
       index: true,
     },
     image: { type: String },
+    customerId: { type: String },
+    subscriptionId: { type: String },
+    plan: {
+      type: String,
+      enum: ["none", "Basic", "Standard", "Pro"],
+      default: "none",
+    },
   },
   { timestamps: true }
 );
