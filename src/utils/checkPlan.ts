@@ -22,8 +22,17 @@ export async function checkUserPlan(clerkId: string): Promise<string | null> {
 export async function getUserQuota(clerkId: string): Promise<UserQuota | null> {
     try {
         await dbConnect();
+        const user: UserDocument | null = await User.findOne({ clerkId });
+        if (!user) {
+            console.error("User not found");
+            return null;
+        }
         const projects = await Project.find({
             user_id: clerkId,
+            createdAt: {
+                $gte: user.billingPeriodStart,
+                $lte: user.billingPeriodEnd,
+            }
         })
         const projectCount = projects.length;
         const finalRenders = projects.filter((project: ProjectDocument) => project.finalRender).length;
