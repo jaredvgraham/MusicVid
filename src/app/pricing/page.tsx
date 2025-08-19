@@ -7,6 +7,7 @@ import { useAuthFetch } from "@/hooks/useAuthFetch";
 import SeoHead from "@/components/SeoHead";
 import JsonLd from "@/components/JsonLd";
 import { faqPageLd, howToLd, absoluteUrl } from "@/lib/seo";
+import { Check, Star, Zap, Crown, Sparkles } from "lucide-react";
 
 type Plan = {
   name: "Basic" | "Standard" | "Pro";
@@ -15,45 +16,62 @@ type Plan = {
   features: string[];
   planKey: "basic" | "standard" | "pro";
   highlight?: boolean;
+  icon: React.ReactNode;
+  color: string;
 };
 
 const plans: Plan[] = [
   {
     name: "Basic",
     price: 9.99,
-    description: "Great to try out AI-timed lyrics and export simple videos.",
+    description:
+      "Perfect for creators just getting started with AI-powered lyric videos.",
     features: [
       "Up to 3 renders/month",
       "1080p exports",
       "Core lyric templates",
+      "Basic customization",
+      "Email support",
     ],
     planKey: "basic",
+    icon: <Sparkles className="w-6 h-6" />,
+    color: "from-blue-500 to-cyan-500",
   },
   {
     name: "Standard",
     price: 19.99,
-    description: "Most popular: more styles, faster renders, custom branding.",
+    description: "Most popular choice for serious creators and content teams.",
     features: [
       "Up to 15 renders/month",
       "720p/1080p/1440p exports",
       "All lyric templates",
       "Brand colors & fonts",
       "Priority rendering",
+      "Advanced customization",
+      "Priority support",
     ],
     planKey: "standard",
     highlight: true,
+    icon: <Star className="w-6 h-6" />,
+    color: "from-fuchsia-500 to-purple-500",
   },
   {
     name: "Pro",
     price: 39.99,
-    description: "For creators and teams shipping high-volume social content.",
+    description:
+      "For professional creators and teams shipping high-volume content.",
     features: [
-      "More monthly renders",
+      "Unlimited monthly renders",
       "720p/1080p/1440p exports",
       "Template overrides",
-      "Priority support",
+      "Custom branding",
+      "API access",
+      "Dedicated support",
+      "Team collaboration",
     ],
     planKey: "pro",
+    icon: <Crown className="w-6 h-6" />,
+    color: "from-purple-500 to-indigo-500",
   },
 ];
 
@@ -167,45 +185,69 @@ export default function PricingPage(): React.ReactElement {
           }),
         ]}
       />
-      {/* Ambient background */}
+
+      {/* Enhanced background with floating elements */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-1/3 left-1/2 h-[70rem] w-[70rem] -translate-x-1/2 rounded-full blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-fuchsia-500 via-purple-500 to-indigo-600" />
         <div className="absolute -bottom-1/3 left-1/4 h-[60rem] w-[60rem] -translate-x-1/2 rounded-full blur-3xl opacity-20 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-emerald-500 via-teal-500 to-cyan-500" />
         <div className="absolute inset-0 bg-[linear-gradient(to_bottom,rgba(0,0,0,0.2),rgba(0,0,0,0.8))]" />
+
+        {/* Floating decorative elements */}
+        <div className="absolute top-1/4 right-1/4 w-32 h-32 border border-white/10 rounded-full opacity-20 animate-pulse" />
+        <div
+          className="absolute bottom-1/4 left-1/4 w-24 h-24 border border-white/10 rounded-full opacity-20 animate-pulse"
+          style={{ animationDelay: "1s" }}
+        />
       </div>
 
       <div className="mx-auto max-w-7xl px-6">
-        <section className="pt-10 pb-16 text-center sm:pt-14">
-          <h1 className="mx-auto max-w-3xl bg-gradient-to-br from-white via-white to-white/70 bg-clip-text text-4xl font-semibold leading-tight text-transparent sm:text-5xl md:text-6xl">
-            Simple, transparent pricing
+        {/* Hero Section */}
+        <section className="pt-20 pb-16 text-center">
+          <div className="mb-8">
+            <div className="inline-flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-4 py-2 text-sm text-white/70 backdrop-blur">
+              <Zap className="w-4 h-4 text-fuchsia-400" />
+              Simple, transparent pricing
+            </div>
+          </div>
+
+          <h1 className="mx-auto max-w-4xl bg-gradient-to-br from-white via-white to-white/70 bg-clip-text text-5xl font-bold leading-tight text-transparent sm:text-6xl md:text-7xl">
+            Choose Your
+            <span className="block bg-gradient-to-r from-fuchsia-400 to-purple-400 bg-clip-text text-transparent">
+              Creative Power
+            </span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-white/70">
-            Pick the plan that fits your release schedule. Upgrade or cancel
-            anytime.
+
+          <p className="mx-auto mt-6 max-w-3xl text-xl text-white/70 leading-relaxed">
+            Pick the plan that fits your creative workflow. Upgrade or cancel
+            anytime with no hidden fees.
           </p>
+
+          {/* CTA Button */}
+          <div className="mt-10">
+            <a
+              href="/upload"
+              className="inline-flex items-center gap-3 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-500 px-8 py-4 text-lg font-semibold text-white transition-all hover:from-fuchsia-600 hover:to-purple-600 hover:scale-105 shadow-2xl shadow-fuchsia-500/25"
+            >
+              <Zap className="w-5 h-5" />
+              Start Creating Now
+            </a>
+          </div>
         </section>
-        <div className="-mt-8 mb-12 text-center">
-          <a
-            href="/upload"
-            className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90"
-          >
-            Start now — upload
-          </a>
-        </div>
 
         {/* Error / Success banners */}
         {error && (
-          <div className="mx-auto mb-6 max-w-3xl rounded-md border border-red-500/30 bg-red-500/10 px-4 py-3 text-sm text-red-200">
+          <div className="mx-auto mb-8 max-w-3xl rounded-2xl border border-red-500/30 bg-red-500/10 px-6 py-4 text-sm text-red-200 backdrop-blur">
             {error}
           </div>
         )}
         {success && (
-          <div className="mx-auto mb-6 max-w-3xl rounded-md border border-emerald-500/30 bg-emerald-500/10 px-4 py-3 text-sm text-emerald-200">
+          <div className="mx-auto mb-8 max-w-3xl rounded-2xl border border-emerald-500/30 bg-emerald-500/10 px-6 py-4 text-sm text-emerald-200 backdrop-blur">
             {success}
           </div>
         )}
 
-        <section className="grid gap-6 pb-20 sm:grid-cols-2 lg:grid-cols-3">
+        {/* Pricing Cards */}
+        <section className="grid gap-8 pb-20 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
             const isCurrent = currentPlan === plan.planKey;
             const isLoading = loading === plan.planKey || loading === "upgrade";
@@ -221,95 +263,173 @@ export default function PricingPage(): React.ReactElement {
             return (
               <div
                 key={plan.name}
-                className={[
-                  "relative rounded-2xl border p-6 shadow-lg",
+                className={`relative rounded-3xl border p-8 shadow-2xl transition-all duration-300 hover:scale-105 ${
                   plan.highlight
-                    ? "border-white/15 bg-white/10 ring-1 ring-white/20"
-                    : "border-white/10 bg-white/5 ring-1 ring-white/10",
-                ].join(" ")}
+                    ? "border-white/20 bg-gradient-to-br from-white/10 via-white/5 to-transparent ring-2 ring-fuchsia-500/30"
+                    : "border-white/10 bg-gradient-to-br from-white/5 to-transparent ring-1 ring-white/10"
+                }`}
               >
                 {/* Popular badge */}
                 {plan.highlight && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/10 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-white/80">
+                  <div className="absolute -top-4 left-1/2 -translate-x-1/2 rounded-full border border-fuchsia-500/30 bg-gradient-to-r from-fuchsia-500 to-purple-500 px-4 py-2 text-xs font-semibold uppercase tracking-wider text-white shadow-lg">
                     Most Popular
                   </div>
                 )}
 
                 {/* Current plan badge */}
                 {isCurrent && (
-                  <div className="absolute -top-3 right-3 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-2 py-0.5 text-[10px] font-medium uppercase tracking-wider text-emerald-200">
+                  <div className="absolute -top-4 right-4 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-200">
                     Current Plan
                   </div>
                 )}
 
-                <div className="flex items-baseline justify-between">
-                  <h3 className="text-lg font-semibold">{plan.name}</h3>
-                  <div className="text-right">
-                    <span className="text-3xl font-semibold">
+                {/* Plan Icon */}
+                <div
+                  className={`mb-6 inline-flex h-16 w-16 items-center justify-center rounded-2xl bg-gradient-to-r ${plan.color} text-white shadow-lg`}
+                >
+                  {plan.icon}
+                </div>
+
+                {/* Plan Header */}
+                <div className="mb-6">
+                  <h3 className="text-2xl font-bold text-white mb-2">
+                    {plan.name}
+                  </h3>
+                  <p className="text-white/70 leading-relaxed">
+                    {plan.description}
+                  </p>
+                </div>
+
+                {/* Price */}
+                <div className="mb-8">
+                  <div className="flex items-baseline gap-2">
+                    <span className="text-5xl font-bold text-white">
                       ${plan.price}
                     </span>
-                    <span className="ml-1 text-sm text-white/60">/mo</span>
+                    <span className="text-lg text-white/60">/month</span>
                   </div>
                 </div>
 
-                <p className="mt-2 text-sm text-white/70">{plan.description}</p>
-
-                <ul className="mt-5 space-y-2 text-sm">
+                {/* Features */}
+                <ul className="mb-8 space-y-4">
                   {plan.features.map((feature) => (
                     <li
                       key={feature}
-                      className="flex items-center gap-2 text-white/80"
+                      className="flex items-start gap-3 text-white/80"
                     >
-                      <svg
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="1.5"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                        className="h-4 w-4 text-emerald-400"
-                        aria-hidden
-                      >
-                        <path d="M20 6L9 17l-5-5" />
-                      </svg>
-                      <span>{feature}</span>
+                      <div className="mt-1 h-2 w-2 rounded-full bg-emerald-400 flex-shrink-0" />
+                      <span className="leading-relaxed">{feature}</span>
                     </li>
                   ))}
                 </ul>
 
-                <div className="mt-6">
+                {/* CTA Button */}
+                <div className="mb-6">
                   <button
                     onClick={() => handleSubscribe(plan.planKey)}
                     disabled={isLoading}
-                    className={[
-                      "inline-flex w-full items-center justify-center rounded-md px-3.5 py-2 text-sm font-medium transition",
+                    className={`w-full rounded-2xl px-6 py-4 text-lg font-semibold transition-all duration-300 ${
                       plan.highlight
-                        ? "bg-white text-neutral-900 hover:bg-white/90"
-                        : "border border-white/15 bg-transparent text-white hover:bg-white/10",
-                      isLoading ? "opacity-70 cursor-not-allowed" : "",
-                    ].join(" ")}
+                        ? "bg-gradient-to-r from-fuchsia-500 to-purple-500 text-white hover:from-fuchsia-600 hover:to-purple-600 shadow-2xl shadow-fuchsia-500/25"
+                        : "border-2 border-white/20 bg-white/5 text-white hover:bg-white/10 hover:border-white/30"
+                    } ${
+                      isLoading
+                        ? "opacity-70 cursor-not-allowed"
+                        : "hover:scale-105"
+                    }`}
                   >
                     {buttonLabel}
                   </button>
-
-                  {/* Nudge under Basic like in old app */}
-                  {plan.planKey === "basic" && (
-                    <p className="mt-3 text-center text-xs text-white/60">
-                      Need more? Upgrade to Standard or Pro anytime.
-                    </p>
-                  )}
                 </div>
+
+                {/* Additional info for Basic plan */}
+                {plan.planKey === "basic" && (
+                  <p className="text-center text-sm text-white/60">
+                    Need more? Upgrade to Standard or Pro anytime.
+                  </p>
+                )}
               </div>
             );
           })}
         </section>
+
+        {/* FAQ Section */}
+        <section className="pb-20">
+          <div className="mx-auto max-w-4xl text-center">
+            <h2 className="text-3xl font-bold text-white mb-12">
+              Frequently Asked Questions
+            </h2>
+
+            <div className="grid gap-6 md:grid-cols-2">
+              <div className="text-left bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="font-semibold text-white mb-3">
+                  Do you support per-word karaoke timing?
+                </h3>
+                <p className="text-white/70">
+                  Yes—toggle Karaoke mode for per-word highlights and perfect
+                  synchronization.
+                </p>
+              </div>
+
+              <div className="text-left bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="font-semibold text-white mb-3">
+                  Which exports are available?
+                </h3>
+                <p className="text-white/70">
+                  MP4 in 16:9, 9:16, 1:1; 720p/1080p/1440p quality options.
+                </p>
+              </div>
+
+              <div className="text-left bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="font-semibold text-white mb-3">
+                  Can I cancel anytime?
+                </h3>
+                <p className="text-white/70">
+                  Yes—plans are flexible and you can cancel anytime from your
+                  settings.
+                </p>
+              </div>
+
+              <div className="text-left bg-white/5 border border-white/10 rounded-2xl p-6">
+                <h3 className="font-semibold text-white mb-3">
+                  What payment methods do you accept?
+                </h3>
+                <p className="text-white/70">
+                  We accept all major credit cards, debit cards, and PayPal
+                  through Stripe.
+                </p>
+              </div>
+            </div>
+          </div>
+        </section>
       </div>
 
-      <footer className="border-t border-white/10 py-10 text-center text-sm text-white/50">
-        <p>
-          © {new Date().getFullYear()} Sonexa — Build lyric videos at the speed
-          of sound.
-        </p>
+      {/* Enhanced Footer */}
+      <footer className="border-t border-white/10 py-16 text-center">
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="mb-8">
+            <h3 className="text-2xl font-bold text-white mb-4">
+              Ready to Transform Your Content?
+            </h3>
+            <p className="text-white/70 mb-6">
+              Join thousands of creators who are already making stunning lyric
+              videos and captions.
+            </p>
+            <a
+              href="/upload"
+              className="inline-flex items-center gap-2 rounded-xl bg-white/10 border border-white/20 px-6 py-3 text-white font-medium hover:bg-white/20 transition-all"
+            >
+              Start Creating Now
+            </a>
+          </div>
+
+          <div className="border-t border-white/10 pt-8">
+            <p className="text-white/50">
+              © {new Date().getFullYear()} Sonexa — Build lyric videos at the
+              speed of sound.
+            </p>
+          </div>
+        </div>
       </footer>
     </main>
   );

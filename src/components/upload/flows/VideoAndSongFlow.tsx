@@ -232,31 +232,117 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           onDragOver={onDragOverAudio}
           onDragLeave={onDragLeaveAudio}
           onDrop={onDropAudio}
-          className={`group relative grid h-36 w-full max-w-xl place-items-center rounded-xl border border-dashed text-center transition ${
+          className={`group relative grid w-full  place-items-center rounded-3xl border-2 border-dashed text-center transition-all duration-300 p-4 ${
             isDraggingAudio
-              ? "border-emerald-400/60 bg-emerald-400/5"
-              : "border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10"
+              ? "border-fuchsia-400/60 bg-gradient-to-br from-fuchsia-500/10 via-purple-500/10 to-indigo-500/10 scale-105 shadow-2xl shadow-fuchsia-500/25"
+              : "border-white/20 bg-gradient-to-br from-white/5 via-white/3 to-transparent hover:border-white/40 hover:bg-gradient-to-br hover:from-white/10 hover:via-white/5 hover:to-transparent hover:scale-102"
           }`}
         >
-          <div className="grid place-items-center text-white px-6">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
+          {/* Background gradient overlay */}
+          <div
+            className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
+              isDraggingAudio
+                ? "bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-indigo-500/5 opacity-100"
+                : "bg-gradient-to-br from-white/5 via-white/3 to-transparent opacity-0 group-hover:opacity-100"
+            }`}
+          />
+
+          {/* Animated border glow */}
+          <div
+            className={`absolute inset-0 rounded-3xl transition-all duration-300 ${
+              isDraggingAudio
+                ? "ring-4 ring-fuchsia-400/20"
+                : "ring-0 group-hover:ring-2 group-hover:ring-white/10"
+            }`}
+          />
+
+          <div className="relative z-10 grid place-items-center text-white px-8">
+            {/* Enhanced icon container */}
+            <div
+              className={`grid h-16 w-16 place-items-center rounded-2xl transition-all duration-300 ${
+                isDraggingAudio
+                  ? "bg-gradient-to-r from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/25 scale-110"
+                  : "bg-gradient-to-r from-white/10 to-white/5 group-hover:bg-gradient-to-r group-hover:from-white/15 group-hover:to-white/10 group-hover:scale-105"
+              }`}
+            >
               <FileAudio
-                className="h-5 w-5 text-purple-300"
-                strokeWidth={1.8}
+                className={`h-7 w-7 transition-all duration-300 ${
+                  isDraggingAudio
+                    ? "text-white scale-110"
+                    : "text-purple-300 group-hover:text-purple-200"
+                }`}
+                strokeWidth={2}
               />
             </div>
-            <p className="mt-2 text-sm text-white/80">
-              Drop <span className="font-semibold text-purple-400">audio</span>{" "}
-              here or click to browse
-            </p>
-            <div className="mt-2 eq" aria-hidden>
+
+            {/* Enhanced text */}
+            <div className="mt-4 text-center">
+              <p
+                className={`text-lg font-semibold transition-all duration-300 ${
+                  isDraggingAudio
+                    ? "text-fuchsia-200"
+                    : "text-white group-hover:text-white/90"
+                }`}
+              >
+                {isDraggingAudio
+                  ? "Drop your audio here!"
+                  : "Drop your audio here or click to browse"}
+              </p>
+              <p className="mt-2 text-sm text-white/70">
+                Supports WAV, MP3, FLAC, M4A, AAC, OGG
+              </p>
+            </div>
+
+            {/* Enhanced equalizer animation */}
+            <div
+              className={`mt-4 eq transition-all duration-300 ${
+                isDraggingAudio ? "scale-110" : "group-hover:scale-105"
+              }`}
+              aria-hidden
+            >
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
             </div>
+
+            {/* Upload hint */}
+            <div className="mt-4 text-xs text-white/50">
+              <span className="inline-flex items-center gap-1">
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Click or drag & drop to upload
+              </span>
+            </div>
           </div>
+
+          {/* Floating particles when dragging */}
+          {isDraggingAudio && (
+            <>
+              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-fuchsia-400 animate-ping" />
+              <div
+                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping"
+                style={{ animationDelay: "0.5s" }}
+              />
+              <div
+                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-indigo-400 animate-ping"
+                style={{ animationDelay: "1s" }}
+              />
+            </>
+          )}
+
           <input
             ref={audioInputRef}
             id="audio-upload"
@@ -266,14 +352,54 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             className="sr-only"
           />
         </label>
+
+        {/* Enhanced file preview */}
         {pendingAudio && (
-          <div className="mt-3 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
-            <audio src={audioUrl ?? undefined} controls className="w-full" />
-            <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
-              <span className="truncate" title={pendingAudio.name}>
-                {pendingAudio.name}
-              </span>
-              <span>{(pendingAudio.size / 1024 / 1024).toFixed(1)} MB</span>
+          <div className="mt-6 w-full max-w-2xl">
+            <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-white/10 via-white/5 to-transparent shadow-xl">
+              <div className="p-4">
+                <audio
+                  src={audioUrl ?? undefined}
+                  controls
+                  className="w-full rounded-xl"
+                />
+              </div>
+              <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-white/70 bg-white/5">
+                <div className="flex items-center gap-3">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-500 flex items-center justify-center">
+                    <FileAudio className="h-4 w-4 text-white" />
+                  </div>
+                  <div>
+                    <span
+                      className="font-medium text-white truncate block"
+                      title={pendingAudio.name}
+                    >
+                      {pendingAudio.name}
+                    </span>
+                    <span className="text-xs text-white/60">
+                      {(pendingAudio.size / 1024 / 1024).toFixed(1)} MB
+                    </span>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">
+                    <svg
+                      className="h-3 w-3"
+                      fill="none"
+                      viewBox="0 0 24 24"
+                      stroke="currentColor"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M5 13l4 4L19 7"
+                      />
+                    </svg>
+                    Ready
+                  </span>
+                </div>
+              </div>
             </div>
           </div>
         )}
@@ -287,31 +413,117 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           onDragOver={onDragOverVideo}
           onDragLeave={onDragLeaveVideo}
           onDrop={onDropVideo}
-          className={`group relative grid h-36 w-full max-w-xl place-items-center rounded-xl border border-dashed text-center transition ${
+          className={`group relative grid w-full place-items-center rounded-3xl border-2 border-dashed text-center transition-all duration-300 p-4 ${
             isDraggingVideo
-              ? "border-emerald-400/60 bg-emerald-400/5"
-              : "border-white/20 bg-white/5 hover:border-white/30 hover:bg-white/10"
+              ? "border-fuchsia-400/60 bg-gradient-to-br from-fuchsia-500/10 via-purple-500/10 to-indigo-500/10 scale-105 shadow-2xl shadow-fuchsia-500/25"
+              : "border-white/20 bg-gradient-to-br from-white/5 via-white/3 to-transparent hover:border-white/40 hover:bg-gradient-to-br hover:from-white/10 hover:via-white/5 hover:to-transparent hover:scale-102"
           }`}
         >
-          <div className="grid place-items-center text-white px-6">
-            <div className="grid h-10 w-10 place-items-center rounded-full bg-white/10">
+          {/* Background gradient overlay */}
+          <div
+            className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
+              isDraggingVideo
+                ? "bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-indigo-500/5 opacity-100"
+                : "bg-gradient-to-br from-white/5 via-white/3 to-transparent opacity-0 group-hover:opacity-100"
+            }`}
+          />
+
+          {/* Animated border glow */}
+          <div
+            className={`absolute inset-0 rounded-3xl transition-all duration-300 ${
+              isDraggingVideo
+                ? "ring-4 ring-fuchsia-400/20"
+                : "ring-0 group-hover:ring-2 group-hover:ring-white/10"
+            }`}
+          />
+
+          <div className="relative z-10 grid place-items-center text-white px-8">
+            {/* Enhanced icon container */}
+            <div
+              className={`grid h-16 w-16 place-items-center rounded-2xl transition-all duration-300 ${
+                isDraggingVideo
+                  ? "bg-gradient-to-r from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/25 scale-110"
+                  : "bg-gradient-to-r from-white/10 to-white/5 group-hover:bg-gradient-to-r group-hover:from-white/15 group-hover:to-white/10 group-hover:scale-105"
+              }`}
+            >
               <FileVideo
-                className="h-5 w-5 text-purple-300"
-                strokeWidth={1.8}
+                className={`h-7 w-7 transition-all duration-300 ${
+                  isDraggingVideo
+                    ? "text-white scale-110"
+                    : "text-purple-300 group-hover:text-purple-200"
+                }`}
+                strokeWidth={2}
               />
             </div>
-            <p className="mt-2 text-sm text-white/80">
-              Drop <span className="font-semibold text-purple-400">video</span>{" "}
-              here or click to browse
-            </p>
-            <div className="mt-2 eq" aria-hidden>
+
+            {/* Enhanced text */}
+            <div className="mt-4 text-center">
+              <p
+                className={`text-lg font-semibold transition-all duration-300 ${
+                  isDraggingVideo
+                    ? "text-fuchsia-200"
+                    : "text-white group-hover:text-white/90"
+                }`}
+              >
+                {isDraggingVideo
+                  ? "Drop your video here!"
+                  : "Drop your video here or click to browse"}
+              </p>
+              <p className="mt-2 text-sm text-white/70">
+                Supports MP4, MOV, WEBM, MKV
+              </p>
+            </div>
+
+            {/* Enhanced equalizer animation */}
+            <div
+              className={`mt-4 eq transition-all duration-300 ${
+                isDraggingVideo ? "scale-110" : "group-hover:scale-105"
+              }`}
+              aria-hidden
+            >
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
               <span className="eq-bar" />
             </div>
+
+            {/* Upload hint */}
+            <div className="mt-4 text-xs text-white/50">
+              <span className="inline-flex items-center gap-1">
+                <svg
+                  className="h-3 w-3"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"
+                  />
+                </svg>
+                Click or drag & drop to upload
+              </span>
+            </div>
           </div>
+
+          {/* Floating particles when dragging */}
+          {isDraggingVideo && (
+            <>
+              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-fuchsia-400 animate-ping" />
+              <div
+                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping"
+                style={{ animationDelay: "0.5s" }}
+              />
+              <div
+                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-indigo-400 animate-ping"
+                style={{ animationDelay: "1s" }}
+              />
+            </>
+          )}
+
           <input
             ref={videoInputRef}
             id="video-upload"
@@ -321,31 +533,88 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             className="sr-only"
           />
         </label>
+
+        {/* Enhanced file preview */}
         {pendingVideo && (
-          <div className="mt-3 w-full max-w-xl overflow-hidden rounded-lg border border-white/10 bg-white/5">
-            <video
-              src={videoUrl ?? undefined}
-              controls
-              preload="metadata"
-              className="w-full"
-            />
-            <div className="flex items-center justify-between border-t border-white/10 px-3 py-2 text-xs text-white/70">
-              <span className="truncate" title={pendingVideo.name}>
-                {pendingVideo.name}
-              </span>
-              <span>{(pendingVideo.size / 1024 / 1024).toFixed(1)} MB</span>
-            </div>
+          <div className="mt-6 w-full max-w-2xl">
+            {videoUrl && (
+              <div className="overflow-hidden rounded-2xl border border-white/10 bg-gradient-to-r from-white/10 via-white/5 to-transparent shadow-xl">
+                <div className="p-4">
+                  <video
+                    src={videoUrl}
+                    controls
+                    preload="metadata"
+                    className="w-full rounded-xl"
+                  />
+                </div>
+                <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-white/70 bg-white/5">
+                  <div className="flex items-center gap-3">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-500 flex items-center justify-center">
+                      <FileVideo className="h-4 w-4 text-white" />
+                    </div>
+                    <div>
+                      <span
+                        className="font-medium text-white truncate block"
+                        title={pendingVideo.name}
+                      >
+                        {pendingVideo.name}
+                      </span>
+                      <span className="text-xs text-white/60">
+                        {(pendingVideo.size / 1024 / 1024).toFixed(1)} MB
+                      </span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <span className="inline-flex items-center gap-1 rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">
+                      <svg
+                        className="h-3 w-3"
+                        fill="none"
+                        viewBox="0 0 24 24"
+                        stroke="currentColor"
+                      >
+                        <path
+                          strokeLinecap="round"
+                          strokeLinejoin="round"
+                          strokeWidth={2}
+                          d="M5 13l4 4L19 7"
+                        />
+                      </svg>
+                      Ready
+                    </span>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
       </div>
 
+      {/* Error display */}
       {uploadError && (
-        <p className="mt-2 rounded-md border border-red-500/20 bg-red-950/40 p-3 text-sm text-red-200">
-          {uploadError}
-        </p>
+        <div className="mt-6 w-full max-w-2xl">
+          <div className="rounded-2xl border border-red-500/30 bg-gradient-to-r from-red-500/10 to-red-600/10 p-4 text-center">
+            <div className="flex items-center gap-3 text-red-200">
+              <svg
+                className="h-5 w-5 text-red-400"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.964-.833-2.732 0L3.732 16.5c-.77.833.192 2.5 1.732 2.5z"
+                />
+              </svg>
+              <span className="text-sm">{uploadError}</span>
+            </div>
+          </div>
+        </div>
       )}
 
-      <div className="mt-2">
+      {/* Upload button */}
+      <div className="mt-6">
         <button
           type="button"
           onClick={() => {
@@ -356,9 +625,31 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             start();
           }}
           disabled={isUploading}
-          className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
+          className="inline-flex items-center justify-center gap-3 rounded-2xl bg-gradient-to-r from-fuchsia-500 to-purple-500 px-8 py-4 text-sm font-semibold text-white shadow-lg shadow-fuchsia-500/25 transition-all hover:from-fuchsia-600 hover:to-purple-600 hover:scale-105 disabled:cursor-not-allowed disabled:opacity-70"
         >
-          Upload both and continue
+          {isUploading ? (
+            <>
+              <div className="h-5 w-5 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              Processing...
+            </>
+          ) : (
+            <>
+              <svg
+                className="h-5 w-5"
+                fill="none"
+                viewBox="0 0 24 24"
+                stroke="currentColor"
+              >
+                <path
+                  strokeLinecap="round"
+                  strokeLinejoin="round"
+                  strokeWidth={2}
+                  d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M9 19l3 3m0 0l3-3m-3 3V10"
+                />
+              </svg>
+              Upload Both & Continue
+            </>
+          )}
         </button>
       </div>
     </div>

@@ -80,56 +80,57 @@ export default function NavBar(): React.ReactElement {
 
         {/* Center: Nav (desktop) */}
         <nav className="hidden gap-8 lg:flex">
-          {/* SEO Pages Dropdown */}
-          <div className="relative">
-            <button
-              onClick={() => setSeoDropdownOpen(!seoDropdownOpen)}
-              onMouseEnter={handleDropdownEnter}
-              onMouseLeave={handleDropdownLeave}
-              className="flex items-center gap-2 text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
-            >
-              Tools
-              <ChevronDown
-                className={`h-5 w-5 transition-transform ${
-                  seoDropdownOpen ? "rotate-180" : ""
-                }`}
-              />
-            </button>
-
-            {/* Dropdown Menu */}
-            {seoDropdownOpen && (
-              <div
-                className="absolute top-full left-0 mt-3 w-80 rounded-xl border border-white/10 bg-neutral-900/95 backdrop-blur-md p-4 shadow-2xl"
+          {/* SEO Pages Dropdown - Only show when signed out */}
+          <SignedOut>
+            <div className="relative">
+              <button
+                onClick={() => setSeoDropdownOpen(!seoDropdownOpen)}
                 onMouseEnter={handleDropdownEnter}
                 onMouseLeave={handleDropdownLeave}
+                className="flex items-center gap-2 text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
               >
-                <div className="grid gap-3">
-                  {seoPages.map((item) => (
-                    <Link
-                      key={item.label}
-                      href={item.href}
-                      className="group rounded-lg p-3 transition-all hover:bg-white/5 hover:border-white/10 border border-transparent"
-                      onClick={() => setSeoDropdownOpen(false)}
-                    >
-                      <div className="flex items-start justify-between">
-                        <div className="flex-1">
-                          <div className="font-medium text-white group-hover:text-fuchsia-300 transition-colors">
-                            {item.label}
-                          </div>
-                          {item.description && (
-                            <div className="mt-1 text-sm text-white/60 group-hover:text-white/80 transition-colors">
-                              {item.description}
+                Tools
+                <ChevronDown
+                  className={`h-5 w-5 transition-transform ${
+                    seoDropdownOpen ? "rotate-180" : ""
+                  }`}
+                />
+              </button>
+              {/* Dropdown Menu */}
+              {seoDropdownOpen && (
+                <div
+                  className="absolute top-full left-0 mt-3 w-80 rounded-xl border border-white/10 bg-neutral-900/95 backdrop-blur-md p-4 shadow-2xl"
+                  onMouseEnter={handleDropdownEnter}
+                  onMouseLeave={handleDropdownLeave}
+                >
+                  <div className="grid gap-3">
+                    {seoPages.map((item) => (
+                      <Link
+                        key={item.label}
+                        href={item.href}
+                        className="group rounded-lg p-3 transition-all hover:bg-white/5 hover:border-white/10 border border-transparent"
+                        onClick={() => setSeoDropdownOpen(false)}
+                      >
+                        <div className="flex items-start justify-between">
+                          <div className="flex-1">
+                            <div className="font-medium text-white group-hover:text-fuchsia-300 transition-colors">
+                              {item.label}
                             </div>
-                          )}
+                            {item.description && (
+                              <div className="mt-1 text-sm text-white/60 group-hover:text-white/80 transition-colors">
+                                {item.description}
+                              </div>
+                            )}
+                          </div>
+                          <ChevronRight className="h-4 w-4 text-white/40 group-hover:text-white/60 transition-colors" />
                         </div>
-                        <ChevronRight className="h-4 w-4 text-white/40 group-hover:text-white/60 transition-colors" />
-                      </div>
-                    </Link>
-                  ))}
+                      </Link>
+                    ))}
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
+          </SignedOut>
 
           {/* Main Navigation Items */}
           {mainNavItems.map((item) => (
@@ -225,23 +226,25 @@ export default function NavBar(): React.ReactElement {
         <div className="border-t border-white/10 lg:hidden">
           <div className="mx-auto max-w-7xl px-4 py-4 sm:px-6">
             <nav className="grid gap-3">
-              {/* SEO Pages Section */}
-              <div className="mb-6">
-                <div className="px-3 py-3 text-sm font-semibold text-white/50 uppercase tracking-wider">
-                  Tools
+              {/* SEO Pages Section - Only show when signed out */}
+              <SignedOut>
+                <div className="mb-6">
+                  <div className="px-3 py-3 text-sm font-semibold text-white/50 uppercase tracking-wider">
+                    Tools
+                  </div>
+                  {seoPages.map((item) => (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      className="flex items-center justify-between rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
+                      onClick={() => setOpen(false)}
+                    >
+                      <span>{item.label}</span>
+                      <ChevronRight className="h-5 w-5 text-white/40" />
+                    </Link>
+                  ))}
                 </div>
-                {seoPages.map((item) => (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="flex items-center justify-between rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
-                    onClick={() => setOpen(false)}
-                  >
-                    <span>{item.label}</span>
-                    <ChevronRight className="h-5 w-5 text-white/40" />
-                  </Link>
-                ))}
-              </div>
+              </SignedOut>
 
               {/* Main Navigation */}
               {mainNavItems.map((item) => (
