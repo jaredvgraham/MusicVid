@@ -22,7 +22,7 @@ export default function Hero(): React.ReactElement {
         transition={{ duration: 0.7, ease: "easeOut", delay: 0.1 }}
         className="mx-auto mt-6 max-w-3xl bg-gradient-to-br from-white via-white to-white/70 bg-clip-text text-4xl font-semibold leading-tight text-transparent sm:text-5xl md:text-6xl"
       >
-        Turn your song into a beautiful lyric video in minutes
+        AI Lyric Video Maker & Caption Studio
       </motion.h1>
 
       <motion.p
@@ -31,9 +31,8 @@ export default function Hero(): React.ReactElement {
         transition={{ duration: 0.7, ease: "easeOut", delay: 0.18 }}
         className="mx-auto mt-5 max-w-2xl text-balance text-white/70"
       >
-        Upload a track and let our AI time lyrics, design motion graphics, and
-        export a crisp, platform‑ready video. No timeline, no keyframes, no
-        stress.
+        Upload a song or clip and get on‑beat, styled words. Edit timing,
+        position, and styles; export for TikTok, Reels, and YouTube.
       </motion.p>
     </section>
   );

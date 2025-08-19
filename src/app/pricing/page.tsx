@@ -4,6 +4,9 @@ import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import SeoHead from "@/components/SeoHead";
+import JsonLd from "@/components/JsonLd";
+import { faqPageLd, howToLd, absoluteUrl } from "@/lib/seo";
 
 type Plan = {
   name: "Basic" | "Standard" | "Pro";
@@ -32,7 +35,7 @@ const plans: Plan[] = [
     description: "Most popular: more styles, faster renders, custom branding.",
     features: [
       "Up to 15 renders/month",
-      "1080p & 4K exports",
+      "720p/1080p/1440p exports",
       "All lyric templates",
       "Brand colors & fonts",
       "Priority rendering",
@@ -45,9 +48,8 @@ const plans: Plan[] = [
     price: 39.99,
     description: "For creators and teams shipping high-volume social content.",
     features: [
-      "Unlimited renders",
-      "4K exports + alpha",
-      "Team collaboration",
+      "More monthly renders",
+      "720p/1080p/1440p exports",
       "Template overrides",
       "Priority support",
     ],
@@ -134,6 +136,37 @@ export default function PricingPage(): React.ReactElement {
 
   return (
     <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
+      <SeoHead
+        title="Pricing — Sonexa AI Lyric Video Maker"
+        description="Simple, transparent pricing. Auto-timed lyrics and captions with designer presets and fast exports."
+        path="/pricing"
+        ogImage={absoluteUrl(
+          "/api/og?title=Sonexa%20Pricing&desc=AI%20Lyric%20Video%20Maker%20%26%20Caption%20Studio"
+        )}
+      />
+      <JsonLd
+        data={[
+          faqPageLd([
+            {
+              question: "Do you support per-word karaoke timing?",
+              answer: "Yes—toggle Karaoke mode for per-word highlights.",
+            },
+            {
+              question: "Which exports are available?",
+              answer: "MP4 in 16:9, 9:16, 1:1; 720p/1080p/1440p.",
+            },
+            {
+              question: "Can I cancel anytime?",
+              answer:
+                "Yes—plans are flexible and you can cancel anytime from settings.",
+            },
+          ]),
+          howToLd({
+            name: "How to upgrade in Sonexa",
+            steps: ["Sign in", "Pick a plan", "Start rendering lyric videos"],
+          }),
+        ]}
+      />
       {/* Ambient background */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-1/3 left-1/2 h-[70rem] w-[70rem] -translate-x-1/2 rounded-full blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-fuchsia-500 via-purple-500 to-indigo-600" />
@@ -151,6 +184,14 @@ export default function PricingPage(): React.ReactElement {
             anytime.
           </p>
         </section>
+        <div className="-mt-8 mb-12 text-center">
+          <a
+            href="/upload"
+            className="inline-flex items-center justify-center rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90"
+          >
+            Start now — upload
+          </a>
+        </div>
 
         {/* Error / Success banners */}
         {error && (
@@ -266,8 +307,8 @@ export default function PricingPage(): React.ReactElement {
 
       <footer className="border-t border-white/10 py-10 text-center text-sm text-white/50">
         <p>
-          © {new Date().getFullYear()} MusicVid — Build lyric videos at the
-          speed of sound.
+          © {new Date().getFullYear()} Sonexa — Build lyric videos at the speed
+          of sound.
         </p>
       </footer>
     </main>

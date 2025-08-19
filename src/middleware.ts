@@ -4,10 +4,24 @@ const isPublicRoute = createRouteMatcher([
   "/",
   "/sign-in(.*)",
   "/sign-up(.*)",
+  "/pricing",
+  // Marketing/SEO pages
+  "/lyric-video-maker",
+  "/add-lyrics-to-video",
+  "/ai-caption-generator",
+  "/tiktok-captions",
+  "/templates(.*)",
+  "/blog(.*)",
+  // Feeds & SEO files
+  "/sitemap.xml",
+  "/robots.txt",
+  "/rss.xml",
+  // Public APIs used by crawlers/og
+  "/api/og",
+  // Webhooks and public APIs
   "/api/webhooks/clerk",
   "/api/webhooks/stripe",
   "/api/transcribe",
-  "/pricing",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {

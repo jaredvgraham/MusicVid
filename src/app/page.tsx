@@ -6,6 +6,14 @@ import { FeatureGrid } from "../components/landing/FeatureGrid";
 import { Steps } from "../components/landing/Steps";
 import Showcase from "../components/landing/Showcase";
 import { useProjectSocket } from "../hooks/useProjectSocket";
+import SeoHead from "@/components/SeoHead";
+import JsonLd from "@/components/JsonLd";
+import {
+  faqPageLd,
+  howToLd,
+  softwareApplicationLd,
+  absoluteUrl,
+} from "@/lib/seo";
 
 export default function Page(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -15,6 +23,52 @@ export default function Page(): React.ReactElement {
   console.log("project", project);
   return (
     <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
+      <SeoHead
+        title="Sonexa — AI Lyric Video Maker & Caption Studio"
+        description="Upload a song or clip and get on-beat, styled words. Edit timing, position, and styles; export for TikTok, Reels, and YouTube."
+        path="/"
+        ogImage={absoluteUrl(
+          "/api/og?title=Sonexa&desc=AI%20Lyric%20Video%20Maker%20%26%20Caption%20Studio"
+        )}
+      />
+      <JsonLd
+        data={[
+          softwareApplicationLd(),
+          faqPageLd([
+            {
+              question: "Can Sonexa auto-make lyric videos?",
+              answer:
+                "Yes—upload a song or video and we time words to the beat.",
+            },
+            {
+              question: "Can I edit positions and styles?",
+              answer:
+                "Yes—drag text and apply presets like Minimal, Neon, Vapor, Bold, and Karaoke.",
+            },
+            {
+              question: "Do you support per-word karaoke timing?",
+              answer: "Yes—toggle Karaoke mode for per‑word highlights.",
+            },
+            {
+              question: "Which exports are available?",
+              answer: "MP4 in 16:9, 9:16, 1:1; 720p/1080p/1440p.",
+            },
+            {
+              question: "Will it caption voice-only clips?",
+              answer: "Yes—perfect for talking‑head content.",
+            },
+          ]),
+          howToLd({
+            name: "How to make a lyric video",
+            steps: [
+              "Upload a song",
+              "Choose a stock clip or upload your video",
+              "Auto‑sync lyrics and style",
+              "Export for TikTok, Reels, or YouTube",
+            ],
+          }),
+        ]}
+      />
       {/* Ambient background */}
       <div aria-hidden className="pointer-events-none absolute inset-0 -z-10">
         <div className="absolute -top-1/3 left-1/2 h-[70rem] w-[70rem] -translate-x-1/2 rounded-full blur-3xl opacity-30 bg-[radial-gradient(circle_at_center,_var(--tw-gradient-stops))] from-fuchsia-500 via-purple-500 to-indigo-600" />
@@ -25,6 +79,37 @@ export default function Page(): React.ReactElement {
       <div className="mx-auto max-w-7xl px-6">
         {/* Hero */}
         <Hero />
+
+        {/* Intent links under hero */}
+        <div className="mx-auto mt-6 max-w-2xl text-center text-sm text-white/70">
+          <a
+            href="/lyric-video-maker"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Lyric Video Maker
+          </a>
+          <span className="px-2">•</span>
+          <a
+            href="/add-lyrics-to-video"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            Add Lyrics to Video
+          </a>
+          <span className="px-2">•</span>
+          <a
+            href="/ai-caption-generator"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            AI Caption Generator
+          </a>
+          <span className="px-2">•</span>
+          <a
+            href="/tiktok-captions"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            TikTok Captions
+          </a>
+        </div>
 
         {/* Upload CTA */}
         <UploadCta
@@ -39,12 +124,15 @@ export default function Page(): React.ReactElement {
           Used by indie artists, labels and creators to ship videos faster.
         </p>
 
+        <h2 id="features" className="sr-only">
+          AI lyric video maker and caption features
+        </h2>
         <FeatureGrid
           items={[
             {
               title: "Auto‑timed lyrics",
               description:
-                "Precision lyric alignment with per‑word highlighting and smart line breaks.",
+                "Auto‑transcription and precision alignment with per‑word highlighting and smart line breaks.",
               icon: <IconWave className="h-6 w-6 text-emerald-400" />,
             },
             {
@@ -56,19 +144,20 @@ export default function Page(): React.ReactElement {
             {
               title: "One‑click export",
               description:
-                "Render 1080p or 4K in portrait, square or landscape for every platform.",
+                "Render 720p/1080p/1440p in 16:9, 9:16 or 1:1 for every platform.",
               icon: <IconBolt className="h-6 w-6 text-cyan-400" />,
             },
           ]}
         />
 
+        <h2 className="sr-only">How it works</h2>
         <Steps
           items={[
             {
               number: 1,
-              title: "Add your song",
+              title: "Upload a song or video",
               description:
-                "Drop an MP3/WAV and paste lyrics or fetch from metadata.",
+                "Drop audio or video; we auto‑transcribe and time words to the beat.",
             },
             {
               number: 2,
@@ -86,13 +175,23 @@ export default function Page(): React.ReactElement {
         />
 
         <Showcase />
+
+        {/* Extra CTA for creators */}
+        <div className="mb-16 text-center">
+          <a
+            href="/upload"
+            className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90"
+          >
+            Start now — upload a song or clip
+          </a>
+        </div>
       </div>
 
       {/* Footer */}
       <footer className="border-t border-white/10 py-10 text-center text-sm text-white/50">
         <p>
-          © {new Date().getFullYear()} MusicVid — Build lyric videos at the
-          speed of sound.
+          © {new Date().getFullYear()} Sonexa — Build lyric videos at the speed
+          of sound.
         </p>
       </footer>
     </main>

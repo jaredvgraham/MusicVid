@@ -9,10 +9,11 @@ import Image from "next/image";
 type NavItem = { label: string; href: string };
 
 const navItems: NavItem[] = [
-  { label: "Features", href: "/#features" },
-  { label: "Templates", href: "/#templates" },
+  { label: "Lyric Video Maker", href: "/lyric-video-maker" },
+  { label: "Add Lyrics to Video", href: "/add-lyrics-to-video" },
+  { label: "AI Caption Generator", href: "/ai-caption-generator" },
+  { label: "Templates", href: "/templates" },
   { label: "Pricing", href: "/pricing" },
-  { label: "Docs", href: "/#docs" },
   { label: "Settings", href: "/settings" },
 ];
 
@@ -69,6 +70,15 @@ export default function NavBar(): React.ReactElement {
               Settings
             </Link>
           </SignedIn>
+          <SignedOut>
+            <Link
+              key="Upload-cta"
+              href="/upload"
+              className="text-sm text-white/70 transition hover:text-white"
+            >
+              Upload
+            </Link>
+          </SignedOut>
         </nav>
 
         {/* Right: Auth & CTA (desktop) */}

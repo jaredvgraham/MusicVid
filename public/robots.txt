@@ -1,0 +1,9 @@
+# *
+User-agent: *
+Allow: /
+
+# Host
+Host: https://www.sonexa.cc
+
+# Sitemaps
+Sitemap: https://www.sonexa.cc/sitemap.xml

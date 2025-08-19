@@ -161,7 +161,7 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
             id="lyrics"
             value={lyrics}
             onChange={(e) => setLyrics(e.target.value)}
-            placeholder="Paste lyrics here (optional)"
+            placeholder="Optional notes or corrections (we auto‑transcribe)"
             rows={6}
             className="mt-3 w-full rounded-md border border-white/10 bg-neutral-900/60 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none ring-0 transition focus:border-white/20 focus:bg-neutral-900/70"
           />

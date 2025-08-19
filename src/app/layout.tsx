@@ -5,6 +5,7 @@ import "./globals.css";
 import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import NavBar from "@/components/NavBar";
+import { siteMeta } from "@/lib/seo";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -16,10 +17,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-export const metadata: Metadata = {
-  title: "Sonexa",
-  description: "Sonexa is a platform for creating and sharing audio content",
-};
+export const metadata: Metadata = siteMeta();
 
 export default function RootLayout({
   children,
