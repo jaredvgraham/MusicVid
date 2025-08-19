@@ -2,7 +2,7 @@ import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import User, { UserDocument } from "@/backend/models/User";
-import dbConnect from "@/backend/lib/db";
+import { dbConnect } from "@/backend/lib/db";
 
 const stripe = new Stripe(process.env.STRIPE_SECRET_KEY as string);
 const BASE_URL = process.env.NEXT_PUBLIC_API_URL?.split("/api")[0];
