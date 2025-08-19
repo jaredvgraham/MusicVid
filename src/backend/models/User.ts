@@ -8,6 +8,8 @@ export interface UserDocument extends Document {
   customerId?: string;
   subscriptionId?: string;
   plan?: string;
+  billingPeriodStart?: Date;
+  billingPeriodEnd?: Date;
   createdAt: Date;
   updatedAt: Date;
 }
@@ -31,6 +33,8 @@ const UserSchema = new Schema<UserDocument>(
       enum: ["none", "Basic", "Standard", "Pro"],
       default: "none",
     },
+    billingPeriodStart: { type: Date },
+    billingPeriodEnd: { type: Date },
   },
   { timestamps: true }
 );

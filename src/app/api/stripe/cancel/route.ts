@@ -29,8 +29,11 @@ export async function POST(req: NextRequest) {
     }
 
     // Cancel the subscription using Stripe's API
-    const deletedSubscription = await stripe.subscriptions.cancel(
-      subscriptionId
+    const deletedSubscription = await stripe.subscriptions.update(
+      subscriptionId,
+      {
+        cancel_at_period_end: true,
+      }
     );
 
     // Update the user's subscription status in your database

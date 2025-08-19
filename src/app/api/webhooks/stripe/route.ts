@@ -98,6 +98,24 @@ export async function POST(req: NextRequest) {
 
       user.subscriptionId = subId as string;
       user.plan = productName;
+      // Populate billing period immediately by fetching the subscription
+      if (typeof subId === "string") {
+        try {
+          const sub = (await stripe.subscriptions.retrieve(subId)) as any;
+          const cps =
+            sub?.current_period_start ??
+            sub?.items?.data?.[0]?.current_period_start ??
+            null;
+          const cpe =
+            sub?.current_period_end ??
+            sub?.items?.data?.[0]?.current_period_end ??
+            null;
+          if (typeof cps === "number" && typeof cpe === "number") {
+            user.billingPeriodStart = new Date(cps * 1000);
+            user.billingPeriodEnd = new Date(cpe * 1000);
+          }
+        } catch {}
+      }
       console.log("[stripe:webhook] updating user", {
         clerkId: user.clerkId,
         subscriptionId: user.subscriptionId,
@@ -151,6 +169,22 @@ export async function POST(req: NextRequest) {
       }
       user.subscriptionId = subscription.id;
       user.plan = productName;
+      // Derive billing period from the subscription object (source of truth)
+      {
+        const subAny = subscription as any;
+        const cps =
+          subAny?.current_period_start ??
+          subAny?.items?.data?.[0]?.current_period_start ??
+          null;
+        const cpe =
+          subAny?.current_period_end ??
+          subAny?.items?.data?.[0]?.current_period_end ??
+          null;
+        if (typeof cps === "number" && typeof cpe === "number") {
+          user.billingPeriodStart = new Date(cps * 1000);
+          user.billingPeriodEnd = new Date(cpe * 1000);
+        }
+      }
       console.log("[stripe:webhook] updating user after update", {
         clerkId: user.clerkId,
         subscriptionId: user.subscriptionId,
@@ -187,6 +221,8 @@ export async function POST(req: NextRequest) {
 
       user.subscriptionId = undefined;
       user.plan = "none";
+      user.billingPeriodStart = undefined;
+      user.billingPeriodEnd = undefined;
       console.log("[stripe:webhook] clearing user subscription", {
         clerkId: user.clerkId,
         subscriptionId: user.subscriptionId,
