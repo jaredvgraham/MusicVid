@@ -87,8 +87,14 @@ export async function PUT(req: NextRequest) {
   try {
     await dbConnect();
     const { userId } = await auth();
+    console.log("userId", userId);
+    if (!userId) {
+      console.log("No userId");
+    }
     const user = await User.findOne({ clerkId: userId });
+    console.log("user", user);
     if (!user) {
+      console.log("User not found");
       return NextResponse.json({ message: "User not found" }, { status: 404 });
     }
     const { newPlan } = await req.json();
