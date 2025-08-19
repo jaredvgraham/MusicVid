@@ -40,6 +40,7 @@ const seoPages: DropdownItem[] = [
 
 const mainNavItems: NavItem[] = [
   { label: "Templates", href: "/templates" },
+
   { label: "Pricing", href: "/pricing" },
 ];
 
@@ -170,6 +171,12 @@ export default function NavBar(): React.ReactElement {
               className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
             >
               Upload
+            </Link>
+            <Link
+              href="/blog"
+              className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+            >
+              Blog
             </Link>
           </SignedOut>
         </nav>

@@ -17,6 +17,7 @@ import {
 import Link from "next/link";
 import { SignedOut, SignedIn } from "@clerk/nextjs";
 import Dashboard from "@/components/dash/Dashboard";
+import Image from "next/image";
 
 export default function Page(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -130,8 +131,8 @@ export default function Page(): React.ReactElement {
             <UploadCta
               setProjectId={setProjectId}
               finished={finished}
+              project={project}
               error={error}
-              project={project || { id: "", video: "", transcript: [] }}
             />
 
             {/* Social proof */}
@@ -203,11 +204,97 @@ export default function Page(): React.ReactElement {
           </div>
 
           {/* Footer */}
-          <footer className="border-t border-white/10 py-10 text-center text-sm text-white/50">
-            <p>
-              © {new Date().getFullYear()} Sonexa — Build lyric videos at the
-              speed of sound.
-            </p>
+          <footer className="bg-neutral-950 border-t border-white/10">
+            <div className="mx-auto max-w-7xl px-6 py-12">
+              <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+                {/* Brand */}
+                <div className="col-span-1 md:col-span-2">
+                  <div className="flex items-center gap-3 mb-4">
+                    <Image
+                      src="/logo.png"
+                      alt="Sonexa-Logo"
+                      width={32}
+                      height={32}
+                    />
+                    <span className="text-lg font-semibold text-white">
+                      Sonexa
+                    </span>
+                  </div>
+                  <p className="text-white/70 max-w-md">
+                    AI-powered lyric video maker and caption studio. Create
+                    stunning content in minutes, not hours.
+                  </p>
+                </div>
+
+                {/* Quick Links */}
+                <div>
+                  <h3 className="text-white font-semibold mb-4">Quick Links</h3>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        href="/upload"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        Upload
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/templates"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        Templates
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/pricing"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        Pricing
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+
+                {/* Resources */}
+                <div>
+                  <h3 className="text-white font-semibold mb-4">Resources</h3>
+                  <ul className="space-y-2">
+                    <li>
+                      <Link
+                        href="/blog"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        Blog
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/lyric-video-maker"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        Lyric Video Maker
+                      </Link>
+                    </li>
+                    <li>
+                      <Link
+                        href="/ai-caption-generator"
+                        className="text-white/70 hover:text-white transition-colors"
+                      >
+                        AI Caption Generator
+                      </Link>
+                    </li>
+                  </ul>
+                </div>
+              </div>
+
+              <div className="border-t border-white/10 mt-8 pt-8 text-center">
+                <p className="text-white/50 text-sm">
+                  © 2024 Sonexa. All rights reserved.
+                </p>
+              </div>
+            </div>
           </footer>
         </main>
       </SignedOut>

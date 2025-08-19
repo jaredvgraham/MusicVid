@@ -5,7 +5,29 @@ const POSTS: Array<{
   title: string;
   excerpt: string;
   date: string;
-}> = [];
+}> = [
+  {
+    slug: "how-to-create-lyric-videos",
+    title: "How to Create Professional Lyric Videos in 5 Minutes",
+    excerpt:
+      "Learn the step-by-step process to create stunning lyric videos with AI-powered timing and professional templates.",
+    date: "2025-08-19",
+  },
+  {
+    slug: "tiktok-caption-tips",
+    title: "10 TikTok Caption Tips That Will Boost Your Engagement",
+    excerpt:
+      "Discover proven strategies to make your TikTok captions go viral and increase your reach on the platform.",
+    date: "2025-08-19",
+  },
+  {
+    slug: "ai-video-editing-guide",
+    title: "The Complete Guide to AI-Powered Video Editing",
+    excerpt:
+      "Everything you need to know about using AI to edit videos, from timing to styling and export options.",
+    date: "2025-08-19",
+  },
+];
 
 export async function GET() {
   const items = POSTS.map(
