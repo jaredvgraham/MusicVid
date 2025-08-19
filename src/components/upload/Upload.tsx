@@ -6,6 +6,7 @@ import { useAuth } from "@clerk/nextjs";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { VideoOnlyFlow, VideoAndSongFlow, SongOnlyFlow } from "./flows";
+import { createPortal } from "react-dom";
 
 function Animations(): React.ReactElement {
   return (
@@ -147,15 +148,30 @@ export default function Upload(): React.ReactElement {
   const { userId } = useAuth();
   const [hasId, setHasId] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [remainingProjects, setRemainingProjects] = useState<number>(0);
+  const [allowed, setAllowed] = useState<boolean>(true);
   const [mode, setMode] = useState<"video-only" | "both" | "song-only">(
     "song-only"
   );
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   // Preserve spinner on refresh if a pending project id exists in localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     const persisted = window.localStorage.getItem("mv:projectId");
     if (persisted) setHasId(true);
+    const check = async () => {
+      const response = await fetch("/api/usage-check?action=project");
+      const data = await response.json();
+      setRemainingProjects(data.projects);
+      setAllowed(data.allowed);
+    }
+    check();
   }, []);
 
   const submitSplit = async (formData: FormData) => {
@@ -444,6 +460,8 @@ export default function Upload(): React.ReactElement {
                 setUploadError={setUploadError}
                 userId={userId || ""}
                 setLastFileName={setLastFileName}
+                allowed={allowed}
+                onShowUpgrade={() => setShowUpgradeModal(true)}
               />
             )}
             {mode === "both" && (
@@ -462,6 +480,8 @@ export default function Upload(): React.ReactElement {
                 setUploadError={setUploadError}
                 userId={userId || ""}
                 setLastFileName={setLastFileName}
+                allowed={allowed}
+                onShowUpgrade={() => setShowUpgradeModal(true)}
               />
             )}
             {mode === "song-only" && (
@@ -480,11 +500,54 @@ export default function Upload(): React.ReactElement {
                 setUploadError={setUploadError}
                 userId={userId || ""}
                 setLastFileName={setLastFileName}
+                allowed={allowed}
+                onShowUpgrade={() => setShowUpgradeModal(true)}
               />
             )}
           </div>
         </div>
       </div>
+
+      {showUpgradeModal && isClient &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)} />
+            <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-900 shadow-2xl ring-1 ring-purple-500/40">
+              <div className="h-1.5 w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+              <div className="p-6 sm:p-8 text-white">
+                <div className="flex items-start gap-4">
+                  <div className="mt-0.5 rounded-xl bg-purple-600/20 p-3 text-purple-200">
+                    <svg width="22" height="22" viewBox="0 0 24 24" fill="none" aria-hidden>
+                      <path d="M12 9v4m0 4h.01M10.29 3.86l-8.48 14.7A2 2 0 0 0 3.52 22h16.96a2 2 0 0 0 1.71-3.44l-8.48-14.7a2 2 0 0 0-3.42 0z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                    </svg>
+                  </div>
+                  <div>
+                    <h3 className="text-xl font-semibold">You’ve reached your monthly usage</h3>
+                    <p className="mt-2 text-sm text-white/80">
+                      You’ve used all projects allowed on your current plan for this billing period. Upgrade to unlock more projects and faster processing.
+                    </p>
+                    <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                      <button
+                        type="button"
+                        className="rounded-md border border-white/20 bg-white/10 px-4 py-2 text-xs text-white/90 hover:bg-white/15"
+                        onClick={() => setShowUpgradeModal(false)}
+                      >
+                        Not now
+                      </button>
+                      <a
+                        href="/pricing"
+                        className="rounded-md bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow hover:brightness-110"
+                      >
+                        See plans & upgrade
+                      </a>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </div>
   );
 }

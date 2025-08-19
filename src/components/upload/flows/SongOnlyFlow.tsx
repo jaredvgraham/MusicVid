@@ -17,6 +17,8 @@ type Props = {
   setUploadError: (v: string | null) => void;
   userId: string;
   setLastFileName: (v: string | null) => void;
+  allowed: boolean;
+  onShowUpgrade: () => void;
 };
 
 export default function SongOnlyFlow(props: Props): React.ReactElement {
@@ -35,6 +37,8 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
     setUploadError,
     userId,
     setLastFileName,
+    allowed,
+    onShowUpgrade,
   } = props;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -42,7 +46,7 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
   const [audioUrl, setAudioUrl] = useState<string | null>(null);
   const [isDragging, setIsDragging] = useState(false);
 
-  const allowed = [
+  const allowedTypes = [
     "audio/wav",
     "audio/x-wav",
     "audio/mpeg",
@@ -55,7 +59,7 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
 
   const validate = (file: File): string | null => {
     if (!file) return "Please upload an audio file.";
-    if (!allowed.includes(file.type)) {
+    if (!allowedTypes.includes(file.type)) {
       return "Unsupported file format. Please upload WAV, MP3, FLAC, M4A, AAC or OGG.";
     }
     if (!projectName.trim()) return "Please enter a project name.";
@@ -232,7 +236,13 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
             <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => pendingFile && startUpload(pendingFile)}
+                onClick={() => {
+                  if (!allowed) {
+                    onShowUpgrade();
+                    return;
+                  }
+                  if (pendingFile) startUpload(pendingFile);
+                }}
                 disabled={isUploading}
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
