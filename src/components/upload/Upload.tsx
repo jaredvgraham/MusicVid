@@ -10,7 +10,7 @@ import {
   Crown,
   Shield,
 } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useSession } from "@clerk/nextjs";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { VideoOnlyFlow, VideoAndSongFlow, SongOnlyFlow } from "./flows";
@@ -134,6 +134,7 @@ export default function Upload(): React.ReactElement {
   const [hasId, setHasId] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [remainingProjects, setRemainingProjects] = useState<number>(0);
+  const { session } = useSession();
   const [allowed, setAllowed] = useState<boolean>(true);
   const [mode, setMode] = useState<"video-only" | "both" | "song-only">(
     "song-only"
@@ -163,7 +164,7 @@ export default function Upload(): React.ReactElement {
     try {
       setIsUploading(true);
       setUploadError(null);
-      const token = await getToken();
+      const token = await session?.getToken();
 
       const response = await fetch(
         "https://extractor-production-721a.up.railway.app/split",
