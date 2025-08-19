@@ -109,6 +109,13 @@ export default function Page(): React.ReactElement {
           >
             TikTok Captions
           </a>
+          <span className="px-2">•</span>
+          <a
+            href="/youtube-captions"
+            className="underline underline-offset-4 hover:text-white"
+          >
+            YouTube Captions
+          </a>
         </div>
 
         {/* Upload CTA */}

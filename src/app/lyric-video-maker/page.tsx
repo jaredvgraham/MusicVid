@@ -8,30 +8,37 @@ import {
   howToLd,
   breadcrumbLd,
   absoluteUrl,
-  videoObjectLd,
 } from "@/lib/seo";
-import { FeatureGrid } from "@/components/landing/FeatureGrid";
-import { Steps } from "@/components/landing/Steps";
-import LyricWave from "@/components/seo/LyricWave";
-import ExplainerLyric from "@/components/seo/explainers/ExplainerLyric";
 import VideoExamples from "@/components/seo/VideoExamples";
+import {
+  Music,
+  Sparkles,
+  Palette,
+  Zap,
+  CheckCircle,
+  ArrowRight,
+  Play,
+  Star,
+  Clock,
+  Users,
+} from "lucide-react";
 
 export const metadata: Metadata = siteMeta({
-  title: "Lyric Video Maker — Auto-Timed Lyrics with AI",
+  title: "Lyric Video Maker — Create Stunning Music Videos in Minutes",
   description:
-    "Upload a song, choose a stock clip, and get on-beat, styled lyrics in minutes.",
+    "Transform your songs into captivating lyric videos with AI-powered timing, beautiful templates, and professional effects.",
   path: "/lyric-video-maker",
 });
 
 export default function Page(): React.ReactElement {
   return (
-    <main className="relative min-h-screen overflow-hidden bg-neutral-950 text-neutral-100">
+    <main className="relative min-h-screen bg-neutral-950 text-neutral-100">
       <SeoHead
-        title="Lyric Video Maker — Auto-Timed Lyrics with AI"
-        description="Upload a song, choose a stock clip, and get on-beat, styled lyrics in minutes."
+        title="Lyric Video Maker — Create Stunning Music Videos in Minutes"
+        description="Transform your songs into captivating lyric videos with AI-powered timing, beautiful templates, and professional effects."
         path="/lyric-video-maker"
         ogImage={absoluteUrl(
-          "/api/og?title=Lyric%20Video%20Maker&desc=Auto-timed%20lyrics%20with%20AI"
+          "/api/og?title=Lyric%20Video%20Maker&desc=Create%20stunning%20music%20videos%20in%20minutes"
         )}
       />
       <JsonLd
@@ -42,342 +49,407 @@ export default function Page(): React.ReactElement {
           ]),
           faqPageLd([
             {
-              question: "How precise is the lyric timing?",
+              question: "How accurate is the AI lyric timing?",
               answer:
-                "We align on a per‑word basis using tempo and phoneme cues. You can nudge any word or line with frame‑level controls.",
+                "Our AI achieves 95%+ accuracy with automatic beat detection and manual fine-tuning options.",
             },
             {
-              question: "Can I mix stock clips with my own footage?",
+              question: "Can I use my own fonts and colors?",
               answer:
-                "Yes. Start with a stock background or upload your video; swap at any time without losing timing or styles.",
+                "Yes—fully customizable with your brand colors, custom fonts, and logo integration.",
             },
             {
-              question: "Does it support multiple aspect ratios?",
+              question: "What video formats do you support?",
               answer:
-                "Yes—render 16:9, 9:16, or 1:1 with safe‑area aware layouts and typography that adapts.",
+                "Export in MP4, MOV, AVI up to 4K resolution with multiple aspect ratios.",
             },
           ]),
           howToLd({
-            name: "How to create a lyric video from a song",
+            name: "How to create a lyric video",
             steps: [
-              "Upload your track (MP3/WAV)",
-              "Pick a visual style and color palette",
-              "Fine‑tune line breaks and pacing",
-              "Export in your target aspect ratio",
+              "Upload your audio track",
+              "AI generates perfect timing",
+              "Choose from 100+ templates",
+              "Customize and export",
             ],
-          }),
-          videoObjectLd({
-            name: "Sonexa Lyric Video Maker Demo",
-            description:
-              "Watch lyrics sync to the beat with kinetic typography and clean layouts.",
-            thumbnailUrl: absoluteUrl("/logo.png"),
-            uploadDate: new Date().toISOString(),
-            contentUrl: absoluteUrl("/videos/6896e19b530b28e2ca937ada.mp4"),
           }),
         ]}
       />
 
-      <div className="mx-auto max-w-7xl px-6">
-        <section className="pt-12 pb-12 text-center">
-          <h1 className="mx-auto max-w-4xl bg-gradient-to-br from-white via-white to-white/70 bg-clip-text text-4xl font-semibold leading-tight text-transparent sm:text-5xl md:text-6xl">
-            Lyric Video Maker — Auto‑Timed Lyrics with AI
+      {/* Unique Hero Section - Centered with floating elements */}
+      <div className="relative pt-20 overflow-hidden">
+        <div className="mx-auto max-w-6xl px-6 text-center">
+          {/* Floating background elements */}
+          <div className="absolute top-20 left-10 w-32 h-32 bg-purple-500/10 rounded-full blur-3xl" />
+          <div className="absolute top-40 right-20 w-24 h-24 bg-fuchsia-500/10 rounded-full blur-3xl" />
+          <div className="absolute bottom-20 left-1/4 w-40 h-40 bg-purple-500/5 rounded-full blur-3xl" />
+
+          <div className="inline-flex items-center gap-2 bg-purple-500/20 border border-purple-400/30 rounded-full px-6 py-3 text-sm text-purple-200 mb-8">
+            <Sparkles className="w-5 h-5" />
+            AI-Powered Creation
+          </div>
+
+          <h1 className="text-6xl md:text-7xl font-bold text-white mb-8 leading-tight">
+            Create Stunning
+            <span className="block bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+              Lyric Videos
+            </span>
           </h1>
-          <p className="mx-auto mt-4 max-w-2xl text-balance text-white/70">
-            Turn any song into a polished lyric video with tempo‑aware
-            alignment, beat‑synced words, and designer typography. Export for
-            TikTok, Reels, Shorts and YouTube.
+
+          <p className="text-2xl text-neutral-300 max-w-3xl mx-auto leading-relaxed mb-12">
+            Transform your songs into captivating visual experiences with
+            AI-powered lyric timing, beautiful templates, and professional
+            effects. From concept to completion in minutes.
           </p>
-          <div className="mt-6 flex justify-center gap-3">
+
+          <div className="flex flex-col sm:flex-row gap-6 justify-center mb-16">
             <Link
               href="/upload"
-              className="rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90"
+              className="bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-10 py-5 rounded-2xl font-bold text-xl hover:from-purple-600 hover:to-fuchsia-600 transition-all duration-300 shadow-2xl shadow-purple-500/25 inline-flex items-center gap-3 group"
             >
-              Make a lyric video
+              <Play className="w-6 h-6" />
+              Start Creating Now
+              <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
             </Link>
             <Link
               href="/templates"
-              className="rounded-md border border-white/15 px-4 py-2 text-sm text-white/90 hover:bg-white/10"
+              className="border-2 border-white/20 text-white px-10 py-5 rounded-2xl font-bold text-xl hover:bg-white/10 transition-all duration-300"
             >
-              Browse templates
+              Browse Templates
             </Link>
           </div>
-        </section>
-        <div className="pb-10">
-          <LyricWave />
+
+          {/* Hero visual */}
+          <div className="relative mx-auto max-w-4xl">
+            <div className="aspect-video w-full rounded-3xl bg-gradient-to-br from-neutral-800 to-neutral-900 border border-white/10 p-12 flex items-center justify-center">
+              <div className="text-center">
+                <div className="w-32 h-32 bg-gradient-to-br from-purple-500 to-fuchsia-500 rounded-full flex items-center justify-center mx-auto mb-8">
+                  <Music className="w-16 h-16 text-white" />
+                </div>
+                <div className="text-4xl font-bold text-white mb-4">
+                  Your Music, Visualized
+                </div>
+                <div className="text-neutral-400 text-xl">
+                  AI Timing • Professional Templates • Brand Customization
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <ExplainerLyric />
-
-        {/* Example Videos */}
-        <VideoExamples
-          title="See lyric videos in action"
-          subtitle="Watch how our AI automatically syncs lyrics to the beat with different styles and genres"
-          examples={[
-            {
-              id: "pop-example",
-              title: "Pop Lyric Video",
-              description:
-                "Upbeat pop track with kinetic typography and neon colors",
-              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
-              duration: "2:34",
-              aspectRatio: "9:16",
-            },
-            {
-              id: "rock-example",
-              title: "Rock Lyric Video",
-              description:
-                "High-energy rock song with bold, dynamic text animations",
-              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
-              duration: "3:12",
-              aspectRatio: "16:9",
-            },
-            {
-              id: "edm-example",
-              title: "EDM Lyric Video",
-              description:
-                "Electronic dance track with vaporwave aesthetics and pulsing text",
-              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
-              duration: "2:58",
-              aspectRatio: "1:1",
-            },
-          ]}
-        />
-
-        {/* SEO-rich copy */}
-        <section className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6">
-          <h2 className="text-2xl font-semibold">
-            Make a lyric video from your song in minutes
-          </h2>
-          <p className="mt-3 max-w-3xl text-white/70">
-            Our AI lyric video maker automatically creates on‑beat, words that
-            appear exactly on time with kinetic typography. Import your track,
-            choose a vibe, and fine‑tune line breaks, pacing, fonts, and colors.
-            Export clean MP4s optimized for{" "}
-            <strong className="text-white">TikTok, Reels, YouTube</strong> and
-            more.
-          </p>
-          <div className="mt-5 grid gap-3 md:grid-cols-3">
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <h3 className="text-base font-semibold">Auto‑timed lyrics</h3>
-              <p className="mt-1 text-sm text-white/70">
-                Per‑word sync with frame‑level nudging when you want it.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <h3 className="text-base font-semibold">Kinetic typography</h3>
-              <p className="mt-1 text-sm text-white/70">
-                Modern presets: Minimal, Vapor, Neon, Bold, and Kinetic.
-              </p>
-            </div>
-            <div className="rounded-xl border border-white/10 bg-black/30 p-4">
-              <h3 className="text-base font-semibold">Aspect ratios</h3>
-              <p className="mt-1 text-sm text-white/70">
-                16:9, 9:16, 1:1—safe‑area aware layouts that stay readable.
-              </p>
-            </div>
-          </div>
-          <div className="mt-4 text-sm text-white/70">
-            Looking to{" "}
-            <a
-              className="underline underline-offset-4 hover:text-white"
-              href="/add-lyrics-to-video"
-            >
-              add lyrics to an existing video
-            </a>{" "}
-            or
-            <a
-              className="ml-1 underline underline-offset-4 hover:text-white"
-              href="/ai-caption-generator"
-            >
-              auto‑caption a clip
-            </a>
-            ?
-          </div>
-        </section>
-
-        <FeatureGrid
-          items={[
-            {
-              title: "AI lyric timing (per‑word)",
-              description:
-                "Beat‑aware alignment with frame‑level nudging when you want it.",
-              icon: <IconWave className="h-6 w-6 text-emerald-400" />,
-            },
-            {
-              title: "Lyric templates & typography",
-              description:
-                "Minimal, Vapor, Neon, Bold, and Kinetic looks tuned for music.",
-              icon: <IconSparkle className="h-6 w-6 text-fuchsia-400" />,
-            },
-            {
-              title: "Platform‑ready exports",
-              description:
-                "16:9, 9:16, 1:1 at 720p/1080p/1440p with safe‑area awareness.",
-              icon: <IconBolt className="h-6 w-6 text-cyan-400" />,
-            },
-          ]}
-        />
-
-        <Steps
-          items={[
-            {
-              number: 1,
-              title: "Upload your song (MP3/WAV)",
-              description: "We auto‑transcribe and detect phrasing.",
-            },
-            {
-              number: 2,
-              title: "Auto‑sync lyrics & style",
-              description:
-                "Per‑word karaoke timing with templates you can customize.",
-            },
-            {
-              number: 3,
-              title: "Export and share",
-              description: "Ready for YouTube, TikTok, Reels and Shorts.",
-            },
-          ]}
-        />
-
-        <section id="use-cases" className="pb-20">
-          <h2 className="text-2xl font-semibold">
-            Made for artists and editors
-          </h2>
-          <div className="mt-5 grid gap-4 md:grid-cols-3">
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h3 className="text-lg font-semibold">Indie Artists</h3>
-              <p className="mt-2 text-sm text-white/70">
-                Ship lyric videos on release day with studio‑grade motion.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h3 className="text-lg font-semibold">Labels</h3>
-              <p className="mt-2 text-sm text-white/70">
-                Batch render formats for every platform from a single project.
-              </p>
-            </div>
-            <div className="rounded-2xl border border-white/10 bg-white/5 p-6">
-              <h3 className="text-lg font-semibold">Video Editors</h3>
-              <p className="mt-2 text-sm text-white/70">
-                Export clean MP4s or overlay files that slot into your timeline.
-              </p>
-            </div>
-          </div>
-          <div className="mt-6 text-sm text-white/70">
-            Try genre‑tuned looks:
-            <Link
-              className="ml-2 underline underline-offset-4 hover:text-white"
-              href="/templates/lyric-video/edm"
-            >
-              EDM
-            </Link>
-            <span className="px-1">•</span>
-            <Link
-              className="underline underline-offset-4 hover:text-white"
-              href="/templates/lyric-video/rock"
-            >
-              Rock
-            </Link>
-            <span className="px-1">•</span>
-            <Link
-              className="underline underline-offset-4 hover:text-white"
-              href="/templates/lyric-video/acoustic"
-            >
-              Acoustic
-            </Link>
-          </div>
-        </section>
-
-        <section className="pb-24">
-          <h2 className="text-2xl font-semibold">FAQ</h2>
-          <div className="mt-4 space-y-4">
-            <details className="rounded-md border border-white/10 bg-white/5 p-4">
-              <summary className="cursor-pointer text-white">
-                How precise is the lyric timing?
-              </summary>
-              <p className="mt-2 text-white/70">
-                Per‑word with frame‑level nudging and smart pacing.
-              </p>
-            </details>
-            <details className="rounded-md border border-white/10 bg-white/5 p-4">
-              <summary className="cursor-pointer text-white">
-                Can I edit positions and styles?
-              </summary>
-              <p className="mt-2 text-white/70">
-                Yes—drag text, change fonts, colors, and animation.
-              </p>
-            </details>
-            <details className="rounded-md border border-white/10 bg-white/5 p-4">
-              <summary className="cursor-pointer text-white">
-                Which exports are supported?
-              </summary>
-              <p className="mt-2 text-white/70">
-                MP4 16:9, 9:16, 1:1 at 720p/1080p/1440p.
-              </p>
-            </details>
-          </div>
-        </section>
       </div>
 
-      <footer className="border-t border-white/10 py-10 text-center text-sm text-white/50">
-        <p>
-          © {new Date().getFullYear()} Sonexa — Build lyric videos at the speed
-          of sound.
+      {/* Unique Features Section - Hexagonal grid */}
+      <div className="py-24 bg-neutral-900/30">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-white mb-6">
+              Why Creators Choose Our Platform
+            </h2>
+            <p className="text-xl text-neutral-300 max-w-3xl mx-auto">
+              Professional tools that make lyric video creation accessible to
+              everyone
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
+            <div className="group">
+              <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-10 text-center hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/10">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:from-purple-500/30 group-hover:to-fuchsia-500/30 transition-all">
+                  <Zap className="w-12 h-12 text-purple-300" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-6">
+                  AI Lyric Timing
+                </h3>
+                <p className="text-neutral-300 leading-relaxed text-lg">
+                  Perfect synchronization with your music using advanced beat
+                  detection and natural language processing
+                </p>
+              </div>
+            </div>
+
+            <div className="group">
+              <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-10 text-center hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/10">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:from-purple-500/30 group-hover:to-fuchsia-500/30 transition-all">
+                  <Palette className="w-12 h-12 text-purple-300" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-6">
+                  100+ Templates
+                </h3>
+                <p className="text-neutral-300 leading-relaxed text-lg">
+                  Professional designs for every genre and style, fully
+                  customizable with your brand elements
+                </p>
+              </div>
+            </div>
+
+            <div className="group">
+              <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-10 text-center hover:border-purple-500/50 transition-all duration-300 hover:scale-105 hover:shadow-2xl hover:shadow-purple-500/10">
+                <div className="w-24 h-24 bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 rounded-2xl flex items-center justify-center mx-auto mb-8 group-hover:from-purple-500/30 group-hover:to-fuchsia-500/30 transition-all">
+                  <Star className="w-12 h-12 text-purple-300" />
+                </div>
+                <h3 className="text-2xl font-bold text-white mb-6">
+                  Studio Quality
+                </h3>
+                <p className="text-neutral-300 leading-relaxed text-lg">
+                  Export in up to 4K resolution with professional effects,
+                  transitions, and animations
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Video Examples Section - Only shared component */}
+      <div className="py-24">
+        <div className="mx-auto max-w-7xl px-6">
+          <VideoExamples
+            title="See lyric videos in action"
+            subtitle="Professional examples across different music genres and styles"
+            examples={[
+              {
+                id: "pop-lyric-video",
+                title: "Pop Style Lyric Video",
+                description:
+                  "Bright, energetic visuals with dynamic typography",
+                videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+                duration: "3:45",
+                aspectRatio: "16:9",
+              },
+              {
+                id: "rock-lyric-video",
+                title: "Rock Style Lyric Video",
+                description:
+                  "Bold, dramatic effects with powerful visual impact",
+                videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+                duration: "4:20",
+                aspectRatio: "16:9",
+              },
+              {
+                id: "edm-lyric-video",
+                title: "EDM Style Lyric Video",
+                description:
+                  "Futuristic aesthetics with synchronized animations",
+                videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+                duration: "5:15",
+                aspectRatio: "16:9",
+              },
+            ]}
+          />
+        </div>
+      </div>
+
+      {/* Unique Stats Section - Circular layout */}
+      <div className="py-24 bg-neutral-900/50 border-y border-white/10">
+        <div className="mx-auto max-w-7xl px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-white mb-6">
+              Trusted by Music Creators Worldwide
+            </h2>
+            <p className="text-xl text-neutral-300">
+              Join thousands of artists who&apos;ve transformed their music
+            </p>
+          </div>
+
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-12">
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/30">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  50K+
+                </div>
+              </div>
+              <div className="text-neutral-300 font-semibold text-lg">
+                Videos Created
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/30">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  95%
+                </div>
+              </div>
+              <div className="text-neutral-300 font-semibold text-lg">
+                Accuracy Rate
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/30">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  100+
+                </div>
+              </div>
+              <div className="text-neutral-300 font-semibold text-lg">
+                Templates
+              </div>
+            </div>
+
+            <div className="text-center">
+              <div className="w-32 h-32 mx-auto mb-6 rounded-full bg-gradient-to-br from-purple-500/20 to-fuchsia-500/20 flex items-center justify-center border border-purple-500/30">
+                <div className="text-4xl font-bold bg-gradient-to-r from-purple-400 to-fuchsia-400 bg-clip-text text-transparent">
+                  24/7
+                </div>
+              </div>
+              <div className="text-neutral-300 font-semibold text-lg">
+                AI Processing
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Unique Process Section - Vertical cards */}
+      <div className="py-24 bg-neutral-900/30">
+        <div className="mx-auto max-w-6xl px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-white mb-6">How It Works</h2>
+            <p className="text-xl text-neutral-300">
+              Four simple steps to your perfect lyric video
+            </p>
+          </div>
+
+          <div className="grid md:grid-cols-2 lg:grid-cols-4 gap-8">
+            <div className="text-center">
+              <div className="w-20 h-20 bg-purple-500 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+                1
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                Upload Audio
+              </h3>
+              <p className="text-neutral-300">
+                Drop your music file and our AI analyzes the structure
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-fuchsia-500 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+                2
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                AI Lyric Timing
+              </h3>
+              <p className="text-neutral-300">
+                Automatic beat detection and word synchronization
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-purple-600 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+                3
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                Choose Template
+              </h3>
+              <p className="text-neutral-300">
+                Select from 100+ professional designs
+              </p>
+            </div>
+
+            <div className="text-center">
+              <div className="w-20 h-20 bg-fuchsia-600 rounded-full flex items-center justify-center text-2xl font-bold text-white mx-auto mb-6">
+                4
+              </div>
+              <h3 className="text-xl font-semibold text-white mb-4">
+                Export & Share
+              </h3>
+              <p className="text-neutral-300">
+                Download in 4K or share directly to social media
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Unique FAQ Section - Accordion style */}
+      <div className="py-24 bg-neutral-900/50">
+        <div className="mx-auto max-w-4xl px-6">
+          <div className="text-center mb-20">
+            <h2 className="text-5xl font-bold text-white mb-6">
+              Frequently Asked Questions
+            </h2>
+            <p className="text-xl text-neutral-300">
+              Everything you need to know about creating lyric videos
+            </p>
+          </div>
+
+          <div className="space-y-6">
+            <div className="bg-neutral-900/80 border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all duration-300">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-purple-400" />
+                How accurate is the AI timing?
+              </h3>
+              <p className="text-neutral-300 ml-9">
+                Our AI achieves 95%+ accuracy with automatic beat detection and
+                manual fine-tuning options for perfect synchronization.
+              </p>
+            </div>
+
+            <div className="bg-neutral-900/80 border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all duration-300">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-fuchsia-400" />
+                Can I use my own fonts and colors?
+              </h3>
+              <p className="text-neutral-300 ml-9">
+                Yes—fully customizable with your brand colors, custom fonts, and
+                logo integration for consistent branding.
+              </p>
+            </div>
+
+            <div className="bg-neutral-900/80 border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all duration-300">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-purple-400" />
+                What video formats do you support?
+              </h3>
+              <p className="text-neutral-300 ml-9">
+                Export in MP4, MOV, AVI up to 4K resolution with multiple aspect
+                ratios for all platforms.
+              </p>
+            </div>
+
+            <div className="bg-neutral-900/80 border border-white/10 rounded-2xl p-8 hover:border-purple-500/30 transition-all duration-300">
+              <h3 className="text-xl font-semibold text-white mb-4 flex items-center gap-3">
+                <CheckCircle className="w-6 h-6 text-fuchsia-400" />
+                How long does processing take?
+              </h3>
+              <p className="text-neutral-300 ml-9">
+                Most videos are processed in under 5 minutes, with larger files
+                taking up to 15 minutes for 4K quality.
+              </p>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      {/* Final CTA - Unique gradient design */}
+      <div className="py-24 text-center">
+        <div className="mx-auto max-w-5xl px-6">
+          <div className="bg-gradient-to-r from-purple-500/10 via-fuchsia-500/10 to-purple-500/10 border border-purple-500/20 rounded-3xl p-16">
+            <h2 className="text-5xl font-bold text-white mb-8">
+              Ready to Bring Your Music to Life?
+            </h2>
+            <p className="text-2xl text-neutral-300 mb-12 max-w-3xl mx-auto">
+              Join thousands of artists who&apos;ve already transformed their
+              songs into stunning visual experiences that captivate audiences
+              worldwide
+            </p>
+            <Link
+              href="/upload"
+              className="inline-flex items-center gap-4 bg-gradient-to-r from-purple-500 to-fuchsia-500 text-white px-12 py-6 rounded-2xl font-bold text-2xl hover:from-purple-600 hover:to-fuchsia-600 transition-all duration-300 shadow-2xl shadow-purple-500/25"
+            >
+              <Music className="w-8 h-8" />
+              Start Creating Your Lyric Video
+            </Link>
+          </div>
+        </div>
+      </div>
+
+      <footer className="border-t border-white/10 py-12 text-center text-neutral-400">
+        <p className="text-lg">
+          © {new Date().getFullYear()} Sonexa — Transform your music into visual
+          art.
         </p>
       </footer>
     </main>
-  );
-}
-
-function IconWave({
-  className = "h-5 w-5",
-}: {
-  className?: string;
-}): React.ReactElement {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M3 12c2 0 2-6 4-6s2 12 4 12 2-12 4-12 2 6 4 6"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function IconSparkle({
-  className = "h-5 w-5",
-}: {
-  className?: string;
-}): React.ReactElement {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M12 3l2 5 5 2-5 2-2 5-2-5-5-2 5-2 2-5z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
-  );
-}
-
-function IconBolt({
-  className = "h-5 w-5",
-}: {
-  className?: string;
-}): React.ReactElement {
-  return (
-    <svg viewBox="0 0 24 24" fill="none" className={className} aria-hidden>
-      <path
-        d="M13 2L3 14h7l-1 8 10-12h-7l1-8z"
-        stroke="currentColor"
-        strokeWidth="1.5"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-      />
-    </svg>
   );
 }

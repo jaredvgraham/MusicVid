@@ -10,6 +10,7 @@ const isPublicRoute = createRouteMatcher([
   "/add-lyrics-to-video",
   "/ai-caption-generator",
   "/tiktok-captions",
+  "/youtube-captions",
   "/templates(.*)",
   "/blog(.*)",
   // Feeds & SEO files
