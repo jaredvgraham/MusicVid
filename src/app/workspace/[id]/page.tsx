@@ -4,6 +4,7 @@ import React, { useCallback, useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Project } from "@/types";
+import { createPortal } from "react-dom";
 
 import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 
@@ -30,9 +31,20 @@ export default function WorkspacePage(): React.ReactElement {
   // const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
-
+  const [allowed, setAllowed] = useState<boolean>(true);
+  const [remainingFinalRenders, setRemainingFinalRenders] = useState<number>(0);
+  const [showUpgradeModal, setShowUpgradeModal] = useState(false);
+  const [isClient, setIsClient] = useState(false);
+  useEffect(() => setIsClient(true), []);
   // Fetch workspace data
   useEffect(() => {
+    const check = async () => {
+      const response = await fetch("/api/usage-check?action=finalRender");
+      const data = await response.json();
+      setAllowed(data.allowed);
+      setRemainingFinalRenders(data.finalRenders);
+    }
+    check();
     let mounted = true;
     async function run() {
       if (!projectId) return;
@@ -65,7 +77,8 @@ export default function WorkspacePage(): React.ReactElement {
     try {
       const res = await authFetch<{ video: string }>(
         "express",
-        `render/${projectId}`,
+        `render/${projectId}`
+      ,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -131,7 +144,8 @@ export default function WorkspacePage(): React.ReactElement {
 
   //     const res = await authFetch<WorkspaceResponse>(
   //       "next",
-  //       `workspace/${projectId}`,
+  //       `workspace/${projectId}`
+  //       ,
   //       {
   //         method: "PATCH",
   //         headers: {
@@ -151,12 +165,17 @@ export default function WorkspacePage(): React.ReactElement {
 
   const onFinalRender = useCallback(async () => {
     if (!projectId) return;
+    if (!allowed) {
+      setShowUpgradeModal(true);
+      return;
+    }
     setSaving(true);
     setError(null);
     try {
       const res = await authFetch<{ id: string; video: string }>(
         "express",
-        `render/finalRender`,
+        `render/finalRender`
+        ,
         {
           method: "POST",
           body: JSON.stringify({ id: projectId as string }),
@@ -171,7 +190,7 @@ export default function WorkspacePage(): React.ReactElement {
     } finally {
       setSaving(false);
     }
-  }, [projectId, authFetch, router]);
+  }, [projectId, authFetch, router, allowed]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;
@@ -215,11 +234,48 @@ export default function WorkspacePage(): React.ReactElement {
                 >
                   Back
                 </button>
+                <span
+                  className={`ml-2 self-center text-xs ${allowed ? "text-white/60" : "text-amber-300"}`}
+                  title="Final renders remaining in this billing period"
+                >
+                  {remainingFinalRenders} final render{remainingFinalRenders === 1 ? "" : "s"} left
+                </span>
               </div>
             </div>
           </div>
         </div>
       </div>
+      {showUpgradeModal && isClient &&
+        createPortal(
+          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
+            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)} />
+            <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-900 shadow-2xl ring-1 ring-purple-500/40">
+              <div className="h-1.5 w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+              <div className="p-6 sm:p-8 text-white">
+                <h3 className="text-xl font-semibold">Final render not available</h3>
+                <p className="mt-2 text-sm text-white/80">
+                  You’ve used all final renders allowed on your current plan for this billing period.
+                </p>
+                <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
+                  <button
+                    type="button"
+                    className="rounded-md border border-white/20 bg-white/10 px-4 py-2 text-xs text-white/90 hover:bg-white/15"
+                    onClick={() => setShowUpgradeModal(false)}
+                  >
+                    Not now
+                  </button>
+                  <a
+                    href="/pricing"
+                    className="rounded-md bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600 px-4 py-2 text-xs font-semibold text-white shadow hover:brightness-110"
+                  >
+                    See plans & upgrade
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>,
+          document.body
+        )}
     </EditorProvider>
   );
 }

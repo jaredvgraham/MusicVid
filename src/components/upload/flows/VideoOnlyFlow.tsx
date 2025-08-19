@@ -14,6 +14,8 @@ type Props = {
   setUploadError: (v: string | null) => void;
   userId: string;
   setLastFileName: (v: string | null) => void;
+  allowed: boolean;
+  onShowUpgrade: () => void;
 };
 
 export default function VideoOnlyFlow(props: Props): React.ReactElement {
@@ -30,6 +32,8 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
     setUploadError,
     userId,
     setLastFileName,
+    allowed,
+    onShowUpgrade,
   } = props;
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
@@ -231,7 +235,13 @@ export default function VideoOnlyFlow(props: Props): React.ReactElement {
             <div className="mt-3 flex items-center gap-3">
               <button
                 type="button"
-                onClick={() => pendingVideo && start(pendingVideo)}
+                onClick={() => {
+                  if (!allowed) {
+                    onShowUpgrade();
+                    return;
+                  }
+                  if (pendingVideo) start(pendingVideo);
+                }}
                 disabled={isUploading}
                 className="inline-flex items-center justify-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 disabled:cursor-not-allowed disabled:opacity-70"
               >
