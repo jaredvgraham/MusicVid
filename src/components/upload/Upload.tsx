@@ -145,7 +145,7 @@ export default function Upload(): React.ReactElement {
   const [projectName, setProjectName] = useState<string>("");
   const [lyrics, setLyrics] = useState<string>("");
   const [showLyrics, setShowLyrics] = useState<boolean>(false);
-  const { userId } = useAuth();
+  const { userId, getToken } = useAuth();
   const [hasId, setHasId] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
   const [remainingProjects, setRemainingProjects] = useState<number>(0);
@@ -178,11 +178,13 @@ export default function Upload(): React.ReactElement {
     try {
       setIsUploading(true);
       setUploadError(null);
+      const token = await getToken();
 
       const response = await fetch(
         "https://extractor-production-721a.up.railway.app/split",
         {
           method: "POST",
+          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
           body: formData,
         }
       );
