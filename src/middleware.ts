@@ -14,6 +14,9 @@ const isPublicRoute = createRouteMatcher([
   "/blog(.*)",
   // Feeds & SEO files
   "/sitemap.xml",
+  "/sitemap-0.xml",
+  "/sitemap-1.xml",
+  "/sitemap(.*)",
   "/robots.txt",
   "/rss.xml",
   // Public APIs used by crawlers/og
