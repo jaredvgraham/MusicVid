@@ -165,6 +165,10 @@ export default function Upload(): React.ReactElement {
       setIsUploading(true);
       setUploadError(null);
       const token = await session?.getToken();
+      console.log("token", token);
+      console.log("token", token);
+      console.log("token", token);
+      console.log("token", token);
 
       const response = await fetch(
         "https://extractor-production-721a.up.railway.app/split",
