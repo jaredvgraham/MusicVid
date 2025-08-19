@@ -14,6 +14,7 @@ import { FeatureGrid } from "@/components/landing/FeatureGrid";
 import { Steps } from "@/components/landing/Steps";
 import LyricWave from "@/components/seo/LyricWave";
 import ExplainerLyric from "@/components/seo/explainers/ExplainerLyric";
+import VideoExamples from "@/components/seo/VideoExamples";
 
 export const metadata: Metadata = siteMeta({
   title: "Lyric Video Maker — Auto-Timed Lyrics with AI",
@@ -105,6 +106,41 @@ export default function Page(): React.ReactElement {
           <LyricWave />
         </div>
         <ExplainerLyric />
+
+        {/* Example Videos */}
+        <VideoExamples
+          title="See lyric videos in action"
+          subtitle="Watch how our AI automatically syncs lyrics to the beat with different styles and genres"
+          examples={[
+            {
+              id: "pop-example",
+              title: "Pop Lyric Video",
+              description:
+                "Upbeat pop track with kinetic typography and neon colors",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:34",
+              aspectRatio: "9:16",
+            },
+            {
+              id: "rock-example",
+              title: "Rock Lyric Video",
+              description:
+                "High-energy rock song with bold, dynamic text animations",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "3:12",
+              aspectRatio: "16:9",
+            },
+            {
+              id: "edm-example",
+              title: "EDM Lyric Video",
+              description:
+                "Electronic dance track with vaporwave aesthetics and pulsing text",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:58",
+              aspectRatio: "1:1",
+            },
+          ]}
+        />
 
         {/* SEO-rich copy */}
         <section className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6">

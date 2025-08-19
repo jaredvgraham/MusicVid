@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { siteMeta } from "@/lib/seo";
+import VideoExamples from "@/components/seo/VideoExamples";
 
 export const metadata: Metadata = siteMeta({
   title: "Templates — Lyric Videos & Captions",
@@ -81,6 +82,38 @@ export default function Page(): React.ReactElement {
             ))}
           </div>
         </section>
+
+        {/* Example Template Videos */}
+        <VideoExamples
+          title="Template examples"
+          subtitle="See how different styles and genres look in action"
+          examples={[
+            {
+              id: "minimal-template",
+              title: "Minimal Style",
+              description: "Clean, modern typography with subtle animations",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "1:45",
+              aspectRatio: "16:9",
+            },
+            {
+              id: "neon-template",
+              title: "Neon Style",
+              description: "Bright, vibrant colors with glowing text effects",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:01",
+              aspectRatio: "9:16",
+            },
+            {
+              id: "kinetic-template",
+              title: "Kinetic Style",
+              description: "Dynamic text movements that sync with the music",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:18",
+              aspectRatio: "1:1",
+            },
+          ]}
+        />
 
         <section className="pb-24">
           <h2 className="text-2xl font-semibold">Captions by style</h2>

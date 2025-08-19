@@ -15,6 +15,7 @@ import { Steps } from "@/components/landing/Steps";
 import CaptionTicker from "@/components/seo/CaptionTicker";
 import ExplainerCaptions from "@/components/seo/explainers/ExplainerCaptions";
 import OverlayComposer from "@/components/seo/OverlayComposer";
+import VideoExamples from "@/components/seo/VideoExamples";
 
 export const metadata: Metadata = siteMeta({
   title: "AI Caption Generator — On-Beat, Styled Captions",
@@ -105,6 +106,41 @@ export default function Page(): React.ReactElement {
           <OverlayComposer />
         </div>
         <ExplainerCaptions />
+
+        {/* Example Caption Videos */}
+        <VideoExamples
+          title="Caption examples"
+          subtitle="See how our AI generates perfectly timed captions for different content types"
+          examples={[
+            {
+              id: "tiktok-captions",
+              title: "TikTok Style Captions",
+              description:
+                "Short-form content with bold, readable text and emojis",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "0:45",
+              aspectRatio: "9:16",
+            },
+            {
+              id: "youtube-captions",
+              title: "YouTube Style Captions",
+              description:
+                "Long-form content with clean, professional typography",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:30",
+              aspectRatio: "16:9",
+            },
+            {
+              id: "instagram-captions",
+              title: "Instagram Style Captions",
+              description:
+                "Square format with stylish fonts and subtle animations",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "1:15",
+              aspectRatio: "1:1",
+            },
+          ]}
+        />
 
         {/* SEO-rich copy */}
         <section className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6">

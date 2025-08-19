@@ -15,6 +15,7 @@ import { Steps } from "@/components/landing/Steps";
 import OverlayComposer from "@/components/seo/OverlayComposer";
 import CaptionTicker from "@/components/seo/CaptionTicker";
 import ExplainerAddLyrics from "@/components/seo/explainers/ExplainerAddLyrics";
+import VideoExamples from "@/components/seo/VideoExamples";
 
 export const metadata: Metadata = siteMeta({
   title: "Add Lyrics to Video — Sync Words On-Beat",
@@ -106,6 +107,39 @@ export default function Page(): React.ReactElement {
           <CaptionTicker />
         </div>
         <ExplainerAddLyrics />
+
+        {/* Example Videos with Lyrics */}
+        <VideoExamples
+          title="See lyrics added to videos"
+          subtitle="Watch how we overlay perfectly timed lyrics onto existing footage"
+          examples={[
+            {
+              id: "music-video-lyrics",
+              title: "Music Video with Lyrics",
+              description:
+                "Original footage enhanced with synchronized song lyrics",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "3:45",
+              aspectRatio: "16:9",
+            },
+            {
+              id: "live-performance-lyrics",
+              title: "Live Performance with Lyrics",
+              description: "Concert footage with real-time lyric overlays",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "2:18",
+              aspectRatio: "9:16",
+            },
+            {
+              id: "cover-song-lyrics",
+              title: "Cover Song with Lyrics",
+              description: "Personal cover video with styled lyric text",
+              videoUrl: "/videos/6896e19b530b28e2ca937ada.mp4",
+              duration: "4:12",
+              aspectRatio: "1:1",
+            },
+          ]}
+        />
 
         {/* SEO-rich copy */}
         <section className="mb-12 rounded-2xl border border-white/10 bg-white/5 p-6">
