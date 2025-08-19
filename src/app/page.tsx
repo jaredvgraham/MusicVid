@@ -14,6 +14,7 @@ import {
   softwareApplicationLd,
   absoluteUrl,
 } from "@/lib/seo";
+import Link from "next/link";
 
 export default function Page(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
@@ -81,41 +82,41 @@ export default function Page(): React.ReactElement {
         <Hero />
 
         {/* Intent links under hero */}
-        <div className="mx-auto mt-6 max-w-2xl text-center text-sm text-white/70">
-          <a
+        <div className="mx-auto mt-6 w-full text-center text-sm text-white/70">
+          <Link
             href="/lyric-video-maker"
             className="underline underline-offset-4 hover:text-white"
           >
             Lyric Video Maker
-          </a>
+          </Link>
           <span className="px-2">•</span>
-          <a
+          <Link
             href="/add-lyrics-to-video"
             className="underline underline-offset-4 hover:text-white"
           >
             Add Lyrics to Video
-          </a>
+          </Link>
           <span className="px-2">•</span>
-          <a
+          <Link
             href="/ai-caption-generator"
             className="underline underline-offset-4 hover:text-white"
           >
             AI Caption Generator
-          </a>
+          </Link>
           <span className="px-2">•</span>
-          <a
+          <Link
             href="/tiktok-captions"
             className="underline underline-offset-4 hover:text-white"
           >
             TikTok Captions
-          </a>
+          </Link>
           <span className="px-2">•</span>
-          <a
+          <Link
             href="/youtube-captions"
             className="underline underline-offset-4 hover:text-white"
           >
             YouTube Captions
-          </a>
+          </Link>
         </div>
 
         {/* Upload CTA */}
