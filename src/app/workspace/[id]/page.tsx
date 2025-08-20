@@ -14,6 +14,8 @@ import { Timeline } from "@/features/workspace/components/Timeline";
 import { EditorProvider } from "@/features/workspace/components/EditorContext";
 
 import { VideoPicker } from "@/components/upload/VideoPicker";
+import { useProjectSocket } from "@/hooks/useProjectSocket";
+import { useFinalRender } from "@/hooks/useFinalRender";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
@@ -23,10 +25,22 @@ export default function WorkspacePage(): React.ReactElement {
   const router = useRouter();
   const authFetch = useAuthFetch();
   const projectId = params?.id ?? null;
-
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState<string | null>(null);
+  const [fetchError, setFetchError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+
+  const { connected, error, status, initializeSocket, isInitialized } =
+    useProjectSocket(projectId ?? "");
+
+  const {
+    isRendering,
+    renderError,
+    renderProgress,
+    renderStatus,
+    videoFinal,
+    isComplete,
+    startRender,
+  } = useFinalRender(projectId);
   // const [serverLines, setServerLines] = useState<Line[]>([]);
   // const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
@@ -43,13 +57,13 @@ export default function WorkspacePage(): React.ReactElement {
       const data = await response.json();
       setAllowed(data.allowed);
       setRemainingFinalRenders(data.finalRenders);
-    }
+    };
     check();
     let mounted = true;
     async function run() {
       if (!projectId) return;
       setLoading(true);
-      setError(null);
+      setFetchError(null);
       try {
         const res = await authFetch<WorkspaceResponse>(
           "express",
@@ -60,7 +74,7 @@ export default function WorkspacePage(): React.ReactElement {
         if (!mounted) return;
         setProject(res.project);
       } catch (e: any) {
-        setError(e?.message || "Failed to load workspace");
+        setFetchError(e?.message || "Failed to load workspace");
       } finally {
         setLoading(false);
       }
@@ -71,14 +85,22 @@ export default function WorkspacePage(): React.ReactElement {
     };
   }, [projectId]);
 
+  // Final render state is now managed by useFinalRender hook
+
+  // Initialize WebSocket connection when component mounts
+  useEffect(() => {
+    if (projectId && isInitialized === false) {
+      initializeSocket();
+    }
+  }, [projectId, isInitialized, initializeSocket]);
+
   const onPickVideo = async (url: string | null) => {
     if (!projectId || !url) return;
     setSelectedVideo(url);
     try {
       const res = await authFetch<{ video: string }>(
         "express",
-        `render/${projectId}`
-      ,
+        `render/${projectId}`,
         {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
@@ -92,7 +114,7 @@ export default function WorkspacePage(): React.ReactElement {
       }t=${Date.now()}`;
       setProject((prev) => (prev ? { ...prev, video: busted } : prev));
     } catch (e: any) {
-      setError(e?.message || "Failed to update video");
+      setFetchError(e?.message || "Failed to update video");
     }
   };
 
@@ -163,38 +185,44 @@ export default function WorkspacePage(): React.ReactElement {
   //   }
   // }, [projectId, draftWords, serverLines, authFetch]);
 
-  const onFinalRender = useCallback(async () => {
+  const onFinalRender = useCallback(() => {
     if (!projectId) return;
     if (!allowed) {
       setShowUpgradeModal(true);
       return;
     }
     setSaving(true);
-    setError(null);
+    setFetchError(null);
+
     try {
-      const res = await authFetch<{ id: string; video: string }>(
-        "express",
-        `render/finalRender`
-        ,
-        {
-          method: "POST",
-          body: JSON.stringify({ id: projectId as string }),
-          headers: { "Content-Type": "application/json" },
-        }
-      );
-      console.log("res", res);
-      console.log("res.detail", (res as any).detail);
-      router.push(`/result/${res.id}?video=${encodeURIComponent(res.video)}`);
+      // Start final render using the dedicated hook
+      startRender();
+      console.log("Final render started");
     } catch (e: any) {
-      setError(e?.message || "Failed to render final video");
-    } finally {
+      console.error("Final render error:", e);
+      setFetchError(e?.message || "Failed to start final render");
       setSaving(false);
     }
-  }, [projectId, authFetch, router, allowed]);
+  }, [projectId, allowed, startRender]);
+
+  // Handle final render completion
+  useEffect(() => {
+    if (isComplete && videoFinal) {
+      setSaving(false);
+      // Navigate to result page with video URL as query parameter
+      console.log(
+        "Final render completed, navigating to result page with video:",
+        videoFinal
+      );
+      router.push(
+        `/result/${projectId}?video=${encodeURIComponent(videoFinal)}`
+      );
+    }
+  }, [isComplete, videoFinal, projectId, router]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
   if (loading) return <div className="p-6">Loading workspace…</div>;
-  if (error) return <div className="p-6 text-red-400">{error}</div>;
+  if (fetchError) return <div className="p-6 text-red-400">{fetchError}</div>;
   if (!project) return <div className="p-6">Not found</div>;
 
   return (
@@ -202,6 +230,27 @@ export default function WorkspacePage(): React.ReactElement {
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <div className="mx-auto max-w-7xl p-4 space-y-4">
           <ControlsBar />
+
+          {/* Connection Status */}
+          <div className="flex items-center gap-2 text-sm">
+            <div
+              className={`w-2 h-2 rounded-full ${
+                connected ? "bg-green-500" : "bg-red-500"
+              }`}
+            />
+            <span className={connected ? "text-green-400" : "text-red-400"}>
+              {connected ? "Connected" : "Disconnected"}
+            </span>
+            {!connected && (
+              <button
+                onClick={() => initializeSocket()}
+                className="ml-2 text-xs text-blue-400 hover:text-blue-300 underline"
+              >
+                Reconnect
+              </button>
+            )}
+          </div>
+
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2 space-y-4">
               <VideoPanel />
@@ -222,11 +271,11 @@ export default function WorkspacePage(): React.ReactElement {
               </div>
               <div className="mt-4 flex gap-2">
                 <button
-                  disabled={saving}
+                  disabled={isRendering}
                   onClick={onFinalRender}
                   className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
                 >
-                  {saving ? "Rendering…" : "Render Final Video"}
+                  {isRendering ? `${renderStatus}...` : "Render Final Video"}
                 </button>
                 <button
                   onClick={() => router.push("/")}
@@ -235,26 +284,69 @@ export default function WorkspacePage(): React.ReactElement {
                   Back
                 </button>
                 <span
-                  className={`ml-2 self-center text-xs ${allowed ? "text-white/60" : "text-amber-300"}`}
+                  className={`ml-2 self-center text-xs ${
+                    allowed ? "text-white/60" : "text-amber-300"
+                  }`}
                   title="Final renders remaining in this billing period"
                 >
-                  {remainingFinalRenders} final render{remainingFinalRenders === 1 ? "" : "s"} left
+                  {remainingFinalRenders} final render
+                  {remainingFinalRenders === 1 ? "" : "s"} left
                 </span>
               </div>
+
+              {/* Render Progress and Status */}
+              {isRendering && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/80">{renderStatus}</span>
+                    <span className="text-white/60">{renderProgress}%</span>
+                  </div>
+                  <div className="w-full bg-neutral-800 rounded-full h-2">
+                    <div
+                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${renderProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Render Error */}
+              {renderError && (
+                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <div className="text-red-400 text-sm">{renderError}</div>
+                  <button
+                    onClick={() => startRender()}
+                    className="mt-2 text-xs text-red-300 hover:text-red-300 underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
             </div>
           </div>
         </div>
       </div>
-      {showUpgradeModal && isClient &&
+      {showUpgradeModal &&
+        isClient &&
         createPortal(
-          <div className="fixed inset-0 z-[100] flex items-center justify-center p-4" role="dialog" aria-modal="true">
-            <div className="absolute inset-0 bg-black/75 backdrop-blur-sm" onClick={() => setShowUpgradeModal(false)} />
+          <div
+            className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+            role="dialog"
+            aria-modal="true"
+          >
+            <div
+              className="absolute inset-0 bg-black/75 backdrop-blur-sm"
+              onClick={() => setShowUpgradeModal(false)}
+            />
             <div className="relative z-10 w-full max-w-2xl overflow-hidden rounded-3xl border border-white/10 bg-neutral-900 shadow-2xl ring-1 ring-purple-500/40">
               <div className="h-1.5 w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
               <div className="p-6 sm:p-8 text-white">
-                <h3 className="text-xl font-semibold">Final render not available</h3>
+                <h3 className="text-xl font-semibold">
+                  Final render not available
+                </h3>
                 <p className="mt-2 text-sm text-white/80">
-                  You’ve used all final renders allowed on your current plan for this billing period.
+                  You’ve used all final renders allowed on your current plan for
+                  this billing period.
                 </p>
                 <div className="mt-5 flex flex-wrap items-center justify-end gap-2">
                   <button

@@ -1,7 +1,7 @@
 // hooks/useProjectSocket.ts
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { getSocket } from "../lib/socket";
 import { Project, Line, Word } from "../types";
 import { useRouter } from "next/navigation";
@@ -23,7 +23,9 @@ export function useProjectSocket(projectId: string | null) {
   const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [persistedId, setPersistedId] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
+
   // Load persisted project id on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -39,34 +41,51 @@ export function useProjectSocket(projectId: string | null) {
 
   const activeId = projectId ?? persistedId;
 
-  useEffect(() => {
+  // Initialize WebSocket connection only when needed
+  const initializeSocket = useCallback(() => {
+    if (!activeId || isInitialized) return;
+
     const sock = getSocket();
-    if (!sock || !activeId) return;
+    if (!sock) {
+      console.error("No socket available");
+      setError("WebSocket not available");
+      return;
+    }
+
+    console.log("Initializing WebSocket connection for project:", activeId);
 
     // check if the project is already completed and do not join if it is
     const checkCompleted = async () => {
-      const response = await fetch("/api/complete/" + activeId);
-      const data = await response.json();
-      if (data.completed) {
-        setFinished(true);
-        if (typeof window !== "undefined") {
-          try {
-            window.localStorage.removeItem("mv:projectId");
-          } catch {}
+      try {
+        const response = await fetch("/api/complete/" + activeId);
+        const data = await response.json();
+        if (data.completed) {
+          setFinished(true);
+          if (typeof window !== "undefined") {
+            try {
+              window.localStorage.removeItem("mv:projectId");
+            } catch {}
+          }
         }
+      } catch (error) {
+        console.error("Failed to check completion status:", error);
       }
     };
 
     const onConnect = () => {
-      console.log("onConnect");
+      console.log("WebSocket connected");
       setConnected(true);
+      setError(null); // Clear any previous connection errors
       sock.emit("project:join", { projectId: activeId });
     };
+
     const onConnectError = (err: any) => {
       const msg = typeof err?.message === "string" ? err.message : String(err);
       console.log("socket connect_error", msg);
       setError(msg);
+      setConnected(false);
     };
+
     const onProjectError = (payload: any) => {
       if (typeof window !== "undefined") {
         try {
@@ -86,8 +105,24 @@ export function useProjectSocket(projectId: string | null) {
         setError("error occurred");
       }
     };
-    const onDisconnect = () => setConnected(false);
-    const onJoined = () => {};
+
+    const onDisconnect = () => {
+      console.log("WebSocket disconnected");
+      setConnected(false);
+
+      // Attempt to reconnect after a short delay
+      setTimeout(() => {
+        if (sock && !sock.connected) {
+          console.log("Attempting to reconnect...");
+          sock.connect();
+        }
+      }, 1000);
+    };
+
+    const onJoined = () => {
+      console.log("Joined project room:", activeId);
+    };
+
     const onFinished = (payload: any) => {
       if (payload?.id === activeId) {
         setFinished(true);
@@ -124,12 +159,21 @@ export function useProjectSocket(projectId: string | null) {
         router.push(`/workspace/${activeId}`);
       }
     };
+
     const onStatus = (payload: any) => {
-      if (payload?.id === activeId) {
-        setStatus(payload);
+      try {
+        if (payload?.id === activeId) {
+          console.log("Status update for active project:", payload);
+          setStatus(payload);
+        }
+      } catch (error) {
+        console.error("Error in onStatus handler:", error);
       }
     };
 
+    // Final render logic moved to useFinalRender hook
+
+    // Set up event listeners
     checkCompleted();
     sock.on("connect", onConnect);
     sock.on("disconnect", onDisconnect);
@@ -137,10 +181,23 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("project:finished", onFinished);
     sock.on("project:error", onProjectError);
     sock.on("project:status", onStatus);
+    // Final render events moved to useFinalRender hook
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
-    if (!sock.connected) sock.connect();
 
+    // Connect to WebSocket
+    if (!sock.connected) {
+      console.log("Connecting to WebSocket...");
+      sock.connect();
+    } else {
+      console.log("WebSocket already connected, joining project room");
+      sock.emit("project:join", { projectId: activeId });
+      setConnected(true);
+    }
+
+    setIsInitialized(true);
+
+    // Cleanup function
     return () => {
       sock.off("connect", onConnect);
       sock.off("disconnect", onDisconnect);
@@ -148,11 +205,19 @@ export function useProjectSocket(projectId: string | null) {
       sock.off("project:finished", onFinished);
       sock.off("project:error", onProjectError);
       sock.off("project:status", onStatus);
+      // Final render event cleanup moved to useFinalRender hook
       sock.off("connect_error", onConnectError);
       sock.off("error", onConnectError);
-      // do not disconnect here; keep singleton alive for other pages
     };
-  }, [activeId]);
+  }, [activeId, isInitialized, router]);
 
-  return { connected, finished, project, error, status };
+  return {
+    connected,
+    finished,
+    project,
+    error,
+    status,
+    initializeSocket,
+    isInitialized,
+  };
 }
