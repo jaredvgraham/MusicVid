@@ -170,6 +170,7 @@ export function useProjectSocket(projectId: string | null) {
 
     const onStatus = (payload: any) => {
       try {
+        console.log("[ProjectSocket] project:status (raw)", payload);
         if (payload?.id !== activeId) {
           console.log(
             "[ProjectSocket] Ignoring status for different id",
@@ -196,6 +197,9 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("project:status", onStatus);
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
+    sock.onAny((event, ...args) => {
+      if (event.startsWith("project:")) console.log("[ProjectSocket onAny]", event, args?.[0]);
+    });
 
     // Connect or join
     if (!sock.connected) {
