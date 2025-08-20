@@ -130,6 +130,7 @@ export function useProjectSocket(projectId: string | null) {
 
     const onJoined = () => {
       console.log("Joined project room:", activeId);
+      console.log("[ProjectSocket] Listening for project id:", activeId);
     };
 
     const onFinished = (payload: any) => {
@@ -169,10 +170,17 @@ export function useProjectSocket(projectId: string | null) {
 
     const onStatus = (payload: any) => {
       try {
-        if (payload?.id === activeId) {
-          console.log("Status update for active project:", payload);
-          setStatus(payload);
+        if (payload?.id !== activeId) {
+          console.log(
+            "[ProjectSocket] Ignoring status for different id",
+            payload?.id,
+            "(listening for)",
+            activeId
+          );
+          return;
         }
+        console.log("[ProjectSocket] Status update", payload);
+        setStatus(payload);
       } catch (error) {
         console.error("Error in onStatus handler:", error);
       }
@@ -197,6 +205,7 @@ export function useProjectSocket(projectId: string | null) {
       console.log("WebSocket already connected, joining project room");
       sock.emit("project:join", { projectId: activeId });
       setConnected(true);
+      console.log("[ProjectSocket] Listening for project id:", activeId);
     }
 
     setIsInitialized(true);
