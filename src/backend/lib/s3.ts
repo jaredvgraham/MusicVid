@@ -1,4 +1,4 @@
-import { S3Client, GetObjectCommand } from "@aws-sdk/client-s3";
+import { S3Client, GetObjectCommand, DeleteObjectCommand } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
 const region =
@@ -45,4 +45,13 @@ export async function getObjectUrl(key: string): Promise<string> {
   const expiresIn = Number(process.env.S3_URL_EXPIRE) || 3600;
   const cmd = new GetObjectCommand({ Bucket: bucket, Key: key });
   return await getSignedUrl(s3, cmd, { expiresIn });
+}
+
+export async function deleteObject(url: string) {
+  const bucket = process.env.AWS_S3_BUCKET as string;
+  if (!bucket) throw new Error("AWS_S3_BUCKET not set");
+  const key = url.split("/").pop();
+  if (!key) throw new Error("Invalid s3 url");
+  const cmd = new DeleteObjectCommand({ Bucket: bucket, Key: key });
+  await s3.send(cmd);
 }
