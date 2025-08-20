@@ -32,7 +32,16 @@ const SettingsPage = () => {
   // Keep hooks before any early returns to preserve hook order across renders
   const [plan, setPlan] = useState("none");
   useEffect(() => {
-    setPlan((user?.publicMetadata?.plan as string | undefined) ?? "none");
+    const fetchPlan = async () => {
+      const res = await fetch("/api/plan");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error?.message || "Failed to fetch plan");
+      }
+      const data = await res.json().catch(() => ({}));
+      setPlan(data?.plan ?? "none");
+    };
+    fetchPlan();
   }, [user]);
 
   useEffect(() => {
