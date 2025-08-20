@@ -7,6 +7,7 @@ import { Project } from "@/types";
 import { createPortal } from "react-dom";
 
 import { VideoPanel } from "@/features/workspace/components/VideoPanel";
+import { VideoControls } from "@/features/workspace/components/VideoControls";
 
 import { ControlsBar } from "@/features/workspace/components/ControlsBar";
 import { Toolbox } from "@/features/workspace/components/Toolbox";
@@ -254,6 +255,8 @@ export default function WorkspacePage(): React.ReactElement {
           <div className="grid gap-6 md:grid-cols-3">
             <div className="md:col-span-2 space-y-4">
               <VideoPanel />
+
+              <VideoControls />
 
               <Timeline />
             </div>
