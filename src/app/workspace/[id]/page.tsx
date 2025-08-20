@@ -5,6 +5,7 @@ import { useParams, useRouter } from "next/navigation";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { Project } from "@/types";
 import { createPortal } from "react-dom";
+import { getSocket } from "@/lib/socket";
 
 import { VideoPanel } from "@/features/workspace/components/VideoPanel";
 import { VideoControls } from "@/features/workspace/components/VideoControls";
@@ -30,8 +31,7 @@ export default function WorkspacePage(): React.ReactElement {
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
 
-  const { connected, error, status, initializeSocket, isInitialized } =
-    useProjectSocket(projectId ?? "");
+  const { connected, error, status } = useProjectSocket(projectId ?? "");
 
   const {
     isRendering,
@@ -40,6 +40,7 @@ export default function WorkspacePage(): React.ReactElement {
     renderStatus,
     videoFinal,
     isComplete,
+    connected: renderConnected,
     startRender,
   } = useFinalRender(projectId);
   // const [serverLines, setServerLines] = useState<Line[]>([]);
@@ -87,13 +88,6 @@ export default function WorkspacePage(): React.ReactElement {
   }, [projectId]);
 
   // Final render state is now managed by useFinalRender hook
-
-  // Initialize WebSocket connection when component mounts
-  useEffect(() => {
-    if (projectId && isInitialized === false) {
-      initializeSocket();
-    }
-  }, [projectId, isInitialized, initializeSocket]);
 
   const onPickVideo = async (url: string | null) => {
     if (!projectId || !url) return;
@@ -233,19 +227,40 @@ export default function WorkspacePage(): React.ReactElement {
           <ControlsBar />
 
           {/* Connection Status */}
-          <div className="flex items-center gap-2 text-sm">
-            <div
-              className={`w-2 h-2 rounded-full ${
-                connected ? "bg-green-500" : "bg-red-500"
-              }`}
-            />
-            <span className={connected ? "text-green-400" : "text-red-400"}>
-              {connected ? "Connected" : "Disconnected"}
-            </span>
-            {!connected && (
+          <div className="flex items-center gap-4 text-sm">
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  connected ? "bg-green-500" : "bg-red-500"
+                }`}
+              />
+              <span className={connected ? "text-green-400" : "text-red-400"}>
+                Project: {connected ? "Connected" : "Disconnected"}
+              </span>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  renderConnected ? "bg-green-500" : "bg-red-500"
+                }`}
+              />
+              <span
+                className={renderConnected ? "text-green-400" : "text-red-400"}
+              >
+                Render: {renderConnected ? "Connected" : "Disconnected"}
+              </span>
+            </div>
+
+            {(!connected || !renderConnected) && (
               <button
-                onClick={() => initializeSocket()}
-                className="ml-2 text-xs text-blue-400 hover:text-blue-300 underline"
+                onClick={() => {
+                  const sock = getSocket();
+                  if (sock && !sock.connected) {
+                    sock.connect();
+                  }
+                }}
+                className="text-xs text-blue-400 hover:text-blue-300 underline"
               >
                 Reconnect
               </button>

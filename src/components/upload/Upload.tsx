@@ -15,6 +15,7 @@ import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { LoadingSpinner } from "../ui/LoadingSpinner";
 import { VideoOnlyFlow, VideoAndSongFlow, SongOnlyFlow } from "./flows";
 import { createPortal } from "react-dom";
+import { getSocket } from "@/lib/socket";
 
 function Animations(): React.ReactElement {
   return (
@@ -122,7 +123,24 @@ function Animations(): React.ReactElement {
 
 export default function Upload(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
-  const { finished, project, error, status } = useProjectSocket(projectId);
+  const { connected, finished, project, error, status } =
+    useProjectSocket(projectId);
+  console.log("all we have", { connected, finished, project, error, status });
+
+  // Debug: log when projectId changes
+  useEffect(() => {
+    console.log("ProjectId changed:", projectId);
+  }, [projectId]);
+
+  // Debug: log status updates from project socket
+  useEffect(() => {
+    console.log("Status update:", status);
+  }, [status]);
+
+  // Debug: log connection state
+  useEffect(() => {
+    console.log("Socket connected:", connected);
+  }, [connected]);
 
   const [isUploading, setIsUploading] = useState(false);
   const [uploadError, setUploadError] = useState<string | null>(null);
@@ -146,13 +164,7 @@ export default function Upload(): React.ReactElement {
     setIsClient(true);
   }, []);
 
-  // Debug: log status updates from project socket
-  useEffect(() => {
-    // eslint-disable-next-line no-console
-    console.log("[Upload] status update", status);
-  }, [status]);
-
-  // Preserve spinner on refresh if a pending project id exists in localStorage
+  // // Preserve spinner on refresh if a pending project id exists in localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
     const persisted = window.localStorage.getItem("mv:projectId");
@@ -249,6 +261,31 @@ export default function Upload(): React.ReactElement {
         </div>
         <div className="overflow-hidden rounded-3xl border border-white/10 bg-gradient-to-br from-white/10 via-white/5 to-transparent shadow-2xl ring-1 ring-white/10 backdrop-blur">
           <div className="p-8">
+            {/* Connection Status */}
+            <div className="mb-4 flex items-center gap-2 text-sm">
+              <div
+                className={`w-2 h-2 rounded-full ${
+                  connected ? "bg-green-500" : "bg-red-500"
+                }`}
+              />
+              <span className={connected ? "text-green-400" : "text-red-400"}>
+                {connected ? "Connected" : "Connecting..."}
+              </span>
+              {!connected && (
+                <button
+                  onClick={() => {
+                    const sock = getSocket();
+                    if (sock && !sock.connected) {
+                      sock.connect();
+                    }
+                  }}
+                  className="ml-2 text-xs text-blue-400 hover:text-blue-300 underline"
+                >
+                  Reconnect
+                </button>
+              )}
+            </div>
+
             <div className="flex items-center gap-4 mb-6">
               <div className="relative">
                 <LoadingSpinner>{`${Math.round(

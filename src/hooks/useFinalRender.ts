@@ -10,6 +10,7 @@ export function useFinalRender(projectId: string | null) {
   const [renderStatus, setRenderStatus] = useState<string>("");
   const [videoFinal, setVideoFinal] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
+  const [connected, setConnected] = useState(false);
 
   // Reset all render state
   const resetRender = useCallback(() => {
@@ -21,7 +22,7 @@ export function useFinalRender(projectId: string | null) {
     setIsComplete(false);
   }, []);
 
-  // Set up WebSocket listeners and join room on mount
+  // Set up WebSocket listeners for final render events
   useEffect(() => {
     if (!projectId) return;
 
@@ -31,40 +32,26 @@ export function useFinalRender(projectId: string | null) {
       return;
     }
 
-    // Ensure connection is established immediately
-    const ensureConnection = async () => {
-      if (!sock.connected) {
-        sock.connect();
-
-        // Wait for connection with timeout
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(
-            () => reject(new Error("Connection timeout")),
-            5000
-          );
-
-          const onConnect = () => {
-            clearTimeout(timeout);
-            sock.off("connect", onConnect);
-            resolve();
-          };
-
-          const onConnectError = (error: any) => {
-            clearTimeout(timeout);
-            sock.off("connect_error", onConnectError);
-            reject(new Error(`Connection failed: ${error?.message || error}`));
-          };
-
-          sock.on("connect", onConnect);
-          sock.on("connect_error", onConnectError);
-        });
-      }
+    const onConnect = () => {
+      console.log("Final render socket connected");
+      setConnected(true);
+      setRenderError(null);
     };
 
-    // Connect immediately when component mounts
-    ensureConnection().catch((error) => {
-      setRenderError(`Failed to connect to server: ${error.message}`);
-    });
+    const onConnectError = (err: any) => {
+      const msg = typeof err?.message === "string" ? err.message : String(err);
+      console.log("Final render socket connect_error", msg);
+      setRenderError(`Connection failed: ${msg}`);
+      setConnected(false);
+    };
+
+    const onDisconnect = () => {
+      console.log("Final render socket disconnected");
+      setConnected(false);
+      if (isRendering) {
+        setRenderStatus("reconnecting");
+      }
+    };
 
     // Progress updates
     const onProgress = (data: any) => {
@@ -72,6 +59,7 @@ export function useFinalRender(projectId: string | null) {
         setRenderProgress(data.progress || 0);
         setRenderStatus(data.status || "rendering");
         setIsRendering(true);
+        setRenderError(null);
       }
     };
 
@@ -83,6 +71,7 @@ export function useFinalRender(projectId: string | null) {
         setIsRendering(false);
         setRenderProgress(100);
         setRenderStatus("completed");
+        setRenderError(null);
       }
     };
 
@@ -107,35 +96,29 @@ export function useFinalRender(projectId: string | null) {
     };
 
     // Set up listeners
+    sock.on("connect", onConnect);
+    sock.on("disconnect", onDisconnect);
+    sock.on("connect_error", onConnectError);
     sock.on("finalRender:progress", onProgress);
     sock.on("finalRender:finished", onComplete);
     sock.on("finalRender:error", onError);
     sock.on("finalRender:resume", onResume);
 
-    // Handle disconnections and reconnections
-    const onDisconnect = () => {
-      if (isRendering) {
-        setRenderStatus("reconnecting");
-      }
-    };
-
-    const onReconnect = () => {
-      // Note: useProjectSocket will handle re-joining the project room
-    };
-
-    sock.on("disconnect", onDisconnect);
-    sock.on("connect", onReconnect);
-
-    // Note: useProjectSocket handles joining the project room, so we don't emit project:join here
+    // Connect if not already connected
+    if (!sock.connected) {
+      sock.connect();
+    }
 
     // Cleanup
     return () => {
+      sock.off("connect", onConnect);
+      sock.off("disconnect", onDisconnect);
+      sock.off("connect_error", onConnectError);
       sock.off("finalRender:progress", onProgress);
       sock.off("finalRender:finished", onComplete);
       sock.off("finalRender:error", onError);
       sock.off("finalRender:resume", onResume);
-      sock.off("disconnect", onDisconnect);
-      sock.off("connect", onReconnect);
+      // do not disconnect here; keep singleton alive for other pages
     };
   }, [projectId, isRendering]);
 
@@ -153,26 +136,6 @@ export function useFinalRender(projectId: string | null) {
       if (!sock) {
         setRenderError("WebSocket not available");
         return;
-      }
-
-      // Ensure connection
-      if (!sock.connected) {
-        sock.connect();
-        // Wait for connection
-        await new Promise<void>((resolve, reject) => {
-          const timeout = setTimeout(
-            () => reject(new Error("Connection timeout")),
-            5000
-          );
-
-          const onConnect = () => {
-            clearTimeout(timeout);
-            sock.off("connect", onConnect);
-            resolve();
-          };
-
-          sock.on("connect", onConnect);
-        });
       }
 
       // Start the render
@@ -195,6 +158,7 @@ export function useFinalRender(projectId: string | null) {
     renderStatus,
     videoFinal,
     isComplete,
+    connected,
 
     // Actions
     startRender,

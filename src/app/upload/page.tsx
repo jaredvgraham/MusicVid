@@ -1,6 +1,6 @@
 "use client";
-import Upload from "@/components/upload/Upload";
 
+import Upload from "@/components/upload/Upload";
 import React from "react";
 
 const Page = () => {

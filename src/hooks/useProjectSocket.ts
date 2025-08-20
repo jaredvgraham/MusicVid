@@ -1,7 +1,7 @@
 // hooks/useProjectSocket.ts
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { getSocket } from "../lib/socket";
 import { Project, Line, Word } from "../types";
 import { useRouter } from "next/navigation";
@@ -23,9 +23,7 @@ export function useProjectSocket(projectId: string | null) {
   const [project, setProject] = useState<Project | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [persistedId, setPersistedId] = useState<string | null>(null);
-  const [isInitialized, setIsInitialized] = useState(false);
   const router = useRouter();
-
   // Load persisted project id on mount
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -36,65 +34,65 @@ export function useProjectSocket(projectId: string | null) {
   // Persist latest provided id
   useEffect(() => {
     if (typeof window === "undefined") return;
+    if (projectId) window.localStorage.setItem("mv:projectId", projectId);
+  }, [projectId]);
+
+  // Reset state when projectId changes
+  useEffect(() => {
     if (projectId) {
-      window.localStorage.setItem("mv:projectId", projectId);
-      // Prefer explicit projectId; clear any stale persisted id in memory
-      setPersistedId(null);
+      setFinished(false);
+      setError(null);
+      setStatus({
+        id: projectId,
+        status: "isolating vocals",
+        progress: 0,
+      });
     }
   }, [projectId]);
 
   const activeId = projectId ?? persistedId;
 
-  // Reset initialization when active project changes so we can rejoin
   useEffect(() => {
-    setIsInitialized(false);
-  }, [activeId]);
-
-  // Initialize WebSocket connection only when needed
-  const initializeSocket = useCallback(() => {
-    if (!activeId || isInitialized) return;
-
     const sock = getSocket();
-    if (!sock) {
-      console.error("No socket available");
-      setError("WebSocket not available");
-      return;
-    }
+    if (!sock || !activeId) return;
 
-    console.log("Initializing WebSocket connection for project:", activeId);
+    console.log("Setting up socket for project:", activeId);
 
-    // check if the project is already completed, but still proceed to join
+    // check if the project is already completed and do not join if it is
     const checkCompleted = async () => {
-      try {
-        const response = await fetch("/api/complete/" + activeId);
-        const data = await response.json();
-        if (data.completed) {
-          setFinished(true);
-          if (typeof window !== "undefined") {
-            try {
-              window.localStorage.removeItem("mv:projectId");
-            } catch {}
-          }
+      const response = await fetch("/api/complete/" + activeId);
+      const data = await response.json();
+      if (data.completed) {
+        setFinished(true);
+        if (typeof window !== "undefined") {
+          try {
+            window.localStorage.removeItem("mv:projectId");
+          } catch {}
         }
-      } catch (error) {
-        console.error("Failed to check completion status:", error);
       }
     };
 
     const onConnect = () => {
-      console.log("WebSocket connected");
+      console.log("onConnect");
       setConnected(true);
-      setError(null); // Clear any previous connection errors
+      setError(null); // Clear any previous errors
+      console.log("Emitting project:join for:", activeId);
       sock.emit("project:join", { projectId: activeId });
     };
-
     const onConnectError = (err: any) => {
       const msg = typeof err?.message === "string" ? err.message : String(err);
       console.log("socket connect_error", msg);
       setError(msg);
       setConnected(false);
-    };
 
+      // Retry connection after a delay
+      setTimeout(() => {
+        if (sock && !sock.connected) {
+          console.log("Retrying connection...");
+          sock.connect();
+        }
+      }, 2000);
+    };
     const onProjectError = (payload: any) => {
       if (typeof window !== "undefined") {
         try {
@@ -114,25 +112,10 @@ export function useProjectSocket(projectId: string | null) {
         setError("error occurred");
       }
     };
-
-    const onDisconnect = () => {
-      console.log("WebSocket disconnected");
-      setConnected(false);
-
-      // Attempt to reconnect after a short delay
-      setTimeout(() => {
-        if (sock && !sock.connected) {
-          console.log("Attempting to reconnect...");
-          sock.connect();
-        }
-      }, 1000);
-    };
-
+    const onDisconnect = () => setConnected(false);
     const onJoined = () => {
       console.log("Joined project room:", activeId);
-      console.log("[ProjectSocket] Listening for project id:", activeId);
     };
-
     const onFinished = (payload: any) => {
       if (payload?.id === activeId) {
         setFinished(true);
@@ -159,6 +142,8 @@ export function useProjectSocket(projectId: string | null) {
           transcript: lines,
         };
         console.log("onFinished", normalized);
+        // setProject(normalized);
+        // Success: clear persisted id so we don't auto-join next load
         if (typeof window !== "undefined") {
           try {
             window.localStorage.removeItem("mv:projectId");
@@ -167,29 +152,14 @@ export function useProjectSocket(projectId: string | null) {
         router.push(`/workspace/${activeId}`);
       }
     };
-
     const onStatus = (payload: any) => {
-      try {
-        console.log("[ProjectSocket] project:status (raw)", payload);
-        if (payload?.id !== activeId) {
-          console.log(
-            "[ProjectSocket] Ignoring status for different id",
-            payload?.id,
-            "(listening for)",
-            activeId
-          );
-          return;
-        }
-        console.log("[ProjectSocket] Status update", payload);
-        setStatus({ id: payload.id, status: payload.status, progress: payload.progress });
-        console.log("[ProjectSocket] Status updated =>", status);
-      } catch (error) {
-        console.error("Error in onStatus handler:", error);
+      if (payload?.id === activeId) {
+        console.log("Status update received:", payload);
+        setStatus(payload);
       }
     };
 
-    // Set up event listeners
-    checkCompleted();
+    // Set up event listeners first
     sock.on("connect", onConnect);
     sock.on("disconnect", onDisconnect);
     sock.on("project:joined", onJoined);
@@ -199,20 +169,19 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
 
-    // Connect or join
+    // Connect immediately if not connected, or join project if already connected
     if (!sock.connected) {
-      console.log("Connecting to WebSocket...");
+      console.log("Socket not connected, connecting...");
       sock.connect();
     } else {
-      console.log("WebSocket already connected, joining project room");
-      sock.emit("project:join", { projectId: activeId });
+      // If already connected, join the project room immediately
+      console.log("Socket already connected, joining project:", activeId);
       setConnected(true);
-      console.log("[ProjectSocket] Listening for project id:", activeId);
+      sock.emit("project:join", { projectId: activeId });
     }
 
-    setIsInitialized(true);
+    checkCompleted();
 
-    // Cleanup function
     return () => {
       sock.off("connect", onConnect);
       sock.off("disconnect", onDisconnect);
@@ -222,24 +191,9 @@ export function useProjectSocket(projectId: string | null) {
       sock.off("project:status", onStatus);
       sock.off("connect_error", onConnectError);
       sock.off("error", onConnectError);
+      // do not disconnect here; keep singleton alive for other pages
     };
-  }, [activeId, isInitialized, router]);
+  }, [activeId, router]);
 
-  // Auto-initialize when activeId is present
-  useEffect(() => {
-    const cleanup = initializeSocket();
-    return () => {
-      if (typeof cleanup === "function") cleanup();
-    };
-  }, [initializeSocket]);
-
-  return {
-    connected,
-    finished,
-    project,
-    error,
-    status,
-    initializeSocket,
-    isInitialized,
-  };
+  return { connected, finished, project, error, status };
 }
