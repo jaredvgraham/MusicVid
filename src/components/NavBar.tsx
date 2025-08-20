@@ -132,19 +132,6 @@ export default function NavBar(): React.ReactElement {
               )}
             </div>
           </SignedOut>
-
-          {/* Main Navigation Items */}
-          {mainNavItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
-            >
-              {item.label}
-            </Link>
-          ))}
-
-          {/* User-specific items */}
           <SignedIn>
             <Link
               href="/dashboard"
@@ -165,6 +152,20 @@ export default function NavBar(): React.ReactElement {
               Settings
             </Link>
           </SignedIn>
+
+          {/* Main Navigation Items */}
+          {mainNavItems.map((item) => (
+            <Link
+              key={item.label}
+              href={item.href}
+              className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+            >
+              {item.label}
+            </Link>
+          ))}
+
+          {/* User-specific items */}
+
           <SignedOut>
             <Link
               href="/upload"
