@@ -157,7 +157,7 @@ const Dashboard = (): React.ReactElement => {
       />
 
       {filteredProjects.length === 0 ? (
-        <EmptyState hasProjects={projects.length > 0} />
+        <EmptyState hasProjects={projects.length > 0} router={router} />
       ) : (
         <div className="mt-6 grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredProjects.map((project) => {
@@ -261,7 +261,11 @@ const Dashboard = (): React.ReactElement => {
       )}
 
       {deleteTarget && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center p-4" role="dialog" aria-modal="true">
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+        >
           <div
             className="absolute inset-0 bg-black/70 backdrop-blur-sm"
             onClick={() => setDeleteTarget(null)}
@@ -271,11 +275,14 @@ const Dashboard = (): React.ReactElement => {
             <div className="p-5 text-white">
               <h3 className="text-lg font-semibold">Delete project</h3>
               <p className="mt-2 text-sm text-white/80">
-                Type the project name to confirm deletion. This action cannot be undone.
+                Type the project name to confirm deletion. This action cannot be
+                undone.
               </p>
               <div className="mt-3 rounded-md border border-white/10 bg-white/5 p-3 text-sm">
                 <div className="text-white/70">Project</div>
-                <div className="font-medium">{deleteTarget.name ?? "Untitled"}</div>
+                <div className="font-medium">
+                  {deleteTarget.name ?? "Untitled"}
+                </div>
               </div>
               <input
                 autoFocus
@@ -445,7 +452,13 @@ function SkeletonGrid() {
   );
 }
 
-function EmptyState({ hasProjects }: { hasProjects: boolean }) {
+function EmptyState({
+  hasProjects,
+  router,
+}: {
+  hasProjects: boolean;
+  router: ReturnType<typeof useRouter>;
+}) {
   return (
     <div className="mt-12 grid place-items-center rounded-2xl border border-white/10 bg-neutral-900/40 p-10 text-center">
       <div className="mx-auto max-w-md">
@@ -458,7 +471,10 @@ function EmptyState({ hasProjects }: { hasProjects: boolean }) {
             ? "Try adjusting your search query."
             : "Create your first project to get started."}
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 cursor-pointer">
+        <div
+          className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 cursor-pointer"
+          onClick={() => router.push("/upload")}
+        >
           <svg
             width="16"
             height="16"
