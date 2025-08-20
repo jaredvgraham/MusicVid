@@ -161,20 +161,26 @@ export default function Upload(): React.ReactElement {
   }, []);
 
   const submitSplit = async (formData: FormData) => {
+    console.log("formData", formData);
     try {
       setIsUploading(true);
       setUploadError(null);
       const token = await session?.getToken();
       console.log("token", token);
-      console.log("token", token);
-      console.log("token", token);
-      console.log("token", token);
+
+      const headers: Record<string, string> = {};
+      if (token) {
+        // Don't set Content-Type for FormData - let the browser set it with boundary
+        headers.Authorization = `Bearer ${token}`;
+      }
+
+      console.log("headers", headers);
 
       const response = await fetch(
-        "https://extractor-production-721a.up.railway.app/split",
+        `${process.env.NEXT_PUBLIC_RAILWAY_API_URL}split`,
         {
           method: "POST",
-          headers: token ? { Authorization: `Bearer ${token}` } : undefined,
+          headers,
           body: formData,
         }
       );
