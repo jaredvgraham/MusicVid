@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
@@ -27,7 +27,8 @@ const plans: Plan[] = [
     description:
       "Perfect for creators just getting started with AI-powered lyric videos.",
     features: [
-      "Up to 3 renders/month",
+      "Up to 5 renders/month",
+      "Up to 5 projects/month",
       "1080p exports",
       "Core lyric templates",
       "Basic customization",
@@ -43,6 +44,7 @@ const plans: Plan[] = [
     description: "Most popular choice for serious creators and content teams.",
     features: [
       "Up to 15 renders/month",
+      "Up to 15 projects/month",
       "720p/1080p/1440p exports",
       "All lyric templates",
       "Brand colors & fonts",
@@ -62,6 +64,7 @@ const plans: Plan[] = [
       "For professional creators and teams shipping high-volume content.",
     features: [
       "Unlimited monthly renders",
+      "Unlimited monthly projects",
       "720p/1080p/1440p exports",
       "Template overrides",
       "Custom branding",
@@ -80,13 +83,22 @@ export default function PricingPage(): React.ReactElement {
   const { user } = useUser();
   const authFetch = useAuthFetch();
 
-  const currentPlan =
-    (user?.publicMetadata?.plan as string | undefined)?.toLowerCase?.() ??
-    "none";
-
   const [loading, setLoading] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
+  const [userPlan, setUserPlan] = useState<string>("none");
+  useEffect(() => {
+    const fetchPlan = async () => {
+      const res = await fetch("/api/plan");
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({}));
+        throw new Error(data?.error?.message || "Failed to fetch plan");
+      }
+      const data = await res.json().catch(() => ({}));
+      setUserPlan(data?.plan?.toLowerCase?.() ?? "none");
+    };
+    fetchPlan();
+  }, [user]);
 
   const handleUpgrade = async (planKey: Plan["planKey"]) => {
     setLoading("upgrade");
@@ -115,13 +127,13 @@ export default function PricingPage(): React.ReactElement {
     }
 
     // Already on this plan → manage
-    if (currentPlan === planKey) {
+    if (userPlan === planKey) {
       router.push("/settings");
       return;
     }
 
     // Switching from an active plan → upgrade path
-    if (currentPlan !== "none") {
+    if (userPlan !== "none") {
       await handleUpgrade(planKey);
       return;
     }
@@ -249,14 +261,14 @@ export default function PricingPage(): React.ReactElement {
         {/* Pricing Cards */}
         <section className="grid gap-8 pb-20 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
-            const isCurrent = currentPlan === plan.planKey;
+            const isCurrent = userPlan === plan.planKey;
             const isLoading = loading === plan.planKey || loading === "upgrade";
 
             const buttonLabel = isLoading
               ? "Redirecting..."
               : isCurrent
               ? "Manage Subscription"
-              : currentPlan !== "none"
+              : userPlan !== "none"
               ? `Upgrade to ${plan.name}`
               : `Get ${plan.name}`;
 

@@ -62,6 +62,7 @@ export interface ProjectDocument extends Document {
   updatedAt: Date;
   length: number;
   finalRender?: string;
+  deleted: boolean;
 }
 
 const ProjectSchema = new Schema<ProjectDocument>(
@@ -80,6 +81,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
     lyrics: { type: String },
     lyricPresetId: { type: String },
     finalRender: { type: String },
+    deleted: { type: Boolean, required: true, default: false },
   },
   { timestamps: true }
 );
