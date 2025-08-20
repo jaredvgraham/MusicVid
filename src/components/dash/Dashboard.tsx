@@ -277,7 +277,7 @@ function HeaderSection({
           <button
             onClick={onRefresh}
             type="button"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white cursor-pointer"
             disabled={isRefreshing}
           >
             <svg
@@ -301,7 +301,7 @@ function HeaderSection({
           </button>
           <button
             type="button"
-            className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90"
+            className="inline-flex items-center gap-2 rounded-md bg-white px-3 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 cursor-pointer"
             onClick={() => router.push("/upload")}
           >
             <svg
@@ -358,7 +358,7 @@ function EmptyState({ hasProjects }: { hasProjects: boolean }) {
             ? "Try adjusting your search query."
             : "Create your first project to get started."}
         </p>
-        <div className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90">
+        <div className="mt-6 inline-flex items-center gap-2 rounded-md bg-white px-4 py-2 text-sm font-medium text-neutral-900 transition hover:bg-white/90 cursor-pointer">
           <svg
             width="16"
             height="16"
