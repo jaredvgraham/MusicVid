@@ -36,10 +36,19 @@ export function useProjectSocket(projectId: string | null) {
   // Persist latest provided id
   useEffect(() => {
     if (typeof window === "undefined") return;
-    if (projectId) window.localStorage.setItem("mv:projectId", projectId);
+    if (projectId) {
+      window.localStorage.setItem("mv:projectId", projectId);
+      // Prefer explicit projectId; clear any stale persisted id in memory
+      setPersistedId(null);
+    }
   }, [projectId]);
 
   const activeId = projectId ?? persistedId;
+
+  // Reset initialization when active project changes so we can rejoin
+  useEffect(() => {
+    setIsInitialized(false);
+  }, [activeId]);
 
   // Initialize WebSocket connection only when needed
   const initializeSocket = useCallback(() => {
@@ -54,7 +63,7 @@ export function useProjectSocket(projectId: string | null) {
 
     console.log("Initializing WebSocket connection for project:", activeId);
 
-    // check if the project is already completed and do not join if it is
+    // check if the project is already completed, but still proceed to join
     const checkCompleted = async () => {
       try {
         const response = await fetch("/api/complete/" + activeId);
@@ -121,6 +130,7 @@ export function useProjectSocket(projectId: string | null) {
 
     const onJoined = () => {
       console.log("Joined project room:", activeId);
+      console.log("[ProjectSocket] Listening for project id:", activeId);
     };
 
     const onFinished = (payload: any) => {
@@ -149,8 +159,6 @@ export function useProjectSocket(projectId: string | null) {
           transcript: lines,
         };
         console.log("onFinished", normalized);
-        // setProject(normalized);
-        // Success: clear persisted id so we don't auto-join next load
         if (typeof window !== "undefined") {
           try {
             window.localStorage.removeItem("mv:projectId");
@@ -162,16 +170,22 @@ export function useProjectSocket(projectId: string | null) {
 
     const onStatus = (payload: any) => {
       try {
-        if (payload?.id === activeId) {
-          console.log("Status update for active project:", payload);
-          setStatus(payload);
+        console.log("[ProjectSocket] project:status (raw)", payload);
+        if (payload?.id !== activeId) {
+          console.log(
+            "[ProjectSocket] Ignoring status for different id",
+            payload?.id,
+            "(listening for)",
+            activeId
+          );
+          return;
         }
+        console.log("[ProjectSocket] Status update", payload);
+        setStatus(payload);
       } catch (error) {
         console.error("Error in onStatus handler:", error);
       }
     };
-
-    // Final render logic moved to useFinalRender hook
 
     // Set up event listeners
     checkCompleted();
@@ -181,11 +195,13 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("project:finished", onFinished);
     sock.on("project:error", onProjectError);
     sock.on("project:status", onStatus);
-    // Final render events moved to useFinalRender hook
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
+    sock.onAny((event, ...args) => {
+      if (event.startsWith("project:")) console.log("[ProjectSocket onAny]", event, args?.[0]);
+    });
 
-    // Connect to WebSocket
+    // Connect or join
     if (!sock.connected) {
       console.log("Connecting to WebSocket...");
       sock.connect();
@@ -193,6 +209,7 @@ export function useProjectSocket(projectId: string | null) {
       console.log("WebSocket already connected, joining project room");
       sock.emit("project:join", { projectId: activeId });
       setConnected(true);
+      console.log("[ProjectSocket] Listening for project id:", activeId);
     }
 
     setIsInitialized(true);
@@ -205,11 +222,18 @@ export function useProjectSocket(projectId: string | null) {
       sock.off("project:finished", onFinished);
       sock.off("project:error", onProjectError);
       sock.off("project:status", onStatus);
-      // Final render event cleanup moved to useFinalRender hook
       sock.off("connect_error", onConnectError);
       sock.off("error", onConnectError);
     };
   }, [activeId, isInitialized, router]);
+
+  // Auto-initialize when activeId is present
+  useEffect(() => {
+    const cleanup = initializeSocket();
+    return () => {
+      if (typeof cleanup === "function") cleanup();
+    };
+  }, [initializeSocket]);
 
   return {
     connected,

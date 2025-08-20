@@ -146,6 +146,12 @@ export default function Upload(): React.ReactElement {
     setIsClient(true);
   }, []);
 
+  // Debug: log status updates from project socket
+  useEffect(() => {
+    // eslint-disable-next-line no-console
+    console.log("[Upload] status update", status);
+  }, [status]);
+
   // Preserve spinner on refresh if a pending project id exists in localStorage
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -166,15 +172,12 @@ export default function Upload(): React.ReactElement {
       setIsUploading(true);
       setUploadError(null);
       const token = await session?.getToken();
-      console.log("token", token);
 
       const headers: Record<string, string> = {};
       if (token) {
         // Don't set Content-Type for FormData - let the browser set it with boundary
         headers.Authorization = `Bearer ${token}`;
       }
-
-      console.log("headers", headers);
 
       const response = await fetch(
         `${process.env.NEXT_PUBLIC_RAILWAY_API_URL}split`,
