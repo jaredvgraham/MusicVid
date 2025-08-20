@@ -3,11 +3,13 @@ import { auth } from "@clerk/nextjs/server";
 import User from "@/backend/models/User";
 import Utils from "@/utils/utils";
 import Project from "@/backend/models/Project";
+import dbConnect from "@/backend/lib/db";
 
 
 export async function GET(request: NextRequest) {
     const { userId } = await auth();
     try {
+        await dbConnect();
         if (!userId) {
             console.error("Unauthorized request");
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
