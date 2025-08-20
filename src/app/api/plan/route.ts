@@ -7,7 +7,7 @@ export async function GET(request: NextRequest) {
     if (!userId) {
         return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
-    const user = await User.findById(userId);
+    const user = await User.findOne({ clerkId: userId });
     if (!user) {
         return NextResponse.json({ error: "User not found" }, { status: 404 });
     }
