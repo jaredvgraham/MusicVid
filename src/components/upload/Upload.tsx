@@ -166,7 +166,6 @@ export default function Upload(): React.ReactElement {
       setIsUploading(true);
       setUploadError(null);
       const token = await session?.getToken();
-      console.log("token", token);
 
       const headers: Record<string, string> = {};
       if (token) {
