@@ -10,7 +10,7 @@ class ProjectClient {
   ): Promise<ProjectDocument[] | ApiError> {
     await dbConnect();
     try {
-      const projects = await Project.find({ user_id: clerkId, deleted: false }).sort({
+      const projects = await Project.find({ user_id: clerkId }).sort({
         timeCreated: -1,
       });
       return projects;
