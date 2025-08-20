@@ -181,7 +181,8 @@ export function useProjectSocket(projectId: string | null) {
           return;
         }
         console.log("[ProjectSocket] Status update", payload);
-        setStatus(payload);
+        setStatus({ id: payload.id, status: payload.status, progress: payload.progress });
+        console.log("[ProjectSocket] Status updated =>", status);
       } catch (error) {
         console.error("Error in onStatus handler:", error);
       }
@@ -197,9 +198,6 @@ export function useProjectSocket(projectId: string | null) {
     sock.on("project:status", onStatus);
     sock.on("connect_error", onConnectError);
     sock.on("error", onConnectError);
-    sock.onAny((event, ...args) => {
-      if (event.startsWith("project:")) console.log("[ProjectSocket onAny]", event, args?.[0]);
-    });
 
     // Connect or join
     if (!sock.connected) {
