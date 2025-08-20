@@ -34,8 +34,8 @@ const Dashboard = (): React.ReactElement => {
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Final renders state
-  const [finalRenders, setFinalRenders] = useState<FinalRender[]>([]);
+  // Final renders state (supports either objects or plain URL strings)
+  const [finalRenders, setFinalRenders] = useState<Array<FinalRender | string>>([]);
   const [finalError, setFinalError] = useState<string | null>(null);
   const [isRefreshingFinal, setIsRefreshingFinal] = useState<boolean>(false);
 
@@ -79,8 +79,8 @@ const Dashboard = (): React.ReactElement => {
         setFinalError((data as any).error.message);
         setFinalRenders([]);
       } else {
-        // Accept either { renders: [...] } or direct array
-        const renders = (data as any).renders ?? data;
+        // Accept either { urls: string[] } | { renders: [...] } | direct array
+        const renders = (data as any).urls ?? (data as any).urls ?? data;
         setFinalRenders(Array.isArray(renders) ? renders : []);
       }
     } catch (error: unknown) {
@@ -351,19 +351,25 @@ const Dashboard = (): React.ReactElement => {
           </div>
         ) : (
           <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {finalRenders.map((r) => {
-              const videoSrc = (r.video && String(r.video)) || (r.url && String(r.url)) || "";
-              const when = r.createdAt ?? r.timeCreated;
+            {finalRenders.map((item, idx) => {
+              const r: any = item as any;
+              const videoSrc =
+                typeof item === "string"
+                  ? String(item)
+                  : (r.video && String(r.video)) || (r.url && String(r.url)) || "";
+              const when = (r?.createdAt ?? r?.timeCreated) as any;
+              const key = (r?._id as string) || (r?.id as string) || (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
+              const name = (r?.name as string) || "Final render";
               return (
                 <article
-                  key={r._id}
+                  key={key}
                   className="relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4"
                 >
                   <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
                   <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
                     {videoSrc ? (
                       <video
-                        key={`${r._id}-${videoSrc}`}
+                        key={`video-${key}`}
                         src={videoSrc}
                         className="h-full w-full"
                         controls
@@ -376,7 +382,7 @@ const Dashboard = (): React.ReactElement => {
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <div className="text-sm text-white">
-                      {r.name ?? "Final render"}
+                      {name}
                       <div className="text-xs text-neutral-400">{when ? formatDate(when) : ""}</div>
                     </div>
                     {videoSrc && (
