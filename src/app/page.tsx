@@ -191,16 +191,6 @@ export default function Page(): React.ReactElement {
             />
 
             <Showcase />
-
-            {/* Extra CTA for creators */}
-            <div className="mb-16 text-center">
-              <a
-                href="/upload"
-                className="inline-flex items-center justify-center rounded-md bg-white px-5 py-2 text-sm font-medium text-neutral-900 hover:bg-white/90"
-              >
-                Start now — upload a song or clip
-              </a>
-            </div>
           </div>
 
           {/* Footer */}
