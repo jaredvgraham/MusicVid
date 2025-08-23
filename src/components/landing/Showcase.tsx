@@ -2,6 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
+import Link from "next/link";
 
 export default function Showcase(): React.ReactElement {
   return (
@@ -166,18 +167,12 @@ export default function Showcase(): React.ReactElement {
               transition={{ duration: 0.8, ease: "easeOut", delay: 0.4 }}
               className="mt-8 flex flex-wrap gap-4"
             >
-              <a
-                href="#get-started"
+              <Link
+                href="/upload"
                 className="inline-flex items-center justify-center rounded-xl bg-gradient-to-r from-fuchsia-500 to-purple-500 px-6 py-3 text-white font-semibold transition-all duration-300 hover:shadow-lg hover:shadow-fuchsia-500/25 hover:scale-105"
               >
                 Try it free
-              </a>
-              <a
-                href="#templates"
-                className="inline-flex items-center justify-center rounded-xl border border-white/20 bg-white/5 px-6 py-3 text-white font-semibold transition-all duration-300 hover:bg-white/10 hover:border-white/30"
-              >
-                Browse templates
-              </a>
+              </Link>
             </motion.div>
           </motion.div>
 
