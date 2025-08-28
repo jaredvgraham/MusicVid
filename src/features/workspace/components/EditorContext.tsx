@@ -49,31 +49,7 @@ export function EditorProvider({
   initialTranscript: Line[];
   children: React.ReactNode;
 }) {
-  function normalizeWordEndsToLineEnds(lines: Line[]): Line[] {
-    if (!Array.isArray(lines)) return lines;
-    return lines.map((ln) => {
-      let normalized = 0;
-
-      for (const w of ln.words ?? []) {
-        if (w.end === ln.end) {
-          normalized++;
-        }
-      }
-      if (normalized >= 2) {
-        normalized = 0;
-        return ln;
-      }
-
-      const words = Array.isArray(ln.words)
-        ? ln.words.map((w) => ({ ...w, end: ln.end }))
-        : [];
-      return { ...ln, words };
-    });
-  }
-
-  const [transcript, setTranscript] = useState<Line[]>(() =>
-    normalizeWordEndsToLineEnds(initialTranscript)
-  );
+  const [transcript, setTranscript] = useState<Line[]>(() => initialTranscript);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [currentTimeMs, _setCurrentTimeMs] = useState(0);
   const [playing, setPlaying] = useState(false);
