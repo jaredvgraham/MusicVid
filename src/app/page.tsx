@@ -1,11 +1,9 @@
-"use client";
-import React, { useState } from "react";
+import React from "react";
 import UploadCta from "../components/landing/UploadCta";
 import Hero from "../components/landing/Hero";
 import { FeatureGrid } from "../components/landing/FeatureGrid";
 import { Steps } from "../components/landing/Steps";
 import Showcase from "../components/landing/Showcase";
-import { useProjectSocket } from "../hooks/useProjectSocket";
 import SeoHead from "@/components/SeoHead";
 import JsonLd from "@/components/JsonLd";
 import {
@@ -20,11 +18,6 @@ import Dashboard from "@/components/dash/Dashboard";
 import Image from "next/image";
 
 export default function Page(): React.ReactElement {
-  const [projectId, setProjectId] = useState<string | null>(null);
-  const { connected, finished, project, error } = useProjectSocket(projectId);
-  console.log("connected", connected);
-  console.log("finished", finished);
-  console.log("project", project);
   return (
     <>
       <SignedOut>
@@ -128,12 +121,7 @@ export default function Page(): React.ReactElement {
             </div>
 
             {/* Upload CTA */}
-            <UploadCta
-              setProjectId={setProjectId}
-              finished={finished}
-              project={project}
-              error={error}
-            />
+            <UploadCta />
 
             {/* Social proof */}
             <p className="mx-auto mt-6 max-w-xl text-center text-xs text-white/40">

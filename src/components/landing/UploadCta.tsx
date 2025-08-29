@@ -4,13 +4,6 @@ import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
 
-interface UploadCtaProps {
-  setProjectId: (projectId: string) => void;
-  finished: boolean;
-  project: any;
-  error: string | null;
-}
-
 function EqStyles(): React.ReactElement {
   return (
     <style jsx global>{`
@@ -60,7 +53,7 @@ function EqStyles(): React.ReactElement {
   );
 }
 
-export default function UploadCta(_: UploadCtaProps): React.ReactElement {
+export default function UploadCta(): React.ReactElement {
   return (
     <div className="relative py-20 overflow-hidden">
       {/* Background elements - simplified */}
