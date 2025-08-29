@@ -63,9 +63,7 @@ export function VideoPicker({
   return (
     <div className={className}>
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-        <h2 className="text-sm font-medium text-white/90">
-          {isWorkspace ? "New video?" : title}
-        </h2>
+        <h2 className="text-sm font-medium text-white/90">{title}</h2>
         <form
           className="flex w-full items-center gap-2 sm:w-auto"
           onSubmit={(e) => {

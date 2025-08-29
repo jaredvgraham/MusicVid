@@ -30,6 +30,7 @@ export default function WorkspacePage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+  const [showVideos, setShowVideos] = useState(false);
 
   const { connected, error, status } = useProjectSocket(projectId ?? "");
 
@@ -277,11 +278,21 @@ export default function WorkspacePage(): React.ReactElement {
             </div>
             <div className="hidden md:block space-y-4">
               <Toolbox />
-              <VideoPicker
-                selectedVideo={selectedVideo}
-                onChange={onPickVideo}
-                isWorkspace={true}
-              />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowVideos(!showVideos)}
+                  className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white hover:bg-neutral-700 cursor-pointer"
+                >
+                  {showVideos ? "Hide videos" : "Change video?"}
+                </button>
+              </div>
+              {showVideos && (
+                <VideoPicker
+                  selectedVideo={selectedVideo}
+                  onChange={onPickVideo}
+                  isWorkspace={true}
+                />
+              )}
 
               <div className="mt-4 rounded border border-white/10 p-3 text-sm text-white/50">
                 Final render is produced server-side from the sanitized
