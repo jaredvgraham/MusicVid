@@ -48,6 +48,7 @@ export default function WorkspacePage(): React.ReactElement {
   // const [draftWords, setDraftWords] = useState<Word[]>([]);
   const [saving, setSaving] = useState(false);
   const [selectedVideo, setSelectedVideo] = useState<string | null>(null);
+  const [updatingVideo, setUpdatingVideo] = useState(false);
   const [allowed, setAllowed] = useState<boolean>(true);
   const [remainingFinalRenders, setRemainingFinalRenders] = useState<number>(0);
   const [showUpgradeModal, setShowUpgradeModal] = useState(false);
@@ -93,6 +94,8 @@ export default function WorkspacePage(): React.ReactElement {
   const onPickVideo = async (url: string | null) => {
     if (!projectId || !url) return;
     setSelectedVideo(url);
+    setUpdatingVideo(true);
+    setFetchError(null);
     try {
       const res = await authFetch<{ video: string }>(
         "express",
@@ -105,81 +108,13 @@ export default function WorkspacePage(): React.ReactElement {
       );
       console.log("res", res);
 
-      const busted = `${res.video}${
-        res.video.includes("?") ? "&" : "?"
-      }t=${Date.now()}`;
-      setProject((prev) => (prev ? { ...prev, video: busted } : prev));
+      // Force reload after a small delay to ensure state is updated
+      window.location.reload();
     } catch (e: any) {
       setFetchError(e?.message || "Failed to update video");
+      setUpdatingVideo(false);
     }
   };
-
-  // const onChangeWord = useCallback(
-  //   (index: number, field: keyof Word, value: string) => {
-  //     setDraftWords((prev) => {
-  //       const next = [...prev];
-  //       const w = { ...next[index] };
-  //       if (field === "text") w.text = value;
-  //       if (field === "start") w.start = Number(value);
-  //       if (field === "end") w.end = Number(value);
-  //       next[index] = w;
-  //       return next;
-  //     });
-  //   },
-  //   []
-  // );
-
-  // const onRenderFinal = useCallback(async () => {
-  //   if (!projectId) return;
-  //   setSaving(true);
-  //   setError(null);
-  //   try {
-  //     // Rebuild Line[] from current edited words, preserving original line grouping
-  //     const template = serverLines;
-  //     const words = draftWords;
-  //     let cursor = 0;
-  //     const rebuilt: Line[] = template.map((ln) => {
-  //       const count = ln.words.length;
-  //       const slice = words.slice(cursor, cursor + count);
-  //       cursor += count;
-  //       const start = slice.length
-  //         ? Math.min(...slice.map((w) => w.start))
-  //         : ln.start;
-  //       const end = slice.length
-  //         ? Math.max(...slice.map((w) => w.end))
-  //         : ln.end;
-  //       return { start, end, words: slice.length ? slice : ln.words };
-  //     });
-  //     if (cursor < words.length && rebuilt.length > 0) {
-  //       const rest = words.slice(cursor);
-  //       const last = rebuilt[rebuilt.length - 1];
-  //       rebuilt[rebuilt.length - 1] = {
-  //         start: Math.min(last.start, ...rest.map((w) => w.start)),
-  //         end: Math.max(last.end, ...rest.map((w) => w.end)),
-  //         words: [...last.words, ...rest],
-  //       };
-  //     }
-
-  //     const res = await authFetch<WorkspaceResponse>(
-  //       "next",
-  //       `workspace/${projectId}`
-  //       ,
-  //       {
-  //         method: "PATCH",
-  //         headers: {
-  //           "Content-Type": "application/json",
-  //         },
-  //         body: JSON.stringify({ transcript: rebuilt }),
-  //       }
-  //     );
-
-  //     setProject(res.project);
-  //   } catch (e: any) {
-  //     setError(e?.message || "Failed to render final video");
-  //   } finally {
-  //     setSaving(false);
-  //   }
-  // }, [projectId, draftWords, serverLines, authFetch]);
 
   const onFinalRender = useCallback(() => {
     if (!projectId) return;
@@ -286,6 +221,11 @@ export default function WorkspacePage(): React.ReactElement {
                   {showVideos ? "Hide videos" : "Change video?"}
                 </button>
               </div>
+              {updatingVideo && (
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                  <div className="text-white text-sm">Updating video...</div>
+                </div>
+              )}
               {showVideos && (
                 <VideoPicker
                   selectedVideo={selectedVideo}
