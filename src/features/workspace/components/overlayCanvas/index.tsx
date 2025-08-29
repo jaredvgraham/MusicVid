@@ -154,22 +154,6 @@ export function OverlayCanvas(): React.ReactElement {
           setIsDragging(false);
           setDraggingIdx(null);
         }}
-        onClick={(e) => {
-          // Alt/Option-click sets the position of the selected word
-          if (!e.altKey) return;
-          if (selectedIndex == null || selectedIndex < 0) return;
-          const rect = (
-            e.currentTarget as HTMLDivElement
-          ).getBoundingClientRect();
-          const x = e.clientX - rect.left;
-          const y = e.clientY - rect.top;
-          const xPct = Math.max(0, Math.min(100, (x / rect.width) * 100));
-          const yPct = Math.max(0, Math.min(100, (y / rect.height) * 100));
-          if (selectedIndex != null && selectedIndex >= 0) {
-            updateWordByGlobalIndex(selectedIndex, xPct, yPct);
-            saveTranscript();
-          }
-        }}
       >
         {/* Optional cinematic beams behind center lyrics */}
         {preset.fxBeams && <FxBeams designW={designW} designH={designH} />}
@@ -206,8 +190,11 @@ export function OverlayCanvas(): React.ReactElement {
                 ? w.scale
                 : 1;
             const transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scl})`;
+            // Only apply fontSizeBump if the word doesn't have custom fontSizePx
+            const hasCustomFontSize =
+              typeof (w as any)?.style?.fontSizePx === "number";
             const textStyle = mergeWordStyle(
-              buildPresetTextStyle(preset, 2),
+              buildPresetTextStyle(preset, hasCustomFontSize ? 0 : 2),
               (w as any).style
             );
             return (

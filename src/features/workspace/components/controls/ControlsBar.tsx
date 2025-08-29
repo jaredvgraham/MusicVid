@@ -1,8 +1,9 @@
 "use client";
 
 import React from "react";
-import { useEditor, formatTime } from "../state/EditorContext";
-import { useEditorHotkeys } from "../state/useEditorHotkeys";
+import { useEditor } from "../../state/EditorContext";
+import { useEditorHotkeys } from "../../state/useEditorHotkeys";
+import { formatTime } from "../../utils/timelineUtils";
 
 export function ControlsBar(): React.ReactElement {
   const {

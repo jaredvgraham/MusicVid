@@ -9,36 +9,11 @@ import React, {
   useState,
   useEffect,
 } from "react";
-import type { Line, Project, Word } from "@/types";
+import type { Line, Project } from "@/types";
+import type { EditorContextValue } from "../types";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
-import { deleteWord as deleteWordOp } from "../actions/wordCrud";
 
-type EditorState = {
-  project: Project;
-  transcript: Line[];
-  setTranscript: React.Dispatch<React.SetStateAction<Line[]>>;
-  selectedIndex: number | null;
-  setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  lyricPresetId: string;
-  setLyricPresetId: React.Dispatch<React.SetStateAction<string>>;
-  currentTimeMs: number;
-  setCurrentTimeMs: (ms: number) => void; // internal playhead update (no seek)
-  seekToMs: (ms: number) => void; // user-initiated seek
-  playing: boolean;
-  setPlaying: (p: boolean) => void;
-  play: () => void;
-  pause: () => void;
-  togglePlay: () => void;
-  pixelsPerSecond: number;
-  setPixelsPerSecond: (pps: number) => void;
-  videoRef: React.RefObject<HTMLVideoElement | null>;
-  saveTranscript: (override?: Line[]) => Promise<void>;
-  saveLyricPreset: (presetId: string) => Promise<void>;
-  renderScale: number; // container width relative to 1080 base
-  setRenderScale: (s: number) => void;
-};
-
-const Ctx = createContext<EditorState | null>(null);
+const EditorContext = createContext<EditorContextValue | null>(null);
 
 export function EditorProvider({
   project,
@@ -49,22 +24,28 @@ export function EditorProvider({
   initialTranscript: Line[];
   children: React.ReactNode;
 }) {
+  // State
   const [transcript, setTranscript] = useState<Line[]>(() => initialTranscript);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [currentTimeMs, _setCurrentTimeMs] = useState(0);
   const [playing, setPlaying] = useState(false);
-  const [pixelsPerSecond, setPixelsPerSecond] = useState(100); // zoom level
-  const videoRef = useRef<HTMLVideoElement | null>(null);
-  const authFetch = useAuthFetch();
-  const transcriptRef = useRef<Line[]>(initialTranscript);
+  const [pixelsPerSecond, setPixelsPerSecond] = useState(100);
   const [lyricPresetId, setLyricPresetId] = useState<string>(
     (project as any)?.lyricPresetId || "classic"
   );
   const [renderScale, setRenderScale] = useState<number>(1);
+
+  // Refs
+  const videoRef = useRef<HTMLVideoElement | null>(null);
+  const transcriptRef = useRef<Line[]>(initialTranscript);
+  const authFetch = useAuthFetch();
+
+  // Update transcript ref when transcript changes
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
 
+  // Actions
   const setCurrentTimeMs = useCallback((ms: number) => {
     _setCurrentTimeMs(ms);
   }, []);
@@ -77,6 +58,7 @@ export function EditorProvider({
     }
   }, []);
 
+  // Controls
   const play = useCallback(() => {
     const v = videoRef.current;
     if (!v) return;
@@ -96,6 +78,7 @@ export function EditorProvider({
     else play();
   }, [playing, play, pause]);
 
+  // Persistence
   const saveTranscript = useCallback(
     async (override?: Line[]) => {
       try {
@@ -137,30 +120,38 @@ export function EditorProvider({
     [authFetch, project?.id]
   );
 
-  const value = useMemo<EditorState>(
+  // Context value
+  const value = useMemo<EditorContextValue>(
     () => ({
+      // State
       project,
       transcript,
-      setTranscript,
       selectedIndex,
-      setSelectedIndex,
       lyricPresetId,
-      setLyricPresetId,
       currentTimeMs,
+      playing,
+      pixelsPerSecond,
+      renderScale,
+      videoRef,
+
+      // Actions
+      setTranscript,
+      setSelectedIndex,
+      setLyricPresetId,
       setCurrentTimeMs,
       seekToMs,
-      playing,
       setPlaying,
+      setPixelsPerSecond,
+      setRenderScale,
+
+      // Controls
       play,
       pause,
       togglePlay,
-      pixelsPerSecond,
-      setPixelsPerSecond,
-      videoRef,
+
+      // Persistence
       saveTranscript,
       saveLyricPreset,
-      renderScale,
-      setRenderScale,
     }),
     [
       project,
@@ -170,21 +161,27 @@ export function EditorProvider({
       currentTimeMs,
       playing,
       pixelsPerSecond,
+      renderScale,
+      setCurrentTimeMs,
+      seekToMs,
       play,
       pause,
       togglePlay,
       saveTranscript,
       saveLyricPreset,
-      renderScale,
     ]
   );
 
-  return <Ctx.Provider value={value}>{children}</Ctx.Provider>;
+  return (
+    <EditorContext.Provider value={value}>{children}</EditorContext.Provider>
+  );
 }
 
 export function useEditor() {
-  const ctx = useContext(Ctx);
-  if (!ctx) throw new Error("useEditor must be used within EditorProvider");
+  const ctx = useContext(EditorContext);
+  if (!ctx) {
+    throw new Error("useEditor must be used within EditorProvider");
+  }
   return ctx;
 }
 

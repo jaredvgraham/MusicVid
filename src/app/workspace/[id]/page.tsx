@@ -7,12 +7,12 @@ import { Project } from "@/types";
 import { createPortal } from "react-dom";
 import { getSocket } from "@/lib/socket";
 
-import { VideoPanel } from "@/features/workspace/components/VideoPanel";
-import { VideoControls } from "@/features/workspace/components/VideoControls";
-
-import { ControlsBar } from "@/features/workspace/components/ControlsBar";
-import { Toolbox } from "@/features/workspace/components/Toolbox";
-import { Timeline } from "@/features/workspace/components/Timeline";
+import {
+  VideoPanel,
+  VideoControls,
+} from "@/features/workspace/components/video";
+import { ControlsBar, Toolbox } from "@/features/workspace/components/controls";
+import { Timeline } from "@/features/workspace/components/timeline";
 import { EditorProvider } from "@/features/workspace/state/EditorContext";
 
 import { VideoPicker } from "@/components/upload/VideoPicker";

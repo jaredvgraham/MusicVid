@@ -1,121 +1,29 @@
 "use client";
 
-import React, { useState, useEffect, useRef } from "react";
-import { useEditor } from "../state/EditorContext";
+import React from "react";
+import { useEditor } from "../../state/EditorContext";
+import { useVideoControls } from "../../hooks/useVideoControls";
 
 export function VideoControls(): React.ReactElement {
+  const { currentTimeMs, seekToMs, playing, togglePlay, videoRef } =
+    useEditor();
+
   const {
+    duration,
+    isDragging,
+    dragTime,
+    progressBarRef,
+    handleProgressClick,
+    handleProgressMouseDown,
+    handleRestart,
+    handleSkipBackward,
+    handleSkipForward,
+    formatTime,
+  } = useVideoControls({
+    videoRef,
     currentTimeMs,
     seekToMs,
-    playing,
-    togglePlay,
-    play,
-    pause,
-    videoRef,
-  } = useEditor();
-
-  const [duration, setDuration] = useState(0);
-  const [isDragging, setIsDragging] = useState(false);
-  const [dragTime, setDragTime] = useState(0);
-  const progressBarRef = useRef<HTMLDivElement>(null);
-
-  // Get video duration when video loads
-  useEffect(() => {
-    const video = videoRef.current;
-    if (!video) return;
-
-    const handleLoadedMetadata = () => {
-      setDuration(video.duration * 1000); // Convert to milliseconds
-    };
-
-    video.addEventListener("loadedmetadata", handleLoadedMetadata);
-
-    return () => {
-      video.removeEventListener("loadedmetadata", handleLoadedMetadata);
-    };
-  }, [videoRef]);
-
-  // Update drag time when currentTimeMs changes from external sources
-  useEffect(() => {
-    if (!isDragging) {
-      setDragTime(currentTimeMs);
-    }
-  }, [currentTimeMs, isDragging]);
-
-  // Global mouse move handler for smoother dragging
-  useEffect(() => {
-    if (!isDragging) return;
-
-    const handleGlobalMouseMove = (e: MouseEvent) => {
-      if (!progressBarRef.current || !duration) return;
-
-      const rect = progressBarRef.current.getBoundingClientRect();
-      const clickX = Math.max(0, Math.min(e.clientX - rect.left, rect.width));
-      const percentage = clickX / rect.width;
-      const newTime = Math.floor(percentage * duration);
-
-      // Only update if time changed significantly (more than 50ms) to reduce lag
-      if (Math.abs(newTime - dragTime) > 50) {
-        setDragTime(newTime);
-      }
-    };
-
-    const handleGlobalMouseUp = () => {
-      if (isDragging && duration) {
-        seekToMs(dragTime);
-      }
-      setIsDragging(false);
-    };
-
-    document.addEventListener("mousemove", handleGlobalMouseMove);
-    document.addEventListener("mouseup", handleGlobalMouseUp);
-
-    return () => {
-      document.removeEventListener("mousemove", handleGlobalMouseMove);
-      document.removeEventListener("mouseup", handleGlobalMouseUp);
-    };
-  }, [isDragging, duration, dragTime, seekToMs]);
-
-  const formatTime = (ms: number): string => {
-    const seconds = Math.floor(ms / 1000);
-    const minutes = Math.floor(seconds / 60);
-    const remainingSeconds = seconds % 60;
-    return `${minutes}:${remainingSeconds.toString().padStart(2, "0")}`;
-  };
-
-  const handleProgressClick = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!progressBarRef.current || !duration) return;
-
-    const rect = progressBarRef.current.getBoundingClientRect();
-    const clickX = e.clientX - rect.left;
-    const percentage = clickX / rect.width;
-    const newTime = Math.floor(percentage * duration);
-
-    seekToMs(newTime);
-    setDragTime(newTime);
-  };
-
-  const handleProgressMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    e.preventDefault(); // Prevent text selection
-    setIsDragging(true);
-  };
-
-  const handleRestart = () => {
-    seekToMs(0);
-    setDragTime(0);
-  };
-
-  const handleSkipBackward = () => {
-    const newTime = Math.max(0, currentTimeMs - 5000); // Skip back 5 seconds
-    seekToMs(newTime);
-    setDragTime(newTime);
-  };
-
-  const handleSkipForward = () => {
-    const newTime = Math.min(duration, currentTimeMs + 5000); // Skip forward 5 seconds
-    seekToMs(newTime);
-    setDragTime(newTime);
-  };
+  });
 
   return (
     <div className="border border-white/10 rounded-lg p-3 space-y-3">
@@ -123,6 +31,7 @@ export function VideoControls(): React.ReactElement {
         <div className="text-xs text-white/60 ">
           {formatTime(currentTimeMs)} / {formatTime(duration)}
         </div>
+
         {/* Control Buttons */}
         <div className="flex items-center justify-center space-x-2">
           <button

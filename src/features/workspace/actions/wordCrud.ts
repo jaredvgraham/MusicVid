@@ -1,51 +1,19 @@
 import type { Line, Word } from "@/types";
-
-function getPositionFromGlobalIndex(
-  lines: Line[],
-  globalIndex: number
-): { lineIndex: number; wordIndex: number } | null {
-  if (globalIndex == null || globalIndex < 0) return null;
-  let acc = 0;
-  for (let li = 0; li < lines.length; li++) {
-    const count = lines[li]?.words?.length ?? 0;
-    if (globalIndex < acc + count) {
-      return { lineIndex: li, wordIndex: globalIndex - acc };
-    }
-    acc += count;
-  }
-  return null;
-}
-
-function computeGlobalIndex(
-  lines: Line[],
-  lineIndex: number,
-  wordIndex: number
-): number {
-  let acc = 0;
-  for (let li = 0; li < lineIndex; li++) acc += lines[li]?.words?.length ?? 0;
-  return acc + wordIndex;
-}
-
-function recalcLineBounds(
-  words: Word[],
-  fallback: { start: number; end: number }
-): {
-  start: number;
-  end: number;
-} {
-  if (words.length === 0) return { start: fallback.start, end: fallback.end };
-  const starts = words.map((w) => w.start);
-  const ends = words.map((w) => w.end);
-  return { start: Math.min(...starts), end: Math.max(...ends) };
-}
+import type { WordCrudResult } from "../types";
+import { TIMELINE_CONSTANTS } from "../types";
+import {
+  getPositionFromGlobalIndex,
+  computeGlobalIndex,
+  recalcLineBounds,
+} from "../utils/timelineUtils";
 
 export function addWord(
   lines: Line[],
   currentTimeMs: number,
   selectedIndex: number | null,
   text: string = "New"
-): { next: Line[]; newSelectedIndex: number } {
-  const defaultDur = 400;
+): WordCrudResult {
+  const defaultDur = TIMELINE_CONSTANTS.DEFAULT_WORD_DURATION;
   const start = Math.max(0, currentTimeMs);
   const end = start + defaultDur;
 
@@ -111,11 +79,12 @@ export function addWord(
 export function duplicateWord(
   lines: Line[],
   selectedIndex: number | null
-): { next: Line[]; newSelectedIndex: number | null } {
+): WordCrudResult {
   if (selectedIndex == null) return { next: lines, newSelectedIndex: null };
 
   const pos = getPositionFromGlobalIndex(lines, selectedIndex);
   if (!pos) return { next: lines, newSelectedIndex: selectedIndex };
+
   const { lineIndex, wordIndex } = pos;
   const ln = lines[lineIndex];
   const w = ln?.words?.[wordIndex];
@@ -125,7 +94,10 @@ export function duplicateWord(
   const copy: Word = {
     ...w,
     start: Math.max(0, w.start + offset),
-    end: Math.max(w.start + offset + 50, w.end + offset),
+    end: Math.max(
+      w.start + offset + TIMELINE_CONSTANTS.MIN_WORD_DURATION,
+      w.end + offset
+    ),
   };
   const insertWordIndex = wordIndex + 1;
 
@@ -151,11 +123,12 @@ export function duplicateWord(
 export function deleteWord(
   lines: Line[],
   selectedIndex: number | null
-): { next: Line[]; newSelectedIndex: number | null } {
+): WordCrudResult {
   if (selectedIndex == null) return { next: lines, newSelectedIndex: null };
 
   const pos = getPositionFromGlobalIndex(lines, selectedIndex);
   if (!pos) return { next: lines, newSelectedIndex: selectedIndex };
+
   const { lineIndex, wordIndex } = pos;
 
   const next: Line[] = lines.map((ln, li) => {
@@ -178,17 +151,19 @@ export function updateWordText(
   newText: string
 ): Line[] {
   if (selectedIndex == null) return lines;
+
   const pos = getPositionFromGlobalIndex(lines, selectedIndex);
   if (!pos) return lines;
+
   const { lineIndex, wordIndex } = pos;
-  const next: Line[] = lines.map((ln, li) => {
+  return lines.map((ln, li) => {
     if (li !== lineIndex) return ln;
     const words = ln.words ?? [];
     const w = words[wordIndex];
     if (!w) return ln;
+
     const newWords = [...words];
     newWords[wordIndex] = { ...w, text: newText };
     return { ...ln, words: newWords };
   });
-  return next;
 }
