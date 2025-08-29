@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useMemo, useState, useEffect } from "react";
-import { useEditor } from "./EditorContext";
+import { useEditor } from "../state/EditorContext";
 import {
   addWord as addWordOp,
   duplicateWord as duplicateWordOp,

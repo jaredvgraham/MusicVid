@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect } from "react";
-import { useEditor } from "./EditorContext";
+import { useEditor } from "../state/EditorContext";
 import { OverlayCanvas } from "./overlayCanvas/index";
 
 export function VideoPanel(): React.ReactElement {

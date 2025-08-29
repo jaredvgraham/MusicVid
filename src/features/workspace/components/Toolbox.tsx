@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { useEditor } from "./EditorContext";
+import { useEditor } from "../state/EditorContext";
 import { addWord as addWordOp } from "../actions/wordCrud";
 import { DEFAULT_LYRIC_PRESET_ID, LYRIC_PRESETS } from "../styles/lyricPresets";
 

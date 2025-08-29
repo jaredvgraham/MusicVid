@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useMemo, useRef } from "react";
-import { useEditor, formatTime } from "./EditorContext";
+import { useEditor, formatTime } from "../state/EditorContext";
 import type { Line } from "@/types";
 import { buildWordSegmentsFromLines } from "../visibility";
 import { deleteWord as deleteWordOp } from "../actions/wordCrud";

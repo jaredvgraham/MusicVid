@@ -13,7 +13,7 @@ import { VideoControls } from "@/features/workspace/components/VideoControls";
 import { ControlsBar } from "@/features/workspace/components/ControlsBar";
 import { Toolbox } from "@/features/workspace/components/Toolbox";
 import { Timeline } from "@/features/workspace/components/Timeline";
-import { EditorProvider } from "@/features/workspace/components/EditorContext";
+import { EditorProvider } from "@/features/workspace/state/EditorContext";
 
 import { VideoPicker } from "@/components/upload/VideoPicker";
 import { useProjectSocket } from "@/hooks/useProjectSocket";

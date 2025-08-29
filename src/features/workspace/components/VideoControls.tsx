@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useRef } from "react";
-import { useEditor } from "./EditorContext";
+import { useEditor } from "../state/EditorContext";
 
 export function VideoControls(): React.ReactElement {
   const {

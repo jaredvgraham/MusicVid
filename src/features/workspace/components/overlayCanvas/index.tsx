@@ -1,7 +1,7 @@
 "use client";
 import React, { useMemo, useState, useRef } from "react";
 import type { TextClip } from "@/types";
-import { useEditor } from "../EditorContext";
+import { useEditor } from "../../state/EditorContext";
 import {
   DEFAULT_LYRIC_PRESET_ID,
   LYRIC_PRESETS,
