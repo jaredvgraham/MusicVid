@@ -7,10 +7,14 @@ import {
   LYRIC_PRESETS,
   LyricPreset,
 } from "../../styles/lyricPresets";
-import CenterLines from "./CenterLines";
+import { LyricLayout } from "./LyricLayout";
 import { buildPresetTextStyle, mergeWordStyle } from "./utils/style";
 import GodRays from "./fx/GodRays";
 import FxBeams from "./fx/FxBeams";
+import {
+  LAYOUT_PRESETS,
+  DEFAULT_LAYOUT_PRESET_ID,
+} from "../../styles/layoutPresets";
 
 export function OverlayCanvas(): React.ReactElement {
   const {
@@ -21,6 +25,7 @@ export function OverlayCanvas(): React.ReactElement {
     project,
     currentTimeMs,
     lyricPresetId,
+    layoutPresetId,
     renderScale,
     saveTranscript,
   } = useEditor();
@@ -31,9 +36,11 @@ export function OverlayCanvas(): React.ReactElement {
   const baseH = (project as any)?.height || 1920;
   const isLandscape =
     (project as any)?.orientation === "landscape" || baseW > baseH;
-  const designW = isLandscape ? 1920 : 1080;
-  const designH = isLandscape ? 1080 : 1920;
-  const finalScale = (renderScale || 1) * (baseW / designW);
+
+  // Use actual video dimensions instead of hardcoded design dimensions
+  const designW = baseW;
+  const designH = baseH;
+  const finalScale = renderScale || 1;
 
   // Style helpers now shared with backend-like utils/style
 
@@ -88,12 +95,24 @@ export function OverlayCanvas(): React.ReactElement {
         const w = words[wi];
         const gi = acc + wi;
         if (currentTimeMs >= w.start && currentTimeMs < w.end) {
-          if (
-            !(
-              typeof (w as any).xPct === "number" &&
-              typeof (w as any).yPct === "number"
-            )
-          ) {
+          // Check if word has custom positioning
+          const hasCustomPositioning =
+            typeof (w as any).xPct === "number" &&
+            typeof (w as any).yPct === "number";
+
+          if (hasCustomPositioning) {
+            // For placed words, keep them in the layout as invisible placeholders
+            // This maintains the layout spacing while making them invisible
+            const placeholderWord = {
+              ...w,
+              style: { ...(w.style || {}), opacity: 0 },
+            };
+            console.log(
+              `Adding placeholder for "${w.text}" in layout (invisible but maintains spacing)`
+            );
+            active.push({ w: placeholderWord, gi });
+          } else {
+            // Word doesn't have custom positioning, include as normal
             active.push({ w, gi });
           }
         }
@@ -114,6 +133,18 @@ export function OverlayCanvas(): React.ReactElement {
       }
     }
     if (buf.length > 0) groups.push(buf);
+
+    console.log(
+      "Final groupedUnplacedWords:",
+      groups.map((group) =>
+        group.map((w) => ({
+          text: w.w.text,
+          gi: w.gi,
+          isTransparent: w.w.opacity === 0,
+        }))
+      )
+    );
+
     return groups.slice(-4);
   }, [transcript, currentTimeMs]);
 
@@ -148,7 +179,8 @@ export function OverlayCanvas(): React.ReactElement {
           if (!isDragging) return;
           setIsDragging(false);
           setDraggingIdx(null);
-          saveTranscript();
+          // Save the transcript after dragging is complete
+          setTimeout(() => saveTranscript(), 0);
         }}
         onPointerCancel={() => {
           setIsDragging(false);
@@ -182,6 +214,7 @@ export function OverlayCanvas(): React.ReactElement {
             }
             acc += words.length;
           }
+
           return placed.map(({ w, gi }, idx) => {
             const rotate =
               typeof w.rotationDeg === "number" ? w.rotationDeg : 0;
@@ -194,7 +227,7 @@ export function OverlayCanvas(): React.ReactElement {
             const hasCustomFontSize =
               typeof (w as any)?.style?.fontSizePx === "number";
             const textStyle = mergeWordStyle(
-              buildPresetTextStyle(preset, hasCustomFontSize ? 0 : 2),
+              buildPresetTextStyle(preset, baseH > baseW),
               (w as any).style
             );
             return (
@@ -223,16 +256,22 @@ export function OverlayCanvas(): React.ReactElement {
             );
           });
         })()}
-        {/* Default lyrics center overlay: group active unplaced words into lines */}
+        {/* Default lyrics overlay: group active unplaced words into lines using layout preset */}
         {groupedUnplacedWords.length > 0 && (
-          <CenterLines
+          <LyricLayout
             preset={preset}
+            layoutPreset={
+              LAYOUT_PRESETS[layoutPresetId] ||
+              LAYOUT_PRESETS[DEFAULT_LAYOUT_PRESET_ID]
+            }
             lines={groupedUnplacedWords as any}
-            onPointerDown={(gi) => {
+            currentTimeMs={currentTimeMs}
+            onPointerDown={(gi: number) => {
               setSelectedIndex(gi);
               setDraggingIdx(gi);
               setIsDragging(true);
             }}
+            isPortrait={baseH > baseW}
           />
         )}
       </div>

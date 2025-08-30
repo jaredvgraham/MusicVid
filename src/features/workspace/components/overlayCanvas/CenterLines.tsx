@@ -1,6 +1,6 @@
 import React from "react";
 import type { LyricPreset } from "../../styles/lyricPresets";
-import { buildPresetTextStyle } from "./utils/style";
+import { buildPresetTextStyle, mergeWordStyle } from "./utils/style";
 
 type WordRef = { w: any; gi: number };
 
@@ -8,10 +8,12 @@ export default function CenterLines({
   preset,
   lines,
   onPointerDown,
+  isPortrait,
 }: {
   preset: LyricPreset;
   lines: Array<Array<WordRef>>;
   onPointerDown: (gi: number) => void;
+  isPortrait?: boolean;
 }) {
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
@@ -25,14 +27,14 @@ export default function CenterLines({
               <span
                 key={`tok-${gi}`}
                 style={{
-                  ...buildPresetTextStyle(preset),
-                  color:
-                    (w as any)?.style?.color && !preset.gradientText
-                      ? (w as any).style.color
-                      : preset.gradientText
-                      ? "transparent"
-                      : preset.color ?? "#fff",
-                  marginRight: wi < lineRefs.length - 1 ? 30 : 0,
+                  ...mergeWordStyle(
+                    buildPresetTextStyle(preset, isPortrait),
+                    w.style
+                  ),
+                  // Force smaller font size and spacing for portrait mode
+                  fontSize: isPortrait ? "48px" : undefined,
+                  marginRight:
+                    wi < lineRefs.length - 1 ? (isPortrait ? 15 : 30) : 0,
                   cursor: "grab",
                 }}
                 onPointerDown={(e) => {

@@ -57,6 +57,7 @@ export interface ProjectDocument extends Document {
   song?: string;
   lyrics?: string;
   lyricPresetId?: string;
+  layoutPresetId?: string;
   callback_status?: number;
   createdAt: Date;
   updatedAt: Date;
@@ -79,7 +80,8 @@ const ProjectSchema = new Schema<ProjectDocument>(
     videoKey: { type: String },
     song: { type: String },
     lyrics: { type: String },
-    lyricPresetId: { type: String },
+    lyricPresetId: { type: String, default: "classic" },
+    layoutPresetId: { type: String, default: "centered-classic" },
     finalRender: { type: String },
     deleted: { type: Boolean, required: true, default: false },
   },

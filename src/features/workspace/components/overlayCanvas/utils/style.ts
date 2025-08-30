@@ -2,7 +2,7 @@ import type { LyricPreset } from "../../../styles/lyricPresets";
 
 export function buildPresetTextStyle(
   preset: LyricPreset,
-  fontSizeBump: number = 0
+  isPortrait: boolean = false
 ): React.CSSProperties {
   const style: React.CSSProperties = {
     color: (preset as any).gradientText
@@ -10,9 +10,7 @@ export function buildPresetTextStyle(
       : (preset as any).color ?? "#fff",
     fontWeight: ((preset as any).fontWeight as any) ?? 700,
     fontFamily: (preset as any).fontFamily ?? undefined,
-    fontSize: `${
-      (((preset as any).fontSizePx ?? 24) as number) + fontSizeBump
-    }px`,
+    fontSize: `${isPortrait ? 60 : 100}px`,
     letterSpacing: `${(preset as any).letterSpacingPx ?? 0}px`,
     textTransform: ((preset as any).textTransform as any) ?? "none",
     textAlign: ((preset as any).textAlign as any) ?? "center",
@@ -34,6 +32,9 @@ export function buildPresetTextStyle(
 export function mergeWordStyle(base: React.CSSProperties, override?: any) {
   if (!override) return base;
   const o = override || {};
+  console.log("o:", o);
+
+  console.log("o.opacity", o.opacity);
   const merged: React.CSSProperties = {
     ...base,
     color: o.gradientText ? "transparent" : o.color ?? base.color,
@@ -48,6 +49,7 @@ export function mergeWordStyle(base: React.CSSProperties, override?: any) {
     textTransform: (o.textTransform as any) ?? base.textTransform,
     textAlign: (o.textAlign as any) ?? base.textAlign,
     textShadow: o.textShadow ?? base.textShadow,
+
     WebkitBackgroundClip: o.gradientText ? "text" : base.WebkitBackgroundClip,
     backgroundClip: o.gradientText
       ? ("text" as any)
@@ -58,6 +60,7 @@ export function mergeWordStyle(base: React.CSSProperties, override?: any) {
     backgroundImage: o.gradientText
       ? `linear-gradient(90deg, ${o.gradientText.from}, ${o.gradientText.to})`
       : base.backgroundImage,
+    opacity: o.opacity === 0 ? 0 : base.opacity || 1,
   };
   // If a solid color override is provided and no word-level gradient, disable preset gradient props
   if (typeof o.color === "string" && !o.gradientText) {

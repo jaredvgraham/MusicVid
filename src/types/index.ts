@@ -48,6 +48,7 @@ export type Project = {
   transcript: Line[];
   textClips?: TextClip[];
   lyricPresetId: string;
+  layoutPresetId?: string; // Optional layout preset ID
 };
 
 export type TextClip = {

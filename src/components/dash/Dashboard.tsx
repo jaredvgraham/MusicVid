@@ -35,7 +35,9 @@ const Dashboard = (): React.ReactElement => {
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
   // Final renders state (supports either objects or plain URL strings)
-  const [finalRenders, setFinalRenders] = useState<Array<FinalRender | string>>([]);
+  const [finalRenders, setFinalRenders] = useState<Array<FinalRender | string>>(
+    []
+  );
   const [finalError, setFinalError] = useState<string | null>(null);
   const [isRefreshingFinal, setIsRefreshingFinal] = useState<boolean>(false);
 
@@ -56,7 +58,13 @@ const Dashboard = (): React.ReactElement => {
         setError(data.error.message);
         setProjects([]);
       } else {
-        setProjects(data.projects);
+        setProjects(
+          data.projects.sort(
+            (a: ClientProject, b: ClientProject) =>
+              new Date(b.timeCreated).getTime() -
+              new Date(a.timeCreated).getTime()
+          )
+        );
       }
     } catch (error: unknown) {
       setProjects([]);
@@ -311,7 +319,8 @@ const Dashboard = (): React.ReactElement => {
           <div>
             <h2 className="text-lg font-semibold text-white">Final renders</h2>
             <p className="text-sm text-neutral-400">
-              {finalRenders.length} {finalRenders.length === 1 ? "item" : "items"}
+              {finalRenders.length}{" "}
+              {finalRenders.length === 1 ? "item" : "items"}
             </p>
           </div>
           <button
@@ -329,7 +338,9 @@ const Dashboard = (): React.ReactElement => {
               strokeWidth="2"
               strokeLinecap="round"
               strokeLinejoin="round"
-              className={isRefreshingFinal ? "animate-spin opacity-80" : "opacity-80"}
+              className={
+                isRefreshingFinal ? "animate-spin opacity-80" : "opacity-80"
+              }
             >
               <polyline points="23 4 23 10 17 10" />
               <polyline points="1 20 1 14 7 14" />
@@ -356,9 +367,14 @@ const Dashboard = (): React.ReactElement => {
               const videoSrc =
                 typeof item === "string"
                   ? String(item)
-                  : (r.video && String(r.video)) || (r.url && String(r.url)) || "";
+                  : (r.video && String(r.video)) ||
+                    (r.url && String(r.url)) ||
+                    "";
               const when = (r?.createdAt ?? r?.timeCreated) as any;
-              const key = (r?._id as string) || (r?.id as string) || (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
+              const key =
+                (r?._id as string) ||
+                (r?.id as string) ||
+                (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
               const name = (r?.name as string) || "Final render";
               return (
                 <article
@@ -377,13 +393,17 @@ const Dashboard = (): React.ReactElement => {
                         preload="metadata"
                       />
                     ) : (
-                      <div className="grid h-full place-items-center text-neutral-400">No video</div>
+                      <div className="grid h-full place-items-center text-neutral-400">
+                        No video
+                      </div>
                     )}
                   </div>
                   <div className="mt-3 flex items-center justify-between">
                     <div className="text-sm text-white">
                       {name}
-                      <div className="text-xs text-neutral-400">{when ? formatDate(when) : ""}</div>
+                      <div className="text-xs text-neutral-400">
+                        {when ? formatDate(when) : ""}
+                      </div>
                     </div>
                     {videoSrc && (
                       <a

@@ -33,6 +33,9 @@ export function EditorProvider({
   const [lyricPresetId, setLyricPresetId] = useState<string>(
     (project as any)?.lyricPresetId || "classic"
   );
+  const [layoutPresetId, setLayoutPresetId] = useState<string>(
+    project?.layoutPresetId || "centered-classic"
+  );
   const [renderScale, setRenderScale] = useState<number>(1);
 
   // Refs
@@ -44,6 +47,13 @@ export function EditorProvider({
   useEffect(() => {
     transcriptRef.current = transcript;
   }, [transcript]);
+
+  // Sync layoutPresetId when project changes
+  useEffect(() => {
+    if (project?.layoutPresetId) {
+      setLayoutPresetId(project.layoutPresetId);
+    }
+  }, [project?.layoutPresetId]);
 
   // Actions
   const setCurrentTimeMs = useCallback((ms: number) => {
@@ -120,6 +130,26 @@ export function EditorProvider({
     [authFetch, project?.id]
   );
 
+  const saveLayoutPreset = useCallback(
+    async (presetId: string) => {
+      try {
+        if (!project?.id) return;
+        await authFetch(
+          "next",
+          `/api/workspace/${project.id}/edits/layout-preset`,
+          {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ presetId }),
+          }
+        );
+      } catch (e) {
+        console.error("Failed to save layout preset", e);
+      }
+    },
+    [authFetch, project?.id]
+  );
+
   // Context value
   const value = useMemo<EditorContextValue>(
     () => ({
@@ -128,6 +158,7 @@ export function EditorProvider({
       transcript,
       selectedIndex,
       lyricPresetId,
+      layoutPresetId,
       currentTimeMs,
       playing,
       pixelsPerSecond,
@@ -138,6 +169,7 @@ export function EditorProvider({
       setTranscript,
       setSelectedIndex,
       setLyricPresetId,
+      setLayoutPresetId,
       setCurrentTimeMs,
       seekToMs,
       setPlaying,
@@ -152,12 +184,14 @@ export function EditorProvider({
       // Persistence
       saveTranscript,
       saveLyricPreset,
+      saveLayoutPreset,
     }),
     [
       project,
       transcript,
       selectedIndex,
       lyricPresetId,
+      layoutPresetId,
       currentTimeMs,
       playing,
       pixelsPerSecond,
@@ -169,6 +203,7 @@ export function EditorProvider({
       togglePlay,
       saveTranscript,
       saveLyricPreset,
+      saveLayoutPreset,
     ]
   );
 

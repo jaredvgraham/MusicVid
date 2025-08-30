@@ -34,19 +34,20 @@ export function VideoPanel(): React.ReactElement {
       className={`relative mx-auto w-full ${
         (project as any)?.width > (project as any)?.height
           ? "max-w-[800px]"
-          : "max-h-[400px]"
-      } rounded border border-white/10 bg-black ${
-        (project as any)?.orientation === "landscape"
-          ? "aspect-[16/9]"
-          : "aspect-[9/16]"
-      }`}
+          : "max-w-[400px]"
+      } rounded border border-white/10 bg-black`}
       ref={(el) => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const scale = rect.width / baseW;
         setRenderScale(scale);
       }}
-      style={{ aspectRatio: `${baseW} / ${baseH}` } as any}
+      style={{
+        aspectRatio: `${baseW} / ${baseH}`,
+        // Force the container to respect the aspect ratio
+        minHeight: 0,
+        minWidth: 0,
+      }}
     >
       <video
         ref={videoRef}
