@@ -427,10 +427,26 @@ export default function PricingPage(): React.ReactElement {
           </div>
 
           <div className="border-t border-white/10 pt-8">
-            <p className="text-white/50">
-              © {new Date().getFullYear()} Sonexa — Build lyric videos at the
-              speed of sound.
-            </p>
+            <div className="flex flex-col md:flex-row justify-between items-center gap-4">
+              <p className="text-white/50">
+                © {new Date().getFullYear()} Sonexa — Build lyric videos at the
+                speed of sound.
+              </p>
+              <div className="flex items-center gap-6 text-sm">
+                <a
+                  href="/privacy-policy"
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  Privacy Policy
+                </a>
+                <a
+                  href="/terms-of-service"
+                  className="text-white/50 hover:text-white transition-colors"
+                >
+                  Terms of Service
+                </a>
+              </div>
+            </div>
           </div>
         </div>
       </footer>
