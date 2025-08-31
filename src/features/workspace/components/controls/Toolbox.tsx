@@ -17,6 +17,7 @@ export function Toolbox(): React.ReactElement {
     transcript,
     setTranscript,
     setSelectedIndex,
+    selectedIndex,
     currentTimeMs,
     saveTranscript,
     project,
@@ -36,6 +37,7 @@ export function Toolbox(): React.ReactElement {
   );
   const [customFontSize, setCustomFontSize] = useState<number | null>(null);
   const [customFontWeight, setCustomFontWeight] = useState<number | null>(null);
+  const [customFontColor, setCustomFontColor] = useState<string | null>(null);
 
   // Determine if video is portrait mode
   const isPortrait = (project as any)?.height > (project as any)?.width;
@@ -108,6 +110,53 @@ export function Toolbox(): React.ReactElement {
     return typeof presetWeight === "number" ? presetWeight : 700;
   };
 
+  const getCurrentFontColor = (): string => {
+    const colorCounts = new Map<string, number>();
+
+    // Count occurrences of each font color
+    for (const line of transcript) {
+      for (const word of line.words) {
+        if ((word as any)?.style?.color) {
+          const color = (word as any).style.color;
+          if (typeof color === "string") {
+            colorCounts.set(color, (colorCounts.get(color) || 0) + 1);
+          }
+        }
+      }
+    }
+
+    // Find the most common font color
+    if (colorCounts.size > 0) {
+      let mostCommonColor = "";
+      let maxCount = 0;
+
+      for (const [color, count] of colorCounts) {
+        if (count > maxCount) {
+          maxCount = count;
+          mostCommonColor = color;
+        }
+      }
+
+      return mostCommonColor;
+    }
+
+    // Return preset default
+    const presetColor = LYRIC_PRESETS[presetId]?.color;
+    return typeof presetColor === "string" ? presetColor : "#ffffff";
+  };
+
+  const getCustomColorCount = (): number => {
+    let count = 0;
+    for (const line of transcript) {
+      for (const word of line.words) {
+        if ((word as any)?.style?.color) {
+          count++;
+        }
+      }
+    }
+    return count;
+  };
+
   // Sync local state with context state
   useEffect(() => {
     setPresetId(lyricPresetId || DEFAULT_LYRIC_PRESET_ID);
@@ -121,6 +170,7 @@ export function Toolbox(): React.ReactElement {
   useEffect(() => {
     setCustomFontSize(getCurrentFontSize());
     setCustomFontWeight(getCurrentFontWeight());
+    setCustomFontColor(getCurrentFontColor());
   }, [transcript, presetId, project]);
 
   async function addTextClip() {
@@ -177,6 +227,108 @@ export function Toolbox(): React.ReactElement {
     await saveTranscript(updatedTranscript);
   }
 
+  async function applyCustomFontColor() {
+    if (customFontColor === null) return;
+
+    // Apply custom font color to all words in the transcript
+    const updatedTranscript = transcript.map((line) => ({
+      ...line,
+      words: line.words.map((word) => ({
+        ...word,
+        style: {
+          ...word.style,
+          color: customFontColor,
+        },
+      })),
+    }));
+
+    setTranscript(updatedTranscript);
+    await saveTranscript(updatedTranscript);
+  }
+
+  async function clearAllCustomColors() {
+    // Remove all custom colors from all words to use preset defaults
+    const updatedTranscript = transcript.map((line) => ({
+      ...line,
+      words: line.words.map((word) => ({
+        ...word,
+        style: {
+          ...word.style,
+          color: undefined, // Remove custom color to use preset
+        },
+      })),
+    }));
+
+    setTranscript(updatedTranscript);
+    await saveTranscript(updatedTranscript);
+    setCustomFontColor(null);
+  }
+
+  async function applyColorToSelectedWords() {
+    if (customFontColor === null || selectedIndex === null) return;
+
+    // Convert global selectedIndex to line and word indices
+    let acc = 0;
+    for (let li = 0; li < transcript.length; li++) {
+      const words = transcript[li]?.words ?? [];
+      if (selectedIndex < acc + words.length) {
+        // Found the selected word
+        const updatedTranscript = transcript.map((line, lineIndex) => ({
+          ...line,
+          words: line.words.map((word, wordIndex) => {
+            if (lineIndex === li && wordIndex === selectedIndex - acc) {
+              return {
+                ...word,
+                style: {
+                  ...word.style,
+                  color: customFontColor,
+                },
+              };
+            }
+            return word;
+          }),
+        }));
+
+        setTranscript(updatedTranscript);
+        await saveTranscript(updatedTranscript);
+        break;
+      }
+      acc += words.length;
+    }
+  }
+
+  async function applyColorToTimeRange() {
+    if (customFontColor === null) return;
+
+    // Apply color to words that are currently visible (within a time window)
+    const timeWindow = 5000; // 5 seconds
+    const updatedTranscript = transcript.map((line) => ({
+      ...line,
+      words: line.words.map((word) => {
+        // Check if word is currently visible or will be visible soon
+        const wordStart = word.start;
+        const wordEnd = word.end;
+        const isVisible =
+          wordStart <= currentTimeMs + timeWindow &&
+          wordEnd >= currentTimeMs - timeWindow;
+
+        if (isVisible) {
+          return {
+            ...word,
+            style: {
+              ...word.style,
+              color: customFontColor,
+            },
+          };
+        }
+        return word;
+      }),
+    }));
+
+    setTranscript(updatedTranscript);
+    await saveTranscript(updatedTranscript);
+  }
+
   return (
     <div className="rounded border border-white/10 bg-neutral-950/70 p-3 text-sm">
       <div className="font-medium text-white/80">Tools</div>
@@ -192,7 +344,7 @@ export function Toolbox(): React.ReactElement {
                 setLyricPresetId(chosen);
                 await saveLyricPreset(chosen);
               }}
-              className="rounded bg-neutral-900 px-2 py-1 text-white outline-none"
+              className="rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
             >
               {Object.values(LYRIC_PRESETS).map((p) => (
                 <option key={p.id} value={p.id}>
@@ -213,7 +365,7 @@ export function Toolbox(): React.ReactElement {
                 setLayoutPresetId(chosen);
                 await saveLayoutPreset(chosen);
               }}
-              className="rounded bg-neutral-900 px-2 py-1 text-white outline-none"
+              className="rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
             >
               {Object.values(LAYOUT_PRESETS).map((p) => (
                 <option key={p.id} value={p.id}>
@@ -230,7 +382,7 @@ export function Toolbox(): React.ReactElement {
               type="number"
               min="12"
               max="200"
-              className="flex-1 rounded bg-neutral-900 px-2 py-1 text-white outline-none"
+              className="flex-1 rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none placeholder:text-white/40"
               placeholder={`${getCurrentFontSize()}px`}
               value={customFontSize || ""}
               onChange={(e) => {
@@ -240,7 +392,7 @@ export function Toolbox(): React.ReactElement {
             />
             <button
               onClick={applyCustomFontSize}
-              className="rounded bg-blue-600 px-3 py-1.5 text-white"
+              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
             >
               Apply
             </button>
@@ -255,7 +407,7 @@ export function Toolbox(): React.ReactElement {
                 const value = e.target.value;
                 setCustomFontWeight(value ? parseInt(value) : null);
               }}
-              className="flex-1 rounded bg-neutral-900 px-2 py-1 text-white outline-none"
+              className="flex-1 rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
             >
               <option value="">Default ({getCurrentFontWeight()})</option>
               <option value="100">Thin (100)</option>
@@ -269,26 +421,156 @@ export function Toolbox(): React.ReactElement {
             </select>
             <button
               onClick={applyCustomFontWeight}
-              className="rounded bg-blue-600 px-3 py-1.5 text-white"
+              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
             >
               Apply
             </button>
           </div>
         </div>
         <div>
-          <label className="mb-1 block text-white/60">Add text</label>
-          <div className="flex gap-2">
-            <input
-              className="flex-1 rounded bg-neutral-900 px-2 py-1 outline-none"
-              placeholder="Enter text"
-              value={text}
-              onChange={(e) => setText(e.target.value)}
-            />
+          <div className="flex items-center justify-between mb-3">
+            <label className="text-white/80 font-medium">Font Color</label>
+            <div className="flex items-center gap-2 text-xs text-white/40">
+              {getCustomColorCount() > 0 && (
+                <span className="px-2 py-1 bg-white/5 rounded text-xs text-white/60">
+                  {getCustomColorCount()} custom
+                </span>
+              )}
+              {selectedIndex !== null && (
+                <span className="px-2 py-1 bg-white/5 rounded text-xs text-white/60">
+                  {(() => {
+                    let acc = 0;
+                    for (let li = 0; li < transcript.length; li++) {
+                      const words = transcript[li]?.words ?? [];
+                      if (selectedIndex < acc + words.length) {
+                        const word = words[selectedIndex - acc];
+                        return word?.style?.color || "preset";
+                      }
+                      acc += words.length;
+                    }
+                    return "preset";
+                  })()}
+                </span>
+              )}
+            </div>
+          </div>
+
+          {/* Color Palette */}
+          <div className="grid grid-cols-5 gap-2 mb-4">
+            {[
+              "#ffffff",
+              "#ff6b6b",
+              "#4ecdc4",
+              "#45b7d1",
+              "#96ceb4",
+              "#feca57",
+              "#ff9ff3",
+              "#54a0ff",
+              "#5f27cd",
+              "#00d2d3",
+            ].map((color) => (
+              <button
+                key={color}
+                onClick={() => {
+                  setCustomFontColor(color);
+                  const updatedTranscript = transcript.map((line) => ({
+                    ...line,
+                    words: line.words.map((word) => ({
+                      ...word,
+                      style: { ...word.style, color: color },
+                    })),
+                  }));
+                  setTranscript(updatedTranscript);
+                  saveTranscript(updatedTranscript);
+                }}
+                className="group relative h-8 w-full rounded border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-105"
+                style={{ backgroundColor: color }}
+                title={color}
+              >
+                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded" />
+                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+                  <svg
+                    className="w-3 h-3 text-white"
+                    fill="currentColor"
+                    viewBox="0 0 20 20"
+                  >
+                    <path
+                      fillRule="evenodd"
+                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </div>
+              </button>
+            ))}
+          </div>
+
+          {/* Custom Color Input */}
+          <div className="flex gap-3 mb-4">
+            <div className="flex-1">
+              <label className="block text-xs text-white/60 mb-2">
+                Custom Color
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="color"
+                  className="h-9 w-16 rounded border border-white/10 bg-black/40 cursor-pointer hover:border-white/20 transition-colors"
+                  value={customFontColor || getCurrentFontColor()}
+                  onChange={(e) => setCustomFontColor(e.target.value)}
+                />
+                <input
+                  type="text"
+                  className="flex-1 h-9 rounded border border-white/10 bg-black/40 px-2 text-white outline-none font-mono text-sm placeholder:text-white/40 transition-colors"
+                  placeholder="#ffffff"
+                  value={customFontColor || ""}
+                  onChange={(e) => setCustomFontColor(e.target.value)}
+                />
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="grid grid-cols-2 gap-2">
             <button
-              onClick={addTextClip}
-              className="rounded bg-emerald-600 px-3 py-1.5 text-white"
+              onClick={applyCustomFontColor}
+              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
             >
-              Add
+              Apply to All Words
+            </button>
+            {selectedIndex !== null && (
+              <button
+                onClick={applyColorToSelectedWords}
+                className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
+              >
+                Apply to Selected
+              </button>
+            )}
+          </div>
+
+          {/* Utility Buttons */}
+          <div className="flex gap-2 mt-3">
+            <button
+              onClick={() => {
+                setCustomFontColor(null);
+                const updatedTranscript = transcript.map((line) => ({
+                  ...line,
+                  words: line.words.map((word) => ({
+                    ...word,
+                    style: { ...word.style, color: undefined },
+                  })),
+                }));
+                setTranscript(updatedTranscript);
+                saveTranscript(updatedTranscript);
+              }}
+              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
+            >
+              Reset to Preset
+            </button>
+            <button
+              onClick={clearAllCustomColors}
+              className="rounded border border-red-500/20 bg-red-500/10 px-3 py-2 text-white hover:bg-red-500/20 transition-colors"
+            >
+              Clear All Colors
             </button>
           </div>
         </div>
