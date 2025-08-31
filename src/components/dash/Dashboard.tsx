@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Trash2, MoreHorizontal } from "lucide-react";
 
 type ClientProject = {
   _id: string;
@@ -14,14 +14,7 @@ type ClientProject = {
   video?: string;
 };
 
-type FinalRender = {
-  _id: string;
-  name?: string;
-  video?: string; // preferred key
-  url?: string; // fallback key if API uses 'url'
-  createdAt?: string | number | Date;
-  timeCreated?: string | number | Date; // fallback if API mirrors projects
-};
+//
 
 const Dashboard = (): React.ReactElement => {
   const [loading, setLoading] = useState<boolean>(true);
@@ -34,12 +27,13 @@ const Dashboard = (): React.ReactElement => {
   const [deleting, setDeleting] = useState<boolean>(false);
   const [deleteError, setDeleteError] = useState<string | null>(null);
 
-  // Final renders state (supports either objects or plain URL strings)
-  const [finalRenders, setFinalRenders] = useState<Array<FinalRender | string>>(
-    []
-  );
-  const [finalError, setFinalError] = useState<string | null>(null);
-  const [isRefreshingFinal, setIsRefreshingFinal] = useState<boolean>(false);
+  //
+
+  // Per-project final renders modal state
+  const [finalsProject, setFinalsProject] = useState<ClientProject | null>(null);
+  const [finalsItems, setFinalsItems] = useState<any[]>([]);
+  const [finalsLoading, setFinalsLoading] = useState<boolean>(false);
+  const [finalsError, setFinalsError] = useState<string | null>(null);
 
   const router = useRouter();
   const loadProjects = useCallback(async () => {
@@ -72,39 +66,16 @@ const Dashboard = (): React.ReactElement => {
     }
   }, []);
 
-  const loadFinalRenders = useCallback(async () => {
-    try {
-      setFinalError(null);
-      const response = await fetch("/api/dashboard/final-renders");
-      if (!response.ok) {
-        const data = await response.json().catch(() => ({}));
-        const message =
-          (data as any)?.error?.message ?? `Request failed: ${response.status}`;
-        throw new Error(message);
-      }
-      const data = await response.json();
-      if ((data as any).error) {
-        setFinalError((data as any).error.message);
-        setFinalRenders([]);
-      } else {
-        // Accept either { urls: string[] } | { renders: [...] } | direct array
-        const renders = (data as any).urls ?? (data as any).urls ?? data;
-        setFinalRenders(Array.isArray(renders) ? renders : []);
-      }
-    } catch (error: unknown) {
-      setFinalRenders([]);
-      setFinalError(error instanceof Error ? error.message : String(error));
-    }
-  }, []);
+  //
 
   useEffect(() => {
     const init = async () => {
       setLoading(true);
-      await Promise.all([loadProjects(), loadFinalRenders()]);
+      await loadProjects();
       setLoading(false);
     };
     init();
-  }, [loadProjects, loadFinalRenders]);
+  }, [loadProjects]);
 
   const handleRefresh = async () => {
     setIsRefreshing(true);
@@ -112,10 +83,34 @@ const Dashboard = (): React.ReactElement => {
     setIsRefreshing(false);
   };
 
-  const handleRefreshFinal = async () => {
-    setIsRefreshingFinal(true);
-    await loadFinalRenders();
-    setIsRefreshingFinal(false);
+  //
+
+  const openProjectFinals = async (project: ClientProject) => {
+    setFinalsProject(project);
+    setFinalsItems([]);
+    setFinalsError(null);
+    setFinalsLoading(true);
+    try {
+      const res = await fetch(`/api/dashboard/final-renders/${project._id}`);
+      if (!res.ok) {
+        const data = await res.json().catch(() => ({} as any));
+        throw new Error((data as any)?.error || `Request failed: ${res.status}`);
+      }
+      const data = await res.json();
+      const items = (data as any).finalRenders ?? data;
+      setFinalsItems(Array.isArray(items) ? items : []);
+    } catch (e: any) {
+      setFinalsError(e?.message || "Failed to load final renders");
+    } finally {
+      setFinalsLoading(false);
+    }
+  };
+
+  const closeProjectFinals = () => {
+    setFinalsProject(null);
+    setFinalsItems([]);
+    setFinalsError(null);
+    setFinalsLoading(false);
   };
 
   const requestDelete = (p: ClientProject) => {
@@ -220,16 +215,25 @@ const Dashboard = (): React.ReactElement => {
             return (
               <article
                 key={project._id}
-                className="group relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4 transition hover:border-white/20 hover:bg-neutral-900/60"
+                className="group relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4 pt-12 transition hover:border-white/20 hover:bg-neutral-900/60"
               >
                 <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+                <div className="absolute right-3 top-3">
+                  <button
+                    type="button"
+                    className="inline-flex items-center rounded-md border border-white/10 bg-white/5 p-1.5 text-white/80 transition hover:bg-white/10 hover:text-white"
+                    onClick={() => openProjectFinals(project)}
+                    aria-label="Open final renders"
+                  >
+                    <MoreHorizontal className="h-4 w-4" />
+                  </button>
+                </div>
                 {hasVideo && (
                   <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
                     <video
                       key={`${project._id}-${project.video}`}
                       src={project.video}
                       className="h-full w-full"
-                      controls
                       playsInline
                       preload="metadata"
                     />
@@ -281,24 +285,6 @@ const Dashboard = (): React.ReactElement => {
                   <div className="flex items-center gap-2">
                     <button
                       type="button"
-                      className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
-                    >
-                      <svg
-                        width="14"
-                        height="14"
-                        viewBox="0 0 24 24"
-                        fill="none"
-                        stroke="currentColor"
-                        strokeWidth="2"
-                        strokeLinecap="round"
-                        strokeLinejoin="round"
-                      >
-                        <path d="M12 5v14M5 12h14" />
-                      </svg>
-                      Export
-                    </button>
-                    <button
-                      type="button"
                       className="inline-flex items-center gap-1.5 rounded-md border border-red-500/30 bg-red-500/10 px-2.5 py-1.5 text-xs font-medium text-red-200 transition hover:bg-red-500/20"
                       onClick={() => requestDelete(project)}
                     >
@@ -312,116 +298,6 @@ const Dashboard = (): React.ReactElement => {
           })}
         </div>
       )}
-
-      {/* Final Renders Section */}
-      <div className="mt-10 border-t border-white/10 pt-8">
-        <div className="mb-4 flex items-end justify-between">
-          <div>
-            <h2 className="text-lg font-semibold text-white">Final renders</h2>
-            <p className="text-sm text-neutral-400">
-              {finalRenders.length}{" "}
-              {finalRenders.length === 1 ? "item" : "items"}
-            </p>
-          </div>
-          <button
-            onClick={handleRefreshFinal}
-            type="button"
-            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-sm font-medium text-white/80 transition hover:bg-white/10 hover:text-white cursor-pointer"
-            disabled={isRefreshingFinal}
-          >
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              strokeWidth="2"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              className={
-                isRefreshingFinal ? "animate-spin opacity-80" : "opacity-80"
-              }
-            >
-              <polyline points="23 4 23 10 17 10" />
-              <polyline points="1 20 1 14 7 14" />
-              <path d="M3.51 9a9 9 0 0114.13-3.36L23 10M1 14l5.36 4.36A9 9 0 0020.49 15" />
-            </svg>
-            Refresh
-          </button>
-        </div>
-
-        {finalError && (
-          <div className="rounded-lg border border-red-500/20 bg-red-950/30 p-4 text-red-200">
-            Error: {finalError}
-          </div>
-        )}
-
-        {finalRenders.length === 0 && !finalError ? (
-          <div className="rounded-lg border border-white/10 bg-neutral-900/40 p-6 text-sm text-neutral-300">
-            No final renders yet.
-          </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-            {finalRenders.map((item, idx) => {
-              const r: any = item as any;
-              const videoSrc =
-                typeof item === "string"
-                  ? String(item)
-                  : (r.video && String(r.video)) ||
-                    (r.url && String(r.url)) ||
-                    "";
-              const when = (r?.createdAt ?? r?.timeCreated) as any;
-              const key =
-                (r?._id as string) ||
-                (r?.id as string) ||
-                (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
-              const name = (r?.name as string) || "Final render";
-              return (
-                <article
-                  key={key}
-                  className="relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4"
-                >
-                  <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
-                  <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
-                    {videoSrc ? (
-                      <video
-                        key={`video-${key}`}
-                        src={videoSrc}
-                        className="h-full w-full"
-                        controls
-                        playsInline
-                        preload="metadata"
-                      />
-                    ) : (
-                      <div className="grid h-full place-items-center text-neutral-400">
-                        No video
-                      </div>
-                    )}
-                  </div>
-                  <div className="mt-3 flex items-center justify-between">
-                    <div className="text-sm text-white">
-                      {name}
-                      <div className="text-xs text-neutral-400">
-                        {when ? formatDate(when) : ""}
-                      </div>
-                    </div>
-                    {videoSrc && (
-                      <a
-                        className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
-                        href={videoSrc}
-                        target="_blank"
-                        rel="noreferrer"
-                      >
-                        Open
-                      </a>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </div>
 
       {deleteTarget && (
         <div
@@ -482,6 +358,114 @@ const Dashboard = (): React.ReactElement => {
                   {deleting ? "Deleting…" : "Confirm delete"}
                 </button>
               </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {finalsProject && (
+        <div
+          className="fixed inset-0 z-50 flex items-center justify-center p-4"
+          role="dialog"
+          aria-modal="true"
+        >
+          <div
+            className="absolute inset-0 bg-black/70 backdrop-blur-sm"
+            onClick={closeProjectFinals}
+          />
+          <div className="relative z-10 w-full max-w-3xl overflow-hidden rounded-2xl border border-white/10 bg-neutral-900 shadow-2xl ring-1 ring-indigo-500/30">
+            <div className="h-1 w-full bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+            <div className="p-5 text-white">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h3 className="text-lg font-semibold">Final renders</h3>
+                  <p className="mt-1 text-sm text-white/70">
+                    {finalsProject.name ?? "Untitled"}
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  className="rounded-md border border-white/10 bg-white/5 px-3 py-1.5 text-xs text-white/80 hover:bg-white/10"
+                  onClick={closeProjectFinals}
+                >
+                  Close
+                </button>
+              </div>
+
+              {finalsLoading && (
+                <div className="mt-4 rounded-lg border border-white/10 bg-neutral-900/40 p-4 text-sm text-neutral-300">
+                  Loading…
+                </div>
+              )}
+              {finalsError && (
+                <div className="mt-4 rounded-lg border border-red-500/20 bg-red-950/30 p-3 text-red-200">
+                  Error: {finalsError}
+                </div>
+              )}
+
+              {!finalsLoading && !finalsError && finalsItems.length === 0 && (
+                <div className="mt-4 rounded-lg border border-white/10 bg-neutral-900/40 p-4 text-sm text-neutral-300">
+                  No final renders for this project yet.
+                </div>
+              )}
+
+              {!finalsLoading && finalsItems.length > 0 && (
+                <div className="mt-5 grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  {finalsItems.map((it, idx) => {
+                    const r: any = it as any;
+                    const videoSrc =
+                      typeof it === "string"
+                        ? String(it)
+                        : (r.renderUrl && String(r.renderUrl)) ||
+                          (r.video && String(r.video)) ||
+                          (r.url && String(r.url)) ||
+                          "";
+                    const when = (r?.createdAt ?? r?.timeCreated) as any;
+                    const key = (r?._id as string) || (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
+                    return (
+                      <article
+                        key={key}
+                        className="relative overflow-hidden rounded-xl border border-white/10 bg-neutral-900/50 p-4"
+                      >
+                        <div className="pointer-events-none absolute inset-x-0 top-0 h-1 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-indigo-600" />
+                        <div className="mt-3 aspect-video w-full overflow-hidden rounded-md bg-black">
+                          {videoSrc ? (
+                            <video
+                              key={`video-${key}`}
+                              src={videoSrc}
+                              className="h-full w-full"
+                              controls
+                              playsInline
+                              preload="metadata"
+                            />
+                          ) : (
+                            <div className="grid h-full place-items-center text-neutral-400">
+                              No video
+                            </div>
+                          )}
+                        </div>
+                        <div className="mt-3 flex items-center justify-between">
+                          <div className="text-sm text-white">
+                            <div className="text-xs text-neutral-400">
+                              {when ? formatDate(when) : ""}
+                            </div>
+                          </div>
+                          {videoSrc && (
+                            <a
+                              className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
+                              href={videoSrc}
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              Open
+                            </a>
+                          )}
+                        </div>
+                      </article>
+                    );
+                  })}
+                </div>
+              )}
             </div>
           </div>
         </div>
