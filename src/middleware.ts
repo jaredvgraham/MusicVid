@@ -28,6 +28,7 @@ const isPublicRoute = createRouteMatcher([
   "/api/webhooks/clerk",
   "/api/webhooks/stripe",
   "/api/transcribe",
+  "/logo-black.png",
 ]);
 
 export default clerkMiddleware(async (auth, req) => {
