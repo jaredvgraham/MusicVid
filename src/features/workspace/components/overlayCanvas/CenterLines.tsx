@@ -31,10 +31,10 @@ export default function CenterLines({
                     buildPresetTextStyle(preset, isPortrait),
                     w.style
                   ),
-                  // Force smaller font size and spacing for portrait mode
-                  fontSize: isPortrait ? "48px" : undefined,
+                  // Scale font size appropriately for each mode
+                  fontSize: isPortrait ? "48px" : "100px",
                   marginRight:
-                    wi < lineRefs.length - 1 ? (isPortrait ? 15 : 30) : 0,
+                    wi < lineRefs.length - 1 ? (isPortrait ? 15 : 40) : 0,
                   cursor: "grab",
                 }}
                 onPointerDown={(e) => {

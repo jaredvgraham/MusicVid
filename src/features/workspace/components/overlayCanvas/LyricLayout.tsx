@@ -102,7 +102,7 @@ const GridLayout: React.FC<{
         style={{
           position: "absolute",
           top: "20%",
-          left: isPortrait ? "15%" : "30%",
+          left: isPortrait ? "20%" : "30%",
           right: isPortrait ? "15%" : "10%",
           gap: isPortrait ? "20px" : "30px",
           maxWidth: isPortrait ? "70%" : "50%",
@@ -119,10 +119,14 @@ const GridLayout: React.FC<{
             }}
           >
             <span
-              style={mergeWordStyle(
-                buildPresetTextStyle(preset, isPortrait),
-                word.w.style
-              )}
+              style={{
+                ...mergeWordStyle(
+                  buildPresetTextStyle(preset, isPortrait),
+                  word.w.style
+                ),
+                // Scale font size appropriately for each mode
+                fontSize: isPortrait ? "60px" : "100px",
+              }}
             >
               {word.w.text}
             </span>
@@ -147,9 +151,9 @@ const KaraokeLayout: React.FC<{
   const allWords = lines.flat();
 
   // Calculate how many words can fit in the available width
-  const availableWidth = isPortrait ? 80 : 80; // Same width but more conservative calculation
-  const wordSpacing = isPortrait ? 2 : 8; // Very small spacing for portrait
-  const estimatedWordWidth = isPortrait ? 8 : 10; // Much smaller word width for portrait
+  const availableWidth = isPortrait ? 80 : 90; // More width for landscape
+  const wordSpacing = isPortrait ? 2 : 12; // Larger spacing for landscape
+  const estimatedWordWidth = isPortrait ? 8 : 15; // Larger word width for landscape
 
   // Calculate how many words can fit
   let wordsThatFit = 0;
@@ -223,8 +227,8 @@ const KaraokeLayout: React.FC<{
                 buildPresetTextStyle(preset, isPortrait),
                 w.style
               ),
-              // Force smaller font size for karaoke in portrait mode to prevent overflow
-              fontSize: isPortrait ? "48px" : undefined,
+              // Scale font size appropriately for each mode
+              fontSize: isPortrait ? "48px" : "100px",
             }}
             onPointerDown={(e) => {
               e.preventDefault();
@@ -258,8 +262,9 @@ const WaveLayout: React.FC<{
           left: "50%",
           top: "50%",
           transform: "translate(-50%, -50%)",
-          maxWidth: "80%", // Prevent overflow
+          maxWidth: isPortrait ? "80%" : "90%", // More width for landscape
           flexWrap: "wrap", // Allow wrapping to new lines
+          gap: isPortrait ? "24px" : "48px", // Larger gap for landscape
         }}
       >
         {words.map(({ w, gi }, idx) => {
@@ -277,6 +282,8 @@ const WaveLayout: React.FC<{
                   buildPresetTextStyle(preset, isPortrait),
                   w.style
                 ),
+                // Scale font size appropriately for each mode
+                fontSize: isPortrait ? "48px" : "100px",
                 transform: `translateY(${waveOffset}px)`,
               }}
               onPointerDown={(e) => {
@@ -289,6 +296,65 @@ const WaveLayout: React.FC<{
             </span>
           );
         })}
+      </div>
+    </div>
+  );
+};
+
+const ScrollingLayout: React.FC<{
+  preset: LyricPreset;
+  lines: Array<Array<WordRef>>;
+  onPointerDown: (gi: number) => void;
+  config: any;
+  isPortrait: boolean;
+}> = ({ preset, lines, onPointerDown, config, isPortrait }) => {
+  const words = lines.flat();
+  const maxLines = config?.maxLines || 3;
+
+  return (
+    <div className="absolute inset-0 select-none">
+      <div
+        className="flex flex-col items-center justify-center gap-4"
+        style={{
+          position: "absolute",
+          left: "50%",
+          top: "50%",
+          transform: "translate(-50%, -50%)",
+          maxWidth: isPortrait ? "90%" : "95%", // Use most of the width
+          gap: isPortrait ? "16px" : "32px", // Larger gap for landscape
+        }}
+      >
+        {lines.slice(0, maxLines).map((lineRefs, lineIdx) => (
+          <div
+            key={`scrolling-line-${lineIdx}`}
+            className="flex items-center justify-center gap-3"
+            style={{
+              gap: isPortrait ? "12px" : "24px", // Larger word spacing for landscape
+            }}
+          >
+            {lineRefs.map(({ w, gi }) => (
+              <span
+                key={`scrolling-${gi}`}
+                className="cursor-grab whitespace-nowrap"
+                style={{
+                  ...mergeWordStyle(
+                    buildPresetTextStyle(preset, isPortrait),
+                    w.style
+                  ),
+                  // Scale font size appropriately for each mode
+                  fontSize: isPortrait ? "48px" : "100px",
+                }}
+                onPointerDown={(e) => {
+                  e.preventDefault();
+                  e.stopPropagation();
+                  onPointerDown(gi);
+                }}
+              >
+                {w.text}
+              </span>
+            ))}
+          </div>
+        ))}
       </div>
     </div>
   );
@@ -333,6 +399,17 @@ export function LyricLayout({
           lines={lines}
           onPointerDown={onPointerDown}
           config={layoutPreset.config.wave}
+          isPortrait={isPortrait}
+        />
+      );
+
+    case "scrolling":
+      return (
+        <ScrollingLayout
+          preset={preset}
+          lines={lines}
+          onPointerDown={onPointerDown}
+          config={layoutPreset.config.scrolling}
           isPortrait={isPortrait}
         />
       );

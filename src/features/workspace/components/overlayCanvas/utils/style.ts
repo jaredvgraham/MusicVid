@@ -32,9 +32,7 @@ export function buildPresetTextStyle(
 export function mergeWordStyle(base: React.CSSProperties, override?: any) {
   if (!override) return base;
   const o = override || {};
-  console.log("o:", o);
 
-  console.log("o.opacity", o.opacity);
   const merged: React.CSSProperties = {
     ...base,
     color: o.gradientText ? "transparent" : o.color ?? base.color,
