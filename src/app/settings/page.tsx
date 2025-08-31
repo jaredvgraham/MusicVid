@@ -248,8 +248,8 @@ const SettingsPage = () => {
 
               <p className="text-white/70 mb-6">
                 {plan === "none"
-                  ? "You&apos;re currently on the Free plan with limited features."
-                  : `You&apos;re subscribed to the ${prettyPlan} plan with premium features.`}
+                  ? "You're currently on the Free plan with limited features."
+                  : `You're subscribed to the ${prettyPlan} plan with premium features.`}
               </p>
 
               <div className="space-y-3">
