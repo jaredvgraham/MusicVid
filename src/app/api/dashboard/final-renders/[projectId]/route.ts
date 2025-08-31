@@ -7,14 +7,14 @@ import { getObjectUrl as getS3ObjectUrl } from "@/backend/lib/s3";
 
 export async function GET(
   req: NextRequest,
-  { params }: { params: { projectId: string } }
+  context: { params: Promise<{ projectId: string }> }
 ) {
   const { userId } = await auth();
   if (!userId) {
     console.error("Unauthorized");
     return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
   }
-  const { projectId } = params || ({} as any);
+  const { projectId } = await context.params;
   if (!projectId) {
     console.error("Missing projectId");
     return NextResponse.json({ error: "Missing projectId" }, { status: 400 });
