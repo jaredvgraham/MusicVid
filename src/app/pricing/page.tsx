@@ -10,11 +10,11 @@ import { faqPageLd, howToLd, absoluteUrl } from "@/lib/seo";
 import { Check, Star, Zap, Crown, Sparkles } from "lucide-react";
 
 type Plan = {
-  name: "Basic" | "Standard" | "Pro";
+  name: "Free" | "Basic" | "Standard" | "Pro";
   price: number;
   description: string;
   features: string[];
-  planKey: "basic" | "standard" | "pro";
+  planKey: "none" | "basic" | "standard" | "pro";
   highlight?: boolean;
   icon: React.ReactNode;
   color: string;
@@ -30,6 +30,7 @@ const plans: Plan[] = [
       "Up to 5 renders/month",
       "Up to 5 projects/month",
       "1080p exports",
+      "Removed Logo watermark ",
       "Core lyric templates",
       "Basic customization",
       "Email support",
@@ -46,6 +47,7 @@ const plans: Plan[] = [
       "Up to 15 renders/month",
       "Up to 15 projects/month",
       "720p/1080p/1440p exports",
+      "Removed Logo watermark ",
       "All lyric templates",
       "Brand colors & fonts",
       "Priority rendering",
@@ -66,6 +68,7 @@ const plans: Plan[] = [
       "Unlimited monthly renders",
       "Unlimited monthly projects",
       "720p/1080p/1440p exports",
+      "Removed Logo watermark ",
       "Template overrides",
       "Custom branding",
       "API access",
@@ -112,6 +115,14 @@ export default function PricingPage(): React.ReactElement {
 
   const handleSubscribe = async (planKey: Plan["planKey"]) => {
     // Not signed in → go sign in
+    if (planKey === "none" && !user) {
+      router.push("/sign-in");
+      return;
+    }
+    if (planKey === "none" && user) {
+      router.push("/");
+      return;
+    }
     if (!user) {
       router.push("/sign-in");
       return;
@@ -249,6 +260,36 @@ export default function PricingPage(): React.ReactElement {
           </div>
         )}
 
+        {/* Free Plan Box */}
+        <div className="mx-auto mb-8 max-w-lg text-center">
+          <div className="relative rounded-xl border border-white/10 bg-white/5 p-4 backdrop-blur">
+            {/* Current plan badge for Free */}
+            {currentPlan === "none" && (
+              <div className="absolute -top-3 left-4 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-2 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-200">
+                Current Plan
+              </div>
+            )}
+
+            <div className="flex items-center justify-center gap-3">
+              <div className="inline-flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-r from-blue-500 to-cyan-500 text-white">
+                <Zap className="w-4 h-4" />
+              </div>
+              <div className="text-left">
+                <h3 className="text-lg font-bold text-white">Free Plan</h3>
+                <p className="text-xs text-white/70">
+                  $0/month • 5 renders • 3 projects • Logo watermark
+                </p>
+              </div>
+              <button
+                onClick={() => handleSubscribe("none")}
+                className="ml-auto rounded-lg border border-white/20 bg-white/5 px-3 py-1.5 text-sm font-medium text-white hover:bg-white/10 transition-all"
+              >
+                {currentPlan === "none" ? "Current Plan" : "Start Free"}
+              </button>
+            </div>
+          </div>
+        </div>
+
         {/* Pricing Cards */}
         <section className="grid gap-8 pb-20 sm:grid-cols-2 lg:grid-cols-3">
           {plans.map((plan) => {
@@ -281,7 +322,7 @@ export default function PricingPage(): React.ReactElement {
 
                 {/* Current plan badge */}
                 {isCurrent && (
-                  <div className="absolute -top-4 right-4 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-200">
+                  <div className="absolute -top-4 left-4 rounded-full border border-emerald-400/30 bg-emerald-400/20 px-3 py-1 text-xs font-semibold uppercase tracking-wider text-emerald-200">
                     Current Plan
                   </div>
                 )}
