@@ -124,8 +124,7 @@ const GridLayout: React.FC<{
                   buildPresetTextStyle(preset, isPortrait),
                   word.w.style
                 ),
-                // Scale font size appropriately for each mode
-                fontSize: isPortrait ? "60px" : "100px",
+                // Font size comes from preset styles and can be overridden
               }}
             >
               {word.w.text}
@@ -227,8 +226,7 @@ const KaraokeLayout: React.FC<{
                 buildPresetTextStyle(preset, isPortrait),
                 w.style
               ),
-              // Scale font size appropriately for each mode
-              fontSize: isPortrait ? "48px" : "100px",
+              // Font size comes from preset styles and can be overridden
             }}
             onPointerDown={(e) => {
               e.preventDefault();
@@ -282,8 +280,7 @@ const WaveLayout: React.FC<{
                   buildPresetTextStyle(preset, isPortrait),
                   w.style
                 ),
-                // Scale font size appropriately for each mode
-                fontSize: isPortrait ? "48px" : "100px",
+                // Font size comes from preset styles and can be overridden
                 transform: `translateY(${waveOffset}px)`,
               }}
               onPointerDown={(e) => {
@@ -342,7 +339,7 @@ const ScrollingLayout: React.FC<{
                     w.style
                   ),
                   // Scale font size appropriately for each mode
-                  fontSize: isPortrait ? "48px" : "100px",
+                  // Font size comes from preset styles and can be overridden
                 }}
                 onPointerDown={(e) => {
                   e.preventDefault();

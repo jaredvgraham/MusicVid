@@ -31,8 +31,7 @@ export default function CenterLines({
                     buildPresetTextStyle(preset, isPortrait),
                     w.style
                   ),
-                  // Scale font size appropriately for each mode
-                  fontSize: isPortrait ? "48px" : "100px",
+                  // Font size comes from preset styles and can be overridden
                   marginRight:
                     wi < lineRefs.length - 1 ? (isPortrait ? 15 : 40) : 0,
                   cursor: "grab",
