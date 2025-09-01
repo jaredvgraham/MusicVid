@@ -1,13 +1,11 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-
-import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
-import { dark } from "@clerk/themes";
-import NavBar from "@/components/NavBar";
-import PixelTracker from "@/components/PixelTracker";
-import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { siteMeta } from "@/lib/seo";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
+import PixelTracker from "@/components/PixelTracker";
+import { ClerkProvider } from "@clerk/nextjs";
+import { dark } from "@clerk/themes";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -27,51 +25,45 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950`}
-      >
-        <ClerkProvider
-          signInUrl="/sign-in"
-          signUpUrl="/sign-up"
-          appearance={{
-            baseTheme: dark,
-            variables: {
-              colorBackground: "#0a0a0a",
-              colorText: "#ffffff",
-              colorInputBackground: "#111111",
-              colorInputText: "#ffffff",
-              colorPrimary: "#ffffff",
-              colorShimmer: "#222222",
-              colorTextSecondary: "#a3a3a3",
-            },
-            elements: {
-              card: "bg-neutral-950/80 backdrop-blur border border-white/10",
-              headerTitle: "text-white",
-              headerSubtitle: "text-white/60",
-              socialButtonsIconButton: "bg-white/10 hover:bg-white/15",
-              formFieldInput:
-                "bg-white/5 border-white/10 text-white placeholder:text-white/40",
-              formButtonPrimary: "bg-white text-neutral-900 hover:bg-white/90",
-              footerActionText: "text-white/70",
-              footerActionLink: "text-white hover:text-white",
-            },
-          }}
+    <ClerkProvider
+      signInUrl="/sign-in"
+      signUpUrl="/sign-up"
+      appearance={{
+        baseTheme: dark,
+        variables: {
+          colorBackground: "#0a0a0a",
+          colorText: "#ffffff",
+          colorInputBackground: "#111111",
+          colorInputText: "#ffffff",
+          colorPrimary: "#ffffff",
+          colorShimmer: "#222222",
+          colorTextSecondary: "#a3a3a3",
+        },
+        elements: {
+          card: "bg-neutral-950/80 backdrop-blur border border-white/10",
+          headerTitle: "text-white",
+          headerSubtitle: "text-white/60",
+          socialButtonsIconButton: "bg-white/10 hover:bg-white/15",
+          formFieldInput:
+            "bg-white/5 border-white/10 text-white placeholder:text-white/40",
+          formButtonPrimary: "bg-white text-neutral-900 hover:bg-white/90",
+          footerActionText: "text-white/70",
+          footerActionLink: "text-white hover:text-white",
+        },
+      }}
+    >
+      <html lang="en">
+        <body
+          className={`${geistSans.variable} ${geistMono.variable} antialiased bg-neutral-950`}
         >
           <GoogleAnalytics />
           <PixelTracker
             facebookPixelId={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || ""}
             tiktokPixelId={process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || ""}
           />
-          <NavBar />
-          <ClerkLoading>
-            <div className="flex h-screen items-center justify-center">
-              <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
-            </div>
-          </ClerkLoading>
-          <ClerkLoaded>{children}</ClerkLoaded>
-        </ClerkProvider>
-      </body>
-    </html>
+          {children}
+        </body>
+      </html>
+    </ClerkProvider>
   );
 }

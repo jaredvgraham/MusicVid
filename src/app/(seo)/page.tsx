@@ -1,13 +1,14 @@
 // app/page.tsx (Server Component)
 import { auth } from "@clerk/nextjs/server";
-import Dashboard from "@/components/dash/Dashboard";
+
 import Main from "@/components/landing/Main";
+import { redirect } from "next/navigation";
 
 export default async function Page() {
   const { userId } = await auth();
 
   if (userId) {
-    return <Dashboard />;
+    redirect("/dashboard");
   }
 
   return <Main />;

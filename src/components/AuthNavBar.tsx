@@ -2,18 +2,11 @@
 
 import React from "react";
 import Link from "next/link";
-import {
-  ClerkLoaded,
-  ClerkProvider,
-  useAuth,
-  SignedIn,
-  SignedOut,
-  UserButton,
-} from "@clerk/nextjs";
+import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { dark } from "@clerk/themes";
+import { useAuth } from "@clerk/nextjs";
 
 type NavItem = { label: string; href: string };
 type DropdownItem = { label: string; href: string; description?: string };
@@ -52,13 +45,14 @@ const mainNavItems: NavItem[] = [
   { label: "Pricing", href: "/pricing" },
 ];
 
-function NavBarContent(): React.ReactElement {
+export default function NavBar(): React.ReactElement {
   const [open, setOpen] = useState(false);
   const [seoDropdownOpen, setSeoDropdownOpen] = useState(false);
   const [dropdownTimeout, setDropdownTimeout] = useState<NodeJS.Timeout | null>(
     null
   );
   const { isSignedIn } = useAuth();
+
   const handleDropdownEnter = () => {
     if (dropdownTimeout) {
       clearTimeout(dropdownTimeout);
@@ -79,10 +73,7 @@ function NavBarContent(): React.ReactElement {
       <div className="mx-auto flex h-20 max-w-7xl items-center justify-between px-4 sm:px-6">
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
-          <Link
-            href={`${isSignedIn ? "/dashboard" : "/"}`}
-            className="flex items-center gap-3"
-          >
+          <Link href="/" className="flex items-center gap-3">
             <Image src="/logo.png" alt="Sonexa-Logo" width={40} height={40} />
             <span className="text-lg font-semibold tracking-wide text-white">
               Sonexa
@@ -171,15 +162,20 @@ function NavBarContent(): React.ReactElement {
           </SignedIn>
 
           {/* Main Navigation Items */}
-          {mainNavItems.map((item) => (
-            <Link
-              key={item.label}
-              href={item.href}
-              className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
-            >
-              {item.label}
-            </Link>
-          ))}
+          {mainNavItems.map((item) => {
+            if (isSignedIn && item.label === "Templates") {
+              return null;
+            }
+            return (
+              <Link
+                key={item.label}
+                href={item.href}
+                className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+              >
+                {item.label}
+              </Link>
+            );
+          })}
 
           {/* User-specific items */}
 
@@ -271,18 +267,6 @@ function NavBarContent(): React.ReactElement {
                 </div>
               </SignedOut>
 
-              {/* Main Navigation */}
-              {mainNavItems.map((item) => (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className="rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
-                  onClick={() => setOpen(false)}
-                >
-                  {item.label}
-                </Link>
-              ))}
-
               {/* User-specific items */}
               <SignedIn>
                 <div className="mt-6 border-t border-white/10 pt-6">
@@ -319,6 +303,22 @@ function NavBarContent(): React.ReactElement {
                   </Link>
                 </div>
               </SignedIn>
+              {/* Main Navigation */}
+              {mainNavItems.map((item) => {
+                if (isSignedIn && item.label === "Templates") {
+                  return null;
+                }
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
+                    onClick={() => setOpen(false)}
+                  >
+                    {item.label}
+                  </Link>
+                );
+              })}
             </nav>
 
             {/* Mobile Auth Buttons */}
@@ -353,39 +353,3 @@ function NavBarContent(): React.ReactElement {
     </header>
   );
 }
-
-function NavBar(): React.ReactElement {
-  return (
-    <ClerkProvider
-      signInUrl="/sign-in"
-      signUpUrl="/sign-up"
-      appearance={{
-        baseTheme: dark,
-        variables: {
-          colorBackground: "#0a0a0a",
-          colorText: "#ffffff",
-          colorInputBackground: "#111111",
-          colorInputText: "#ffffff",
-          colorPrimary: "#ffffff",
-          colorShimmer: "#222222",
-          colorTextSecondary: "#a3a3a3",
-        },
-        elements: {
-          card: "bg-neutral-950/80 backdrop-blur border border-white/10",
-          headerTitle: "text-white",
-          headerSubtitle: "text-white/60",
-          socialButtonsIconButton: "bg-white/10 hover:bg-white/15",
-          formFieldInput:
-            "bg-white/5 border-white/10 text-white placeholder:text-white/40",
-          formButtonPrimary: "bg-white text-neutral-900 hover:bg-white/90",
-          footerActionText: "text-white/70",
-          footerActionLink: "text-white hover:text-white",
-        },
-      }}
-    >
-      <NavBarContent />
-    </ClerkProvider>
-  );
-}
-
-export default NavBar;

@@ -3,7 +3,7 @@
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useUser, SignOutButton } from "@clerk/nextjs";
-import PricingPage from "@/app/pricing/page";
+import PricingPage from "@/app/(auth)/pricing/page";
 import ConfirmDialog from "@/components/ui/ConfirmDialog";
 import {
   User,
