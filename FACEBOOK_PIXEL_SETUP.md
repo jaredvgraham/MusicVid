@@ -52,7 +52,14 @@ NEXT_PUBLIC_TIKTOK_PIXEL_ID=your_tiktok_pixel_id_here
 
 The following events are automatically tracked for both Facebook and TikTok:
 
-### Client-Side Events
+### Primary Conversion Events (Recommended for Freemium Model)
+
+- **CompleteRegistration**: Tracks when users complete sign-up and reach the welcome page
+  - **Why this matters**: For freemium apps, registration completion is a strong indicator of user intent
+  - **Mobile-friendly**: Works well for users who discover your app on mobile but may use it later on desktop
+  - **Higher volume**: More users will complete registration than make immediate purchases
+
+### Secondary Events
 
 - **PageView**: Tracks when users visit pages
 - **ViewContent**: Tracks when users view the pricing page
@@ -70,9 +77,10 @@ _Note: Server-side events require the access token setup above._
 
 1. Install the [Facebook Pixel Helper](https://chrome.google.com/webstore/detail/facebook-pixel-helper/fdgfkebogiimcoedmjlckhdkpoggiemg) Chrome extension
 2. Install the [TikTok Pixel Helper](https://chrome.google.com/webstore/detail/tiktok-pixel-helper/ebjbfgdfnjofbpdgjpkgkkkhkjoaopmh) Chrome extension
-3. Visit your pricing page and click on a plan
-4. Check both Pixel Helpers to see if events are firing
-5. Complete a test purchase to verify server-side events
+3. **Test CompleteRegistration**: Sign up for a new account and verify you reach the welcome page
+4. Check both Pixel Helpers to see if the CompleteRegistration event is firing
+5. Visit your pricing page and click on a plan to test InitiateCheckout
+6. Complete a test purchase to verify server-side events
 
 ## 7. Setting Up Conversion Tracking
 
@@ -82,7 +90,8 @@ _Note: Server-side events require the access token setup above._
 2. Select your pixel
 3. Go to **Aggregated Event Measurement**
 4. Configure your conversion events:
-   - **Purchase** (highest priority)
+   - **CompleteRegistration** (highest priority - recommended for freemium)
+   - **Purchase** (high priority)
    - **InitiateCheckout** (medium priority)
    - **ViewContent** (low priority)
 
@@ -92,9 +101,20 @@ _Note: Server-side events require the access token setup above._
 2. Select your pixel
 3. Go to **Event Configuration**
 4. Configure your conversion events:
-   - **Purchase** (highest priority)
+   - **CompleteRegistration** (highest priority - recommended for freemium)
+   - **Purchase** (high priority)
    - **InitiateCheckout** (medium priority)
    - **ViewContent** (low priority)
+
+### Why CompleteRegistration for Freemium?
+
+For freemium apps like Sonexa, **CompleteRegistration** is often a better primary conversion event than **Purchase** because:
+
+- **Higher volume**: More users will sign up than immediately purchase
+- **Mobile-friendly**: Works well for users discovering your app on mobile platforms
+- **Strong intent signal**: Registration completion indicates genuine interest
+- **Better optimization**: Facebook/TikTok algorithms can optimize for a higher-volume event
+- **Realistic expectations**: Aligns with how users actually interact with freemium products
 
 ## 8. Advanced Configuration
 

@@ -268,7 +268,7 @@ export const trackLead = (value?: number, currency: string = "USD") => {
 };
 
 export const trackCompleteRegistration = () => {
-  trackEvent("CompleteRegistration");
+  trackEvent("Complete registration");
 };
 
 export const trackSubscribe = (value: number, currency: string = "USD") => {
