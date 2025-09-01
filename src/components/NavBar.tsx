@@ -42,6 +42,7 @@ const mainNavItems: NavItem[] = [
   { label: "Templates", href: "/templates" },
 
   { label: "Pricing", href: "/pricing" },
+
 ];
 
 export default function NavBar(): React.ReactElement {
@@ -150,6 +151,12 @@ export default function NavBar(): React.ReactElement {
               className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
             >
               Settings
+            </Link>
+            <Link
+            href="/help"
+            className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+            >
+              Help
             </Link>
           </SignedIn>
 
@@ -292,6 +299,13 @@ export default function NavBar(): React.ReactElement {
                     onClick={() => setOpen(false)}
                   >
                     Settings
+                  </Link>
+                  <Link
+                    href="/help"
+                    className="rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
+                    onClick={() => setOpen(false)}
+                  >
+                    Help
                   </Link>
                 </div>
               </SignedIn>
