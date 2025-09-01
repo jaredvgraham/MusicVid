@@ -10,9 +10,14 @@ class ProjectClient {
   ): Promise<ProjectDocument[] | ApiError> {
     await dbConnect();
     try {
-      const projects = await Project.find({ user_id: clerkId, deleted: false }).sort({
-        timeCreated: -1,
-      });
+      const projects = await Project.find({
+        user_id: clerkId,
+        deleted: false,
+      })
+        .sort({
+          timeCreated: -1,
+        })
+        .lean<ProjectDocument[]>();
       return projects;
     } catch (err) {
       return Utils.handleApiError(err);
@@ -24,7 +29,7 @@ class ProjectClient {
   ): Promise<ProjectDocument | ApiError> {
     await dbConnect();
     try {
-      const project = await Project.findById(projectId);
+      const project = await Project.findById(projectId).lean<ProjectDocument>();
       if (!project) {
         const error: ApiError = {
           _error: "Project not found",

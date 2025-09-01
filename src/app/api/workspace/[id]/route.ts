@@ -63,16 +63,16 @@ export async function GET(
 
     // If we have a stored videoKey, get a fresh S3 URL
     let videoUrl = project.video || "";
-    if ((project as any).videoKey) {
+    if (project.videoKey) {
       try {
-        videoUrl = await getS3ObjectUrl((project as any).videoKey);
+        videoUrl = await getS3ObjectUrl(project.videoKey);
       } catch (error) {
-        console.warn(
-          "Failed to get S3 URL for videoKey:",
-          (project as any).videoKey
-        );
+        console.warn("Failed to get S3 URL for videoKey:", project.videoKey);
       }
     }
+    console.log("project", project);
+    console.log("project width:", project.width);
+    console.log("project height:", project.height);
 
     return NextResponse.json({
       project: {
