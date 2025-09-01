@@ -56,6 +56,9 @@ export interface ProjectDocument extends Document {
   videoKey?: string; // canonical S3 object key
   song?: string;
   lyrics?: string;
+  width?: number;
+  height?: number;
+  orientation?: "portrait" | "landscape";
   lyricPresetId?: string;
   layoutPresetId?: string;
   callback_status?: number;

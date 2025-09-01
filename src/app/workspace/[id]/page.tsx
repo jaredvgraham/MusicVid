@@ -70,14 +70,15 @@ export default function WorkspacePage(): React.ReactElement {
       setFetchError(null);
       try {
         const res = await authFetch<WorkspaceResponse>(
-          "express",
-          `workspace/${projectId}`
+          "next",
+          `api/workspace/${projectId}`
         );
         console.log("res", res.project);
         console.log("res.project.transcript", res.project.video);
         if (!mounted) return;
         setProject(res.project);
       } catch (e: any) {
+        console.log("e", e);
         setFetchError(e?.message || "Failed to load workspace");
       } finally {
         setLoading(false);

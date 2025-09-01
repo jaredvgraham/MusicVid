@@ -42,7 +42,6 @@ const mainNavItems: NavItem[] = [
   { label: "Templates", href: "/templates" },
 
   { label: "Pricing", href: "/pricing" },
-
 ];
 
 export default function NavBar(): React.ReactElement {
@@ -153,8 +152,8 @@ export default function NavBar(): React.ReactElement {
               Settings
             </Link>
             <Link
-            href="/help"
-            className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+              href="/help"
+              className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
             >
               Help
             </Link>

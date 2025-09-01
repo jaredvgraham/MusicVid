@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
-import { ClerkProvider } from "@clerk/nextjs";
+import { ClerkLoaded, ClerkLoading, ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import NavBar from "@/components/NavBar";
 import PixelTracker from "@/components/PixelTracker";
@@ -64,7 +64,12 @@ export default function RootLayout({
             tiktokPixelId={process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || ""}
           />
           <NavBar />
-          {children}
+          <ClerkLoading>
+            <div className="flex h-screen items-center justify-center">
+              <div className="animate-spin rounded-full h-32 w-32 border-t-2 border-b-2 border-white"></div>
+            </div>
+          </ClerkLoading>
+          <ClerkLoaded>{children}</ClerkLoaded>
         </ClerkProvider>
       </body>
     </html>
