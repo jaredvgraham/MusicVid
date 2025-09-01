@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useUser } from "@clerk/nextjs";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
@@ -8,6 +8,10 @@ import SeoHead from "@/components/SeoHead";
 import JsonLd from "@/components/JsonLd";
 import { faqPageLd, howToLd, absoluteUrl } from "@/lib/seo";
 import { Check, Star, Zap, Crown, Sparkles } from "lucide-react";
+import {
+  trackInitiateCheckout,
+  trackViewContent,
+} from "@/components/FacebookPixel";
 
 type Plan = {
   name: "Free" | "Basic" | "Standard" | "Pro";
@@ -94,6 +98,12 @@ export default function PricingPage(): React.ReactElement {
   const [error, setError] = useState<string | null>(null);
   const [success, setSuccess] = useState<string | null>(null);
 
+  // Track pricing page view for Facebook Pixel
+  useEffect(() => {
+    const planIds = plans.map((plan) => plan.planKey);
+    trackViewContent(planIds, "product");
+  }, []);
+
   const handleUpgrade = async (planKey: Plan["planKey"]) => {
     setLoading("upgrade");
     setError(null);
@@ -138,6 +148,12 @@ export default function PricingPage(): React.ReactElement {
     if (currentPlan !== "none") {
       await handleUpgrade(planKey);
       return;
+    }
+
+    // Track InitiateCheckout event for Facebook Pixel
+    const selectedPlan = plans.find((plan) => plan.planKey === planKey);
+    if (selectedPlan) {
+      trackInitiateCheckout(selectedPlan.price, "USD", [planKey]);
     }
 
     // New checkout

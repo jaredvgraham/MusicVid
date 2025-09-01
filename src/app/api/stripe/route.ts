@@ -73,7 +73,7 @@ export async function POST(req: NextRequest) {
         },
       ],
       mode: "subscription",
-      success_url: `${BASE_URL}/`,
+      success_url: `${BASE_URL}/success?success=true&session_id={CHECKOUT_SESSION_ID}&plan=${plan}`,
       cancel_url: `${BASE_URL}/pricing`,
     });
     return NextResponse.json({ url: session.url });
