@@ -64,6 +64,28 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
     "video/x-matroska",
   ];
 
+  const MAX_DURATION_SECONDS = 60 * 10; // 10 minutes
+
+  const getMediaDuration = (file: File, type: "audio" | "video"): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const url = URL.createObjectURL(file);
+        const el = document.createElement(type);
+        el.preload = "metadata";
+        const cleanup = () => {
+          URL.revokeObjectURL(url);
+          el.removeAttribute("src");
+          try { el.load(); } catch {}
+        };
+        const onLoaded = () => { const d = Number((el as any).duration); cleanup(); resolve(d); };
+        const onError = () => { cleanup(); reject(new Error("Failed to read duration")); };
+        el.addEventListener("loadedmetadata", onLoaded, { once: true });
+        el.addEventListener("error", onError, { once: true });
+        (el as HTMLMediaElement).src = url;
+      } catch (e) { reject(e as Error); }
+    });
+  };
+
   const validate = (): string | null => {
     if (!projectName.trim()) return "Please enter a project name.";
     if (!pendingAudio) return "Please add a song file.";
@@ -97,17 +119,41 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
     await onSubmitSplit(fd);
   };
 
-  const onAudioChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onAudioChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPendingAudio(file);
-    setLastFileName(file.name);
+    try {
+      const duration = await getMediaDuration(file, "audio");
+      if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+        setUploadError("Audio must be 10 minutes or less.");
+        e.target.value = "";
+        return;
+      }
+      setPendingAudio(file);
+      setLastFileName(file.name);
+    } catch {
+      setUploadError("Could not read audio duration. Please try another file.");
+      e.target.value = "";
+      return;
+    }
     e.target.value = "";
   };
-  const onVideoChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onVideoChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPendingVideo(file);
+    try {
+      const duration = await getMediaDuration(file, "video");
+      if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+        setUploadError("Video must be 10 minutes or less.");
+        e.target.value = "";
+        return;
+      }
+      setPendingVideo(file);
+    } catch {
+      setUploadError("Could not read video duration. Please try another file.");
+      e.target.value = "";
+      return;
+    }
     e.target.value = "";
   };
 
@@ -121,14 +167,24 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
     e.stopPropagation();
     setIsDraggingAudio(false);
   };
-  const onDropAudio = (e: React.DragEvent) => {
+  const onDropAudio = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDraggingAudio(false);
     const file = e.dataTransfer?.files?.[0];
     if (file) {
-      setLastFileName(file.name);
-      setPendingAudio(file);
+      try {
+        const duration = await getMediaDuration(file, "audio");
+        if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+          setUploadError("Audio must be 10 minutes or less.");
+          return;
+        }
+        setLastFileName(file.name);
+        setPendingAudio(file);
+      } catch {
+        setUploadError("Could not read audio duration. Please try another file.");
+        return;
+      }
     }
   };
 
@@ -142,13 +198,23 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
     e.stopPropagation();
     setIsDraggingVideo(false);
   };
-  const onDropVideo = (e: React.DragEvent) => {
+  const onDropVideo = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDraggingVideo(false);
     const file = e.dataTransfer?.files?.[0];
     if (file) {
-      setPendingVideo(file);
+      try {
+        const duration = await getMediaDuration(file, "video");
+        if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+          setUploadError("Video must be 10 minutes or less.");
+          return;
+        }
+        setPendingVideo(file);
+      } catch {
+        setUploadError("Could not read video duration. Please try another file.");
+        return;
+      }
     }
   };
 
