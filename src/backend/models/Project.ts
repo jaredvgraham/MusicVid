@@ -62,6 +62,7 @@ export interface ProjectDocument extends Document {
   lyricPresetId?: string;
   layoutPresetId?: string;
   callback_status?: number;
+  transcriptRefreshes?: number; // how many times the transcript has been refreshed
   createdAt: Date;
   updatedAt: Date;
   length: number;
@@ -87,6 +88,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
     layoutPresetId: { type: String, default: "centered-classic" },
     finalRender: { type: String },
     deleted: { type: Boolean, required: true, default: false },
+    transcriptRefreshes: { type: Number, default: 0 },
   },
   { timestamps: true }
 );
