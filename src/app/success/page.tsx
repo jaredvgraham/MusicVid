@@ -2,7 +2,7 @@
 
 import { useEffect, Suspense } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
-import { trackPurchase } from "@/components/FacebookPixel";
+import { trackPurchase } from "@/components/PixelTracker";
 import { CheckCircle, ArrowRight, Sparkles } from "lucide-react";
 import Link from "next/link";
 

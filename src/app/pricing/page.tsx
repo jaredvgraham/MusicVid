@@ -11,7 +11,7 @@ import { Check, Star, Zap, Crown, Sparkles } from "lucide-react";
 import {
   trackInitiateCheckout,
   trackViewContent,
-} from "@/components/FacebookPixel";
+} from "@/components/PixelTracker";
 
 type Plan = {
   name: "Free" | "Basic" | "Standard" | "Pro";
