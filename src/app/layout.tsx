@@ -6,6 +6,7 @@ import { ClerkProvider } from "@clerk/nextjs";
 import { dark } from "@clerk/themes";
 import NavBar from "@/components/NavBar";
 import PixelTracker from "@/components/PixelTracker";
+import GoogleAnalytics from "@/components/GoogleAnalytics";
 import { siteMeta } from "@/lib/seo";
 
 const geistSans = Geist({
@@ -57,6 +58,7 @@ export default function RootLayout({
             },
           }}
         >
+          <GoogleAnalytics />
           <PixelTracker
             facebookPixelId={process.env.NEXT_PUBLIC_FACEBOOK_PIXEL_ID || ""}
             tiktokPixelId={process.env.NEXT_PUBLIC_TIKTOK_PIXEL_ID || ""}
