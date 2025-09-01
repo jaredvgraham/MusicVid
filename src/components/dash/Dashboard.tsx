@@ -30,7 +30,9 @@ const Dashboard = (): React.ReactElement => {
   //
 
   // Per-project final renders modal state
-  const [finalsProject, setFinalsProject] = useState<ClientProject | null>(null);
+  const [finalsProject, setFinalsProject] = useState<ClientProject | null>(
+    null
+  );
   const [finalsItems, setFinalsItems] = useState<any[]>([]);
   const [finalsLoading, setFinalsLoading] = useState<boolean>(false);
   const [finalsError, setFinalsError] = useState<string | null>(null);
@@ -94,7 +96,9 @@ const Dashboard = (): React.ReactElement => {
       const res = await fetch(`/api/dashboard/final-renders/${project._id}`);
       if (!res.ok) {
         const data = await res.json().catch(() => ({} as any));
-        throw new Error((data as any)?.error || `Request failed: ${res.status}`);
+        throw new Error(
+          (data as any)?.error || `Request failed: ${res.status}`
+        );
       }
       const data = await res.json();
       const items = (data as any).finalRenders ?? data;
@@ -421,7 +425,9 @@ const Dashboard = (): React.ReactElement => {
                           (r.url && String(r.url)) ||
                           "";
                     const when = (r?.createdAt ?? r?.timeCreated) as any;
-                    const key = (r?._id as string) || (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
+                    const key =
+                      (r?._id as string) ||
+                      (videoSrc ? `video:${videoSrc}` : `idx:${idx}`);
                     return (
                       <article
                         key={key}
@@ -460,6 +466,33 @@ const Dashboard = (): React.ReactElement => {
                               Open
                             </a>
                           )}
+                          <button
+                            type="button"
+                            className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
+                            onClick={async () => {
+                              if (videoSrc) {
+                                try {
+                                  const response = await fetch(videoSrc);
+                                  const blob = await response.blob();
+                                  const url = window.URL.createObjectURL(blob);
+                                  const link = document.createElement("a");
+                                  link.href = url;
+                                  link.download = `video-${Date.now()}.mp4`;
+                                  document.body.appendChild(link);
+                                  link.click();
+                                  document.body.removeChild(link);
+                                  window.URL.revokeObjectURL(url);
+                                } catch (error) {
+                                  console.error("Download failed:", error);
+                                  // Fallback to opening in new tab if download fails
+                                  window.open(videoSrc, "_blank");
+                                }
+                              }
+                            }}
+                            disabled={!videoSrc}
+                          >
+                            Download
+                          </button>
                         </div>
                       </article>
                     );

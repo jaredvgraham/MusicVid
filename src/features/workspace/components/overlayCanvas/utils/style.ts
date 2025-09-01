@@ -10,9 +10,7 @@ export function buildPresetTextStyle(
       : (preset as any).color ?? "#fff",
     fontWeight: ((preset as any).fontWeight as any) ?? 700,
     fontFamily: (preset as any).fontFamily ?? undefined,
-    fontSize: preset.fontSizePx
-      ? `${preset.fontSizePx}px`
-      : `${isPortrait ? 60 : 100}px`,
+    fontSize: `${isPortrait ? 60 : 100}px`,
     letterSpacing: `${(preset as any).letterSpacingPx ?? 0}px`,
     textTransform: ((preset as any).textTransform as any) ?? "none",
     textAlign: ((preset as any).textAlign as any) ?? "center",

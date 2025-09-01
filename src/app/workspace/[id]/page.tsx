@@ -191,10 +191,7 @@ export default function WorkspacePage(): React.ReactElement {
             {(!connected || !renderConnected) && (
               <button
                 onClick={() => {
-                  const sock = getSocket();
-                  if (sock && !sock.connected) {
-                    sock.connect();
-                  }
+                  window.location.reload();
                 }}
                 className="text-xs text-blue-400 hover:text-blue-300 underline"
               >
