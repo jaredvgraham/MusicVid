@@ -57,6 +57,28 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
     "audio/ogg",
   ];
 
+  const MAX_DURATION_SECONDS = 60 * 10; // 10 minutes
+
+  const getAudioDuration = (file: File): Promise<number> => {
+    return new Promise((resolve, reject) => {
+      try {
+        const url = URL.createObjectURL(file);
+        const audio = document.createElement("audio");
+        audio.preload = "metadata";
+        const cleanup = () => {
+          URL.revokeObjectURL(url);
+          audio.removeAttribute("src");
+          try { audio.load(); } catch {}
+        };
+        const onLoaded = () => { const d = Number(audio.duration); cleanup(); resolve(d); };
+        const onError = () => { cleanup(); reject(new Error("Failed to read audio duration")); };
+        audio.addEventListener("loadedmetadata", onLoaded, { once: true });
+        audio.addEventListener("error", onError, { once: true });
+        audio.src = url;
+      } catch (e) { reject(e as Error); }
+    });
+  };
+
   const validate = (file: File): string | null => {
     if (!file) return "Please upload an audio file.";
     if (!allowedTypes.includes(file.type)) {
@@ -88,11 +110,23 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
     await onSubmitSplit(fd);
   };
 
-  const onUploadChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const onUploadChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
-    setPendingFile(file);
-    setLastFileName(file.name);
+    try {
+      const duration = await getAudioDuration(file);
+      if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+        setUploadError("Audio must be 10 minutes or less.");
+        e.target.value = "";
+        return;
+      }
+      setPendingFile(file);
+      setLastFileName(file.name);
+    } catch {
+      setUploadError("Could not read audio duration. Please try another file.");
+      e.target.value = "";
+      return;
+    }
     e.target.value = "";
   };
 
@@ -106,14 +140,24 @@ export default function SongOnlyFlow(props: Props): React.ReactElement {
     e.stopPropagation();
     setIsDragging(false);
   };
-  const onDrop = (e: React.DragEvent) => {
+  const onDrop = async (e: React.DragEvent) => {
     e.preventDefault();
     e.stopPropagation();
     setIsDragging(false);
     const file = e.dataTransfer?.files?.[0];
     if (file) {
-      setLastFileName(file.name);
-      setPendingFile(file);
+      try {
+        const duration = await getAudioDuration(file);
+        if (!Number.isFinite(duration) || duration > MAX_DURATION_SECONDS) {
+          setUploadError("Audio must be 10 minutes or less.");
+          return;
+        }
+        setLastFileName(file.name);
+        setPendingFile(file);
+      } catch {
+        setUploadError("Could not read audio duration. Please try another file.");
+        return;
+      }
     }
   };
 
