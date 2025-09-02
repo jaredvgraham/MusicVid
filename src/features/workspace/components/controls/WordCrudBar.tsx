@@ -13,6 +13,15 @@ function debounce<T extends (...args: any[]) => any>(
     timeoutId = setTimeout(() => func(...args), delay);
   };
 }
+
+// Utility functions for time conversion
+function msToSeconds(ms: number): number {
+  return Math.round(ms) / 1000;
+}
+
+function secondsToMs(seconds: number): number {
+  return Math.round(seconds * 1000);
+}
 import { useEditor } from "../../state/EditorContext";
 import {
   addWord as addWordOp,
@@ -33,6 +42,8 @@ export function WordCrudBar(): React.ReactElement {
   const { saveTranscript } = useEditor();
   const [fontSizePx, setFontSizePx] = useState<string>("");
   const [color, setColor] = useState<string>("");
+  const [startTimeSeconds, setStartTimeSeconds] = useState<string>("");
+  const [endTimeSeconds, setEndTimeSeconds] = useState<string>("");
 
   const handleAdd = async () => {
     const { next, newSelectedIndex } = addWordOp(
@@ -83,6 +94,8 @@ export function WordCrudBar(): React.ReactElement {
     if (selectedIndex == null || selectedIndex < 0) {
       setFontSizePx("");
       setColor("");
+      setStartTimeSeconds("");
+      setEndTimeSeconds("");
       return;
     }
     let acc = 0;
@@ -96,6 +109,8 @@ export function WordCrudBar(): React.ReactElement {
             : ""
         );
         setColor(typeof w?.style?.color === "string" ? w.style.color : "");
+        setStartTimeSeconds(msToSeconds(w.start).toFixed(2));
+        setEndTimeSeconds(msToSeconds(w.end).toFixed(2));
         break;
       }
       acc += words.length;
@@ -153,9 +168,63 @@ export function WordCrudBar(): React.ReactElement {
     }
   };
 
+  // Handle timestamp updates with debouncing
+  const debouncedTimestampSave = useCallback(
+    debounce(async (field: "start" | "end", value: string) => {
+      if (selectedIndex == null) return;
+
+      const numValue = parseFloat(value);
+      if (isNaN(numValue) || numValue < 0) return;
+
+      const newMs = secondsToMs(numValue);
+      const minDuration = 100; // Minimum 100ms duration
+
+      let acc = 0;
+      for (let li = 0; li < transcript.length; li++) {
+        const words = transcript[li]?.words ?? [];
+        if (selectedIndex < acc + words.length) {
+          const w = words[selectedIndex - acc];
+          const updatedWord = { ...w };
+
+          if (field === "start") {
+            // Ensure start doesn't go beyond end and maintains minimum duration
+            const maxStart = Math.max(0, w.end - minDuration);
+            updatedWord.start = Math.min(newMs, maxStart);
+          } else if (field === "end") {
+            // Ensure end doesn't go before start and maintains minimum duration
+            const minEnd = w.start + minDuration;
+            updatedWord.end = Math.max(newMs, minEnd);
+          }
+
+          const nextWords = [...words];
+          nextWords[selectedIndex - acc] = updatedWord;
+          const nextLines = [...transcript];
+          nextLines[li] = { ...nextLines[li], words: nextWords };
+          setTranscript(nextLines);
+          await saveTranscript(nextLines);
+          break;
+        }
+        acc += words.length;
+      }
+    }, 500),
+    [selectedIndex, transcript, saveTranscript]
+  );
+
+  const handleTimestampChange = (field: "start" | "end", value: string) => {
+    // Update local state immediately for responsive UI
+    if (field === "start") {
+      setStartTimeSeconds(value);
+    } else {
+      setEndTimeSeconds(value);
+    }
+
+    // Debounce the actual save operation
+    debouncedTimestampSave(field, value);
+  };
+
   return (
     <div className="w-full bg-white/[0.02] p-1">
-      <div className="flex items-center gap-4 w-full">
+      <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full">
         <div className="flex items-center gap-2">
           <button
             className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10"
@@ -179,9 +248,9 @@ export function WordCrudBar(): React.ReactElement {
           </button>
         </div>
 
-        <div className="flex items-center gap-2">
+        <div className="flex items-center gap-2 min-w-0 flex-1">
           <input
-            className="w-56 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            className="w-full min-w-32 max-w-56 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
             type="text"
             placeholder="Edit selected word text"
             value={editText}
@@ -193,10 +262,12 @@ export function WordCrudBar(): React.ReactElement {
           />
         </div>
 
-        <label className="flex items-center gap-1">
-          <span className="text-[11px] text-white/50">Font (px)</span>
+        <label className="flex items-center gap-1 flex-shrink-0">
+          <span className="text-[11px] text-white/50 whitespace-nowrap">
+            Font (px)
+          </span>
           <input
-            className="w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
             type="number"
             placeholder="font px"
             value={fontSizePx}
@@ -208,11 +279,13 @@ export function WordCrudBar(): React.ReactElement {
           />
         </label>
 
-        <label className="flex items-center gap-2">
+        <label className="flex items-center gap-2 flex-shrink-0">
           <div className="flex items-center gap-1">
-            <span className="text-[11px] text-white/50">Color</span>
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              Color
+            </span>
             <input
-              className="w-24 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+              className="w-20 sm:w-24 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
               type="text"
               placeholder="#ffffff"
               value={color}
@@ -224,7 +297,7 @@ export function WordCrudBar(): React.ReactElement {
             />
           </div>
           <input
-            className="h-9 w-9 rounded border border-white/10 bg-transparent p-0"
+            className="h-8 w-8 sm:h-9 sm:w-9 rounded border border-white/10 bg-transparent p-0"
             type="color"
             value={
               color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)
@@ -238,6 +311,39 @@ export function WordCrudBar(): React.ReactElement {
             disabled={disabled}
           />
         </label>
+
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <label className="flex items-center gap-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              Start (s)
+            </span>
+            <input
+              key={`start-${selectedIndex}`}
+              className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={startTimeSeconds}
+              onChange={(e) => handleTimestampChange("start", e.target.value)}
+              disabled={disabled}
+            />
+          </label>
+          <label className="flex items-center gap-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              End (s)
+            </span>
+            <input
+              key={`end-${selectedIndex}`}
+              className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={endTimeSeconds}
+              onChange={(e) => handleTimestampChange("end", e.target.value)}
+              disabled={disabled}
+            />
+          </label>
+        </div>
       </div>
     </div>
   );

@@ -105,7 +105,7 @@ export function Timeline(): React.ReactElement {
   };
 
   const handleSegmentDragStart = (
-    e: React.MouseEvent | React.TouchEvent,
+    e: React.MouseEvent,
     mode: "move" | "resize-start" | "resize-end",
     globalIndex: number,
     originalWord: Word

@@ -11,7 +11,7 @@ interface TimelineSegmentProps {
   onSelect: (index: number) => void;
   onSeek: (ms: number) => void;
   onDragStart: (
-    e: React.MouseEvent | React.TouchEvent,
+    e: React.MouseEvent,
     mode: DragState["mode"],
     globalIndex: number,
     originalWord: Word
@@ -42,16 +42,17 @@ export function TimelineSegment({
     onDragStart(e, "move", index, word);
   };
 
-  const handleTouchStart = (e: React.TouchEvent) => {
-    if ((e.target as HTMLElement).dataset.resizeHandle) return;
-    e.preventDefault();
+  // Touch events disabled - using text inputs for mobile timestamp editing
+  // const handleTouchStart = (e: React.TouchEvent) => {
+  //   if ((e.target as HTMLElement).dataset.resizeHandle) return;
+  //   e.preventDefault();
 
-    if (!word) return;
-    onDragStart(e, "move", index, word);
-  };
+  //   if (!word) return;
+  //   onDragStart(e, "move", index, word);
+  // };
 
   const handleResizeStart = (
-    e: React.MouseEvent | React.TouchEvent,
+    e: React.MouseEvent,
     mode: "resize-start" | "resize-end"
   ) => {
     e.stopPropagation();
@@ -83,14 +84,12 @@ export function TimelineSegment({
       onClick={() => onSelect(index)}
       onDoubleClick={() => onSeek(start)}
       onMouseDown={handleMouseDown}
-      onTouchStart={handleTouchStart}
     >
       {/* Resize handle - start */}
       <div
         data-resize-handle="start"
         className="absolute left-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent flex items-center"
         onMouseDown={(e) => handleResizeStart(e, "resize-start")}
-        onTouchStart={(e) => handleResizeStart(e, "resize-start")}
       >
         <div className="mx-auto h-2/3 w-0.5 rounded bg-white/60" />
       </div>
@@ -100,7 +99,6 @@ export function TimelineSegment({
         data-resize-handle="end"
         className="absolute right-0 top-0 h-full w-1.5 cursor-ew-resize bg-transparent flex items-center"
         onMouseDown={(e) => handleResizeStart(e, "resize-end")}
-        onTouchStart={(e) => handleResizeStart(e, "resize-end")}
       >
         <div className="mx-auto h-2/3 w-0.5 rounded bg-white/60" />
       </div>
