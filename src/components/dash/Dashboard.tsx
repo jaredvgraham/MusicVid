@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter } from "next/navigation";
-import { Trash2, MoreHorizontal } from "lucide-react";
+import { Trash2, MoreHorizontal, ExternalLink, Download as DownloadIcon } from "lucide-react";
 
 type ClientProject = {
   _id: string;
@@ -225,11 +225,12 @@ const Dashboard = (): React.ReactElement => {
                 <div className="absolute right-3 top-3">
                   <button
                     type="button"
-                    className="inline-flex items-center rounded-md border border-white/10 bg-white/5 p-1.5 text-white/80 transition hover:bg-white/10 hover:text-white"
+                    className="text-sm inline-flex items-center rounded-md border border-white/10 bg-white/5 p-1.5 text-white/80 transition hover:bg-white/10 hover:text-white"
                     onClick={() => openProjectFinals(project)}
                     aria-label="Open final renders"
                   >
-                    <MoreHorizontal className="h-4 w-4" />
+                    {/* <MoreHorizontal className="h-4 w-4" /> */}
+                    Final Renders
                   </button>
                 </div>
                 {hasVideo && (
@@ -458,17 +459,20 @@ const Dashboard = (): React.ReactElement => {
                           </div>
                           {videoSrc && (
                             <a
-                              className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
+                              className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
                               href={videoSrc}
                               target="_blank"
-                              rel="noreferrer"
+                              rel="noopener noreferrer"
+                              aria-label="Open render in new tab"
+                              title="Open"
                             >
+                              <ExternalLink className="h-3.5 w-3.5 opacity-80" />
                               Open
                             </a>
                           )}
                           <button
                             type="button"
-                            className="inline-flex items-center gap-1.5 rounded-md bg-white px-2.5 py-1.5 text-xs font-medium text-neutral-900 transition hover:bg-white/90"
+                            className="inline-flex items-center gap-1.5 rounded-md border border-white/10 bg-white/5 px-2.5 py-1.5 text-xs font-medium text-white/80 transition hover:bg-white/10 hover:text-white"
                             onClick={async () => {
                               if (videoSrc) {
                                 try {
@@ -491,6 +495,7 @@ const Dashboard = (): React.ReactElement => {
                             }}
                             disabled={!videoSrc}
                           >
+                            <DownloadIcon className="h-3.5 w-3.5 opacity-80" />
                             Download
                           </button>
                         </div>
