@@ -33,9 +33,7 @@ export function useVideoState() {
     const readyState = v.readyState;
     const networkState = v.networkState;
 
-    console.log(
-      `📱 Force sync called: time=${currentTime}ms, playing=${isPlaying}, readyState=${readyState}, networkState=${networkState}`
-    );
+    // Force sync called
     setCurrentTimeMs(currentTime);
     setPlaying(isPlaying);
   }, []);
@@ -50,7 +48,7 @@ export function useVideoState() {
     }
 
     v.play().catch((error) => {
-      console.log("Video play failed:", error);
+      // Video play failed
       // If play fails, try to load and play again
       v.load();
       v.play().catch(() => {});
@@ -83,19 +81,19 @@ export function useVideoState() {
 
     const onTime = () => setCurrentTimeMs(Math.floor(v.currentTime * 1000));
     const onPlay = () => {
-      console.log("🎬 Video play event fired");
+      // Video play event fired
       setPlaying(true);
     };
     const onPause = () => {
-      console.log("🎬 Video pause event fired");
+      // Video pause event fired
       setPlaying(false);
     };
     const onLoadedData = () => {
-      console.log("🎬 Video loadeddata event fired");
+      // Video loadeddata event fired
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
     };
     const onSeeked = () => {
-      console.log("🎬 Video seeked event fired");
+      // Video seeked event fired
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
       // Force full sync after seeking to ensure all controls are updated
       setTimeout(() => {
@@ -103,7 +101,7 @@ export function useVideoState() {
       }, 10);
     };
     const onSeeking = () => {
-      console.log("🎬 Video seeking event fired");
+      // Video seeking event fired
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
       // Force sync during seeking to keep controls responsive
       setTimeout(() => {
@@ -111,11 +109,11 @@ export function useVideoState() {
       }, 10);
     };
     const onCanPlay = () => {
-      console.log("🎬 Video canplay event fired");
+      // Video canplay event fired
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
     };
     const onLoadedMetadata = () => {
-      console.log("🎬 Video loadedmetadata event fired");
+      // Video loadedmetadata event fired
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
     };
 
@@ -170,16 +168,14 @@ export function useVideoState() {
       if (isPlaying !== lastKnownPlaying) {
         setPlaying(isPlaying);
         lastKnownPlaying = isPlaying;
-        console.log(
-          `🎬 State sync: playing=${isPlaying}, time=${currentTime}ms`
-        );
+        // State sync
       }
     };
 
     // Update immediately and set up interval
     updateProgress();
-    // Use shorter interval for better mobile responsiveness
-    const intervalMs = isMobile ? 25 : 50; // More frequent updates on mobile
+    // Optimized interval for video performance
+    const intervalMs = isMobile ? 150 : 200; // Balanced for video responsiveness
     const interval = setInterval(updateProgress, intervalMs);
 
     return () => {
@@ -198,12 +194,14 @@ export function useVideoState() {
       // Force sync when user interacts with video on mobile
       setCurrentTimeMs(Math.floor(v.currentTime * 1000));
       setPlaying(!v.paused);
-      console.log("📱 Mobile interaction detected, syncing state");
+      // Mobile interaction detected, syncing state
     };
 
-    // Add listeners for mobile-specific events
-    v.addEventListener("touchstart", handleMobileInteraction);
-    v.addEventListener("touchend", handleMobileInteraction);
+    // Add listeners for mobile-specific events (passive for better performance)
+    v.addEventListener("touchstart", handleMobileInteraction, {
+      passive: true,
+    });
+    v.addEventListener("touchend", handleMobileInteraction, { passive: true });
     v.addEventListener("focus", handleMobileInteraction);
     v.addEventListener("blur", handleMobileInteraction);
 
@@ -213,7 +211,7 @@ export function useVideoState() {
         if (mutation.type === "attributes") {
           const target = mutation.target as HTMLVideoElement;
           if (target === v) {
-            console.log("📱 Video attribute changed, syncing state");
+            // Video attribute changed, syncing state
             setCurrentTimeMs(Math.floor(v.currentTime * 1000));
             setPlaying(!v.paused);
           }
@@ -255,9 +253,7 @@ export function useVideoState() {
 
       // Check if state has changed since last sync
       if (currentTime !== lastSyncTime || isPlaying !== lastSyncPlaying) {
-        console.log(
-          `📱 Aggressive sync: time=${currentTime}ms, playing=${isPlaying}, readyState=${readyState}, networkState=${networkState}, attempts=${syncAttempts}`
-        );
+        // Aggressive sync
 
         setCurrentTimeMs(currentTime);
         setPlaying(isPlaying);
@@ -270,7 +266,7 @@ export function useVideoState() {
         // If no changes detected for a while, force a sync anyway
         if (syncAttempts > 20) {
           // 20 * 100ms = 2 seconds
-          console.log("📱 Force syncing after no changes detected");
+          // Force syncing after no changes detected
           setCurrentTimeMs(currentTime);
           setPlaying(isPlaying);
           syncAttempts = 0;
@@ -281,9 +277,7 @@ export function useVideoState() {
       const timeDiff = Math.abs(currentTime - currentTimeMs);
       if (timeDiff > 100) {
         // More than 100ms difference indicates seeking
-        console.log(
-          `📱 Seeking detected: video=${currentTime}ms, state=${currentTimeMs}ms, diff=${timeDiff}ms`
-        );
+        // Seeking detected
         setCurrentTimeMs(currentTime);
         setPlaying(isPlaying);
         lastSyncTime = currentTime;
@@ -293,7 +287,7 @@ export function useVideoState() {
     };
 
     // Run aggressive sync every 100ms on mobile
-    const aggressiveInterval = setInterval(aggressiveSync, 100);
+    const aggressiveInterval = setInterval(aggressiveSync, 300); // Optimized for video buffering
 
     return () => {
       clearInterval(aggressiveInterval);

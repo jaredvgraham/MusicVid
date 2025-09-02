@@ -64,7 +64,6 @@ export default function WorkspacePage(): React.ReactElement {
         setAllowed(data.allowed);
         setRemainingFinalRenders(data.finalRenders);
       } catch (e: any) {
-        console.log("e", e);
         setAllowed(true);
         setRemainingFinalRenders(1);
       }
@@ -80,12 +79,9 @@ export default function WorkspacePage(): React.ReactElement {
           "next",
           `api/workspace/${projectId}`
         );
-        console.log("res", res.project);
-        console.log("res.project.transcript", res.project.video);
         if (!mounted) return;
         setProject(res.project);
       } catch (e: any) {
-        console.log("e", e);
         setFetchError(e?.message || "Failed to load workspace");
       } finally {
         setLoading(false);
@@ -114,7 +110,6 @@ export default function WorkspacePage(): React.ReactElement {
           body: JSON.stringify({ video_url: url }),
         }
       );
-      console.log("res", res);
 
       // Force reload after a small delay to ensure state is updated
       window.location.reload();
@@ -136,7 +131,6 @@ export default function WorkspacePage(): React.ReactElement {
     try {
       // Start final render using the dedicated hook
       startRender();
-      console.log("Final render started");
     } catch (e: any) {
       console.error("Final render error:", e);
       setFetchError(e?.message || "Failed to start final render");
@@ -149,10 +143,6 @@ export default function WorkspacePage(): React.ReactElement {
     if (isComplete && videoFinal) {
       setSaving(false);
       // Navigate to result page with video URL as query parameter
-      console.log(
-        "Final render completed, navigating to result page with video:",
-        videoFinal
-      );
       router.push(
         `/result/${projectId}?video=${encodeURIComponent(videoFinal)}`
       );

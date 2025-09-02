@@ -48,7 +48,7 @@ const Dashboard = (): React.ReactElement => {
           data?.error?.message ?? `Request failed: ${response.status}`;
         throw new Error(message);
       }
-      console.log(response);
+      // Dashboard response
       const data = await response.json();
       if (data.error) {
         setError(data.error.message);

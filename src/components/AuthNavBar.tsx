@@ -74,7 +74,13 @@ export default function NavBar(): React.ReactElement {
         {/* Left: Brand */}
         <div className="flex items-center gap-3">
           <Link href="/" className="flex items-center gap-3">
-            <Image src="/logo.png" alt="Sonexa-Logo" width={40} height={40} />
+            <Image
+              src="/logo.png"
+              alt="Sonexa-Logo"
+              width={40}
+              height={40}
+              priority
+            />
             <span className="text-lg font-semibold tracking-wide text-white">
               Sonexa
             </span>

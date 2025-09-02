@@ -1,8 +1,10 @@
 import { NextRequest, NextResponse } from "next/server";
-import { auth, currentUser } from "@clerk/nextjs/server";
+import { auth } from "@clerk/nextjs/server";
 import { ApiError } from "@/types/ApiError";
 import ProjectClient from "@/backend/lib/projectClient";
 import { getObjectUrl as getS3ObjectUrl } from "@/backend/lib/s3";
+import User from "@/backend/models/User";
+import dbConnect from "@/backend/lib/db";
 
 export async function GET(
   request: NextRequest,
@@ -12,16 +14,6 @@ export async function GET(
     // Check if the current user is authenticated
     const { userId } = await auth();
     if (!userId) {
-      const error: ApiError = {
-        _error: "Unauthorized",
-        message: "You must be logged in to access this resource",
-        statusCode: 401,
-      };
-      return NextResponse.json({ error }, { status: 401 });
-    }
-
-    const user = await currentUser();
-    if (!user) {
       const error: ApiError = {
         _error: "Unauthorized",
         message: "You must be logged in to access this resource",
@@ -40,10 +32,11 @@ export async function GET(
       return NextResponse.json({ error }, { status: 400 });
     }
 
-    console.log("getWorkspace for project:", id);
+    // Connect to database once
+    await dbConnect();
 
-    // Get the project using ProjectClient
-    const result = await ProjectClient.getProject(id);
+    // Get the project using ProjectClient (skip dbConnect since we already connected)
+    const result = await ProjectClient.getProject(id, true);
 
     if ("_error" in result) {
       // Handle error from ProjectClient
@@ -53,12 +46,18 @@ export async function GET(
 
     const project = result;
 
-    if (
-      user.id !== project.user_id &&
-      user.primaryEmailAddress?.emailAddress !==
-        process.env.NEXT_PUBLIC_ADMIN_EMAIL
-    ) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    // Check if user owns the project or is admin
+    const isOwner = userId === project.user_id;
+
+    if (!isOwner) {
+      // Check if user is admin using database lookup (much faster than currentUser())
+      const user = await User.findOne({ clerkId: userId })
+        .select("email")
+        .lean();
+
+      if (!user || user.email !== process.env.NEXT_PUBLIC_ADMIN_EMAIL) {
+        return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+      }
     }
 
     // If we have a stored videoKey, get a fresh S3 URL
@@ -70,9 +69,6 @@ export async function GET(
         console.warn("Failed to get S3 URL for videoKey:", project.videoKey);
       }
     }
-    console.log("project", project);
-    console.log("project width:", project.width);
-    console.log("project height:", project.height);
 
     return NextResponse.json({
       project: {

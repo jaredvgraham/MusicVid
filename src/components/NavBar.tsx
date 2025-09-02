@@ -83,7 +83,13 @@ function NavBarContent(): React.ReactElement {
             href={`${isSignedIn ? "/dashboard" : "/"}`}
             className="flex items-center gap-3"
           >
-            <Image src="/logo.png" alt="Sonexa-Logo" width={40} height={40} />
+            <Image
+              src="/logo.png"
+              alt="Sonexa-Logo"
+              width={40}
+              height={40}
+              priority
+            />
             <span className="text-lg font-semibold tracking-wide text-white">
               Sonexa
             </span>

@@ -56,8 +56,6 @@ export function useProjectSocket(projectId: string | null) {
     const sock = getSocket();
     if (!sock || !activeId) return;
 
-    console.log("Setting up socket for project:", activeId);
-
     // check if the project is already completed and do not join if it is
     const checkCompleted = async () => {
       const response = await fetch("/api/complete/" + activeId);
@@ -73,22 +71,18 @@ export function useProjectSocket(projectId: string | null) {
     };
 
     const onConnect = () => {
-      console.log("onConnect");
       setConnected(true);
       setError(null); // Clear any previous errors
-      console.log("Emitting project:join for:", activeId);
       sock.emit("project:join", { projectId: activeId });
     };
     const onConnectError = (err: any) => {
       const msg = typeof err?.message === "string" ? err.message : String(err);
-      console.log("socket connect_error", msg);
       setError(msg);
       setConnected(false);
 
       // Retry connection after a delay
       setTimeout(() => {
         if (sock && !sock.connected) {
-          console.log("Retrying connection...");
           sock.connect();
         }
       }, 2000);
@@ -114,7 +108,7 @@ export function useProjectSocket(projectId: string | null) {
     };
     const onDisconnect = () => setConnected(false);
     const onJoined = () => {
-      console.log("Joined project room:", activeId);
+      // Joined project room
     };
     const onFinished = (payload: any) => {
       if (payload?.id === activeId) {
@@ -141,7 +135,6 @@ export function useProjectSocket(projectId: string | null) {
           ...(payload as Project),
           transcript: lines,
         };
-        console.log("onFinished", normalized);
         // setProject(normalized);
         // Success: clear persisted id so we don't auto-join next load
         if (typeof window !== "undefined") {
@@ -154,7 +147,6 @@ export function useProjectSocket(projectId: string | null) {
     };
     const onStatus = (payload: any) => {
       if (payload?.id === activeId) {
-        console.log("Status update received:", payload);
         setStatus(payload);
       }
     };
@@ -171,11 +163,9 @@ export function useProjectSocket(projectId: string | null) {
 
     // Connect immediately if not connected, or join project if already connected
     if (!sock.connected) {
-      console.log("Socket not connected, connecting...");
       sock.connect();
     } else {
       // If already connected, join the project room immediately
-      console.log("Socket already connected, joining project:", activeId);
       setConnected(true);
       sock.emit("project:join", { projectId: activeId });
     }
@@ -183,14 +173,16 @@ export function useProjectSocket(projectId: string | null) {
     checkCompleted();
 
     return () => {
-      sock.off("connect", onConnect);
-      sock.off("disconnect", onDisconnect);
-      sock.off("project:joined", onJoined);
-      sock.off("project:finished", onFinished);
-      sock.off("project:error", onProjectError);
-      sock.off("project:status", onStatus);
-      sock.off("connect_error", onConnectError);
-      sock.off("error", onConnectError);
+      if (sock) {
+        sock.off("connect", onConnect);
+        sock.off("disconnect", onDisconnect);
+        sock.off("project:joined", onJoined);
+        sock.off("project:finished", onFinished);
+        sock.off("project:error", onProjectError);
+        sock.off("project:status", onStatus);
+        sock.off("connect_error", onConnectError);
+        sock.off("error", onConnectError);
+      }
       // do not disconnect here; keep singleton alive for other pages
     };
   }, [activeId, router]);

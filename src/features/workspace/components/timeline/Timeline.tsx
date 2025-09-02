@@ -53,10 +53,10 @@ export function Timeline(): React.ReactElement {
   const widthMs = Math.max(totalMs, currentTimeMs + 2000);
   const lanesToShow = 10;
 
-  // Generate timeline data
+  // Generate timeline data (optimized to reduce recalculations)
   const segments = useMemo(
     () => buildTimelineSegments(transcript, selectedIndex, currentTimeMs),
-    [transcript, selectedIndex, currentTimeMs]
+    [transcript, selectedIndex, Math.floor(currentTimeMs / 200)] // Only recalculate every 200ms
   );
 
   const gridMarks = useMemo(
@@ -152,18 +152,32 @@ export function Timeline(): React.ReactElement {
             onMouseDown={handlePlayheadMouseDown}
           />
 
-          {/* Timeline segments */}
-          {segments.map((segment) => (
-            <TimelineSegment
-              key={`${segment.index}-${segment.start}`}
-              segment={segment}
-              lines={transcript}
-              pixelsPerSecond={pixelsPerSecond}
-              onSelect={setSelectedIndex}
-              onSeek={seekToMs}
-              onDragStart={handleSegmentDragStart}
-            />
-          ))}
+          {/* Timeline segments - Virtualized for performance */}
+          {segments
+            .filter((segment) => {
+              // Only render segments that are visible in the viewport
+              const segmentLeft = (segment.start / 1000) * pixelsPerSecond;
+              const segmentRight = (segment.end / 1000) * pixelsPerSecond;
+              const viewportLeft = containerRef.current?.scrollLeft || 0;
+              const viewportRight =
+                viewportLeft + (containerRef.current?.clientWidth || 0);
+
+              return (
+                segmentRight >= viewportLeft - 100 &&
+                segmentLeft <= viewportRight + 100
+              );
+            })
+            .map((segment) => (
+              <TimelineSegment
+                key={`${segment.index}-${segment.start}`}
+                segment={segment}
+                lines={transcript}
+                pixelsPerSecond={pixelsPerSecond}
+                onSelect={setSelectedIndex}
+                onSeek={seekToMs}
+                onDragStart={handleSegmentDragStart}
+              />
+            ))}
         </div>
       </div>
     </div>

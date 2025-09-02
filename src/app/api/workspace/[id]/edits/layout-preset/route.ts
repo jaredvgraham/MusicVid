@@ -17,7 +17,6 @@ export async function PUT(
   }
   const { id: projectId } = await context.params;
   const { presetId } = await req.json();
-  console.log("presetId", presetId);
   const project = await Project.findById(projectId);
   if (!project) {
     return NextResponse.json({ error: "Project not found" }, { status: 404 });

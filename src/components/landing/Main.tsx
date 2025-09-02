@@ -184,6 +184,7 @@ const Main = () => {
               <div className="flex items-center gap-3 mb-4">
                 <Image
                   src="/logo.png"
+                  priority
                   alt="Sonexa-Logo"
                   width={32}
                   height={32}

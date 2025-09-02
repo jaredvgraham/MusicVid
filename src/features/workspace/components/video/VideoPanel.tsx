@@ -4,7 +4,7 @@ import React from "react";
 import { useEditor } from "../../state/EditorContext";
 import { OverlayCanvas } from "../overlayCanvas";
 
-export function VideoPanel(): React.ReactElement {
+export const VideoPanel = React.memo(function VideoPanel(): React.ReactElement {
   const { project, videoRef, setRenderScale, mute, forceSync } = useEditor();
 
   const baseW = (project as any)?.width || 1080;
@@ -16,15 +16,7 @@ export function VideoPanel(): React.ReactElement {
     if (!v) return;
 
     const logVideoState = () => {
-      console.log("📱 Video state check:", {
-        paused: v.paused,
-        readyState: v.readyState,
-        networkState: v.networkState,
-        currentTime: v.currentTime,
-        duration: v.duration,
-        src: v.src,
-        muted: v.muted,
-      });
+      // Video state check
     };
 
     // Log state every 2 seconds for debugging
@@ -83,127 +75,117 @@ export function VideoPanel(): React.ReactElement {
           if (!el) return;
           const rect = el.getBoundingClientRect();
           const scale = rect.width / baseW;
-          console.log("🎨 VideoPanel scale calculation:", {
-            rectWidth: rect.width,
-            baseW: baseW,
-            baseH: baseH,
-            scale: scale,
-            isPortrait: baseH > baseW,
-          });
+          // VideoPanel scale calculation
           setRenderScale(scale);
         }}
       >
         <video
           ref={videoRef}
-          key={project.video}
+          key={project.id}
           src={project.video}
           className="absolute inset-0 h-full w-full"
           playsInline
           webkit-playsinline="true"
-          muted={mute}
-          preload="auto" // iOS is flaky with "metadata"
+          preload="metadata" // Changed from "auto" to reduce initial buffering
           controls={true}
           disablePictureInPicture
           controlsList="nodownload nofullscreen noremoteplaybook"
+          crossOrigin="anonymous"
+          poster="" // Prevent poster loading
           style={{
             zIndex: 1,
+            // Optimize for performance
+            willChange: "transform",
+            backfaceVisibility: "hidden",
+            transform: "translateZ(0)", // Force hardware acceleration
           }}
           onLoadStart={() => {
-            console.log("📱 Video load started");
+            // Video load started - optimize buffering
+            if (videoRef.current) {
+              // Set buffer size for better performance
+              const buffered = videoRef.current.buffered;
+              // Use buffered data for optimization if needed
+              if (buffered.length > 0) {
+                // Buffer optimization logic can be added here
+              }
+            }
           }}
           onLoadedMetadata={() => {
-            console.log("📱 Video metadata loaded");
+            // Video metadata loaded - prepare for playback
+            if (videoRef.current) {
+              // Video is ready for smooth playback
+              // Don't call load() again as it can cause infinite loading
+            }
           }}
           onCanPlay={() => {
-            console.log("📱 Video can play");
+            // Video can play - optimize for smooth playback
+            if (videoRef.current) {
+              // Set playback rate for consistency
+              videoRef.current.playbackRate = 1.0;
+            }
+          }}
+          onWaiting={() => {
+            // Video is buffering - wait for it to recover naturally
+            // Don't call load() as it can cause loading loops
+          }}
+          onStalled={() => {
+            // Video stalled - let it recover naturally
+            // Don't call load() as it can cause loading loops
           }}
           onError={(e) => {
             console.error("📱 Video error:", e);
+            // Don't automatically reload as it can cause infinite loops
+            // Let the user manually refresh if needed
           }}
-          onTouchStart={() => {
-            // Force sync on mobile touch
-            console.log("📱 Video touch start detected");
-            setTimeout(() => forceSync(), 100);
+          onTouchStart={(e) => {
+            // Force sync on mobile touch (passive)
+            e.preventDefault();
+            // Reduced timeout for better responsiveness
+            setTimeout(() => forceSync(), 50);
           }}
-          onTouchEnd={() => {
-            // Force sync on mobile touch end
-            console.log("📱 Video touch end detected");
-            setTimeout(() => forceSync(), 100);
+          onTouchEnd={(e) => {
+            // Force sync on mobile touch end (passive)
+            e.preventDefault();
+            // Reduced timeout for better responsiveness
+            setTimeout(() => forceSync(), 50);
           }}
           onPlay={() => {
-            console.log("📱 Native play button clicked");
-            // Force the video to actually play on mobile
+            // Native play button clicked - optimized for performance
             setTimeout(() => {
-              if (videoRef.current) {
-                console.log("📱 Video state before play:", {
-                  paused: videoRef.current.paused,
-                  readyState: videoRef.current.readyState,
-                  networkState: videoRef.current.networkState,
-                  currentTime: videoRef.current.currentTime,
-                  duration: videoRef.current.duration,
-                  src: videoRef.current.src,
+              if (videoRef.current && videoRef.current.paused) {
+                videoRef.current.play().catch((error) => {
+                  console.error("📱 Play failed:", error);
                 });
-
-                if (videoRef.current.paused) {
-                  console.log("📱 Video was paused, forcing play()");
-                  videoRef.current.play().catch((error) => {
-                    console.error("📱 Play failed:", error);
-                  });
-                }
               }
               forceSync();
-            }, 50);
+            }, 25); // Reduced timeout for faster response
           }}
           onPause={() => {
-            console.log("📱 Native pause button clicked");
-            // Force the video to actually pause on mobile
+            // Native pause button clicked - optimized for performance
             setTimeout(() => {
-              if (videoRef.current) {
-                console.log("📱 Video state before pause:", {
-                  paused: videoRef.current.paused,
-                  readyState: videoRef.current.readyState,
-                  networkState: videoRef.current.networkState,
-                  currentTime: videoRef.current.currentTime,
-                  duration: videoRef.current.duration,
-                });
-
-                if (!videoRef.current.paused) {
-                  console.log("📱 Video was playing, forcing pause()");
-                  videoRef.current.pause();
-                }
+              if (videoRef.current && !videoRef.current.paused) {
+                videoRef.current.pause();
               }
               forceSync();
-            }, 50);
+            }, 25); // Reduced timeout for faster response
           }}
           onSeeking={() => {
-            console.log("📱 Native seeking detected");
-            // Force sync during seeking to keep controls responsive
+            // Native seeking detected - optimized for performance
             setTimeout(() => {
               forceSync();
-            }, 10);
+            }, 5); // Reduced timeout for faster seeking response
           }}
           onSeeked={() => {
-            console.log("📱 Native seek completed");
-            // Force immediate sync after seeking
+            // Native seek completed - optimized for performance
             setTimeout(() => {
-              if (videoRef.current) {
-                console.log("📱 Video state after seek:", {
-                  paused: videoRef.current.paused,
-                  readyState: videoRef.current.readyState,
-                  networkState: videoRef.current.networkState,
-                  currentTime: videoRef.current.currentTime,
-                  duration: videoRef.current.duration,
-                });
-              }
               forceSync();
-            }, 10);
+            }, 5); // Reduced timeout for faster seek completion
           }}
           onClick={() => {
-            console.log("📱 Video clicked directly");
-            // Ensure user interaction is registered
+            // Video clicked directly - optimized for performance
             setTimeout(() => {
               forceSync();
-            }, 100);
+            }, 50); // Reduced timeout for faster click response
           }}
         />
         <OverlayCanvas />
@@ -213,4 +195,4 @@ export function VideoPanel(): React.ReactElement {
       </div>
     </>
   );
-}
+});

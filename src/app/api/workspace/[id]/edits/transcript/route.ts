@@ -25,7 +25,6 @@ export async function PUT(
     transcript
   );
   if (!resp.ok) {
-    console.log(resp.error.message);
     return NextResponse.json(
       { error: resp.error._error },
       { status: resp.error.statusCode }

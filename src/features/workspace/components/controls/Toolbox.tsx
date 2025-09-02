@@ -30,7 +30,8 @@ export function Toolbox(): React.ReactElement {
   } = useEditor();
   const [refreshing, setRefreshing] = useState(false);
   const [refreshError, setRefreshError] = useState<string | null>(null);
-  const [refreshLimitReached, setRefreshLimitReached] = useState<boolean>(false);
+  const [refreshLimitReached, setRefreshLimitReached] =
+    useState<boolean>(false);
   const MAX_REFRESHES = 3;
   const initialUsed = Math.max(
     0,
@@ -47,7 +48,9 @@ export function Toolbox(): React.ReactElement {
       0,
       Math.min(
         MAX_REFRESHES,
-        Number(((project as any)?.transcriptRefreshes as number | undefined) ?? 0)
+        Number(
+          ((project as any)?.transcriptRefreshes as number | undefined) ?? 0
+        )
       )
     );
     setRefreshesUsed(used);
@@ -228,7 +231,7 @@ export function Toolbox(): React.ReactElement {
       if (!Array.isArray(next)) {
         throw new Error("Server did not return a transcript array.");
       }
-      console.log("next", next);
+      // Transcript refreshed
       setTranscript(next);
       // Optimistically count this refresh locally
       setRefreshesUsed((u) => Math.min(MAX_REFRESHES, u + 1));
@@ -408,10 +411,14 @@ export function Toolbox(): React.ReactElement {
       <div className="mt-2 flex items-center gap-2">
         <button
           onClick={refreshTranscriptFromServer}
-          disabled={refreshing || refreshLimitReached || (MAX_REFRESHES - refreshesUsed) <= 0}
+          disabled={
+            refreshing ||
+            refreshLimitReached ||
+            MAX_REFRESHES - refreshesUsed <= 0
+          }
           className="inline-flex items-center gap-2 rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 disabled:opacity-60"
         >
-          {refreshLimitReached || (MAX_REFRESHES - refreshesUsed) <= 0
+          {refreshLimitReached || MAX_REFRESHES - refreshesUsed <= 0
             ? "Limit reached"
             : refreshing
             ? "Refreshing…"
@@ -435,12 +442,19 @@ export function Toolbox(): React.ReactElement {
               viewBox="0 0 24 24"
               stroke="currentColor"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.66 1.73-2.5L13.73 5.5c-.77-.83-1.96-.83-2.73 0L3.2 16.5c-.77.84.19 2.5 1.73 2.5z" />
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.66 1.73-2.5L13.73 5.5c-.77-.83-1.96-.83-2.73 0L3.2 16.5c-.77.84.19 2.5 1.73 2.5z"
+              />
             </svg>
             <div className="flex-1">
               <div className="font-medium text-red-200">{refreshError}</div>
               {refreshLimitReached && (
-                <div className="mt-1 text-red-300/90">You can refresh a project’s transcript up to 3 times.</div>
+                <div className="mt-1 text-red-300/90">
+                  You can refresh a project’s transcript up to 3 times.
+                </div>
               )}
             </div>
           </div>

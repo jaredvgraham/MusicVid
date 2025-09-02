@@ -15,7 +15,6 @@ export const useAuthFetch = () => {
         ? process.env.NEXT_PUBLIC_API_URL ?? ""
         : process.env.NEXT_PUBLIC_EXPRESS_URL ?? "";
     const url = `${baseUrl}${endpoint.replace(/^\//, "")}`;
-    console.log("url", url);
 
     const headers = new Headers(options.headers ?? {});
 

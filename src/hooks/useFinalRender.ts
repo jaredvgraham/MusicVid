@@ -35,20 +35,17 @@ export function useFinalRender(projectId: string | null) {
     }
 
     const onConnect = () => {
-      console.log("Final render socket connected");
       setConnected(true);
       setRenderError(null);
     };
 
     const onConnectError = (err: any) => {
       const msg = typeof err?.message === "string" ? err.message : String(err);
-      console.log("Final render socket connect_error", msg);
       setRenderError(`Connection failed: ${msg}`);
       setConnected(false);
     };
 
     const onDisconnect = () => {
-      console.log("Final render socket disconnected");
       setConnected(false);
       setIsCancelling(false);
       if (isRendering) {

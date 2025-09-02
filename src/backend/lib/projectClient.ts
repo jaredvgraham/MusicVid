@@ -25,9 +25,12 @@ class ProjectClient {
   }
 
   static async getProject(
-    projectId: string
+    projectId: string,
+    skipDbConnect: boolean = false
   ): Promise<ProjectDocument | ApiError> {
-    await dbConnect();
+    if (!skipDbConnect) {
+      await dbConnect();
+    }
     try {
       const project = await Project.findById(projectId).lean<ProjectDocument>();
       if (!project) {

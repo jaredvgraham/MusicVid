@@ -125,21 +125,21 @@ export default function Upload(): React.ReactElement {
   const [projectId, setProjectId] = useState<string | null>(null);
   const { connected, finished, project, error, status } =
     useProjectSocket(projectId);
-  console.log("all we have", { connected, finished, project, error, status });
+  // Project socket state
 
   // Debug: log when projectId changes
   useEffect(() => {
-    console.log("ProjectId changed:", projectId);
+    // ProjectId changed
   }, [projectId]);
 
   // Debug: log status updates from project socket
   useEffect(() => {
-    console.log("Status update:", status);
+    // Status update
   }, [status]);
 
   // Debug: log connection state
   useEffect(() => {
-    console.log("Socket connected:", connected);
+    // Socket connected
   }, [connected]);
 
   const [isUploading, setIsUploading] = useState(false);
@@ -179,7 +179,7 @@ export default function Upload(): React.ReactElement {
   }, []);
 
   const submitSplit = async (formData: FormData) => {
-    console.log("formData", formData);
+    // Form data submitted
     try {
       setIsUploading(true);
       setUploadError(null);
@@ -211,7 +211,7 @@ export default function Upload(): React.ReactElement {
         throw new Error(message);
       }
       const data = await response.json();
-      console.log("data", data);
+      // Upload response data
       setHasId(true);
       setProjectId(data.id || data);
     } catch (e: unknown) {

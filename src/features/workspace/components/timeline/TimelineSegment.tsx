@@ -18,7 +18,7 @@ interface TimelineSegmentProps {
   ) => void;
 }
 
-export function TimelineSegment({
+export const TimelineSegment = React.memo(function TimelineSegment({
   segment,
   lines,
   pixelsPerSecond,
@@ -109,4 +109,4 @@ export function TimelineSegment({
       </div>
     </div>
   );
-}
+});
