@@ -114,14 +114,14 @@ export function Timeline(): React.ReactElement {
   };
 
   return (
-    <div className="rounded border border-white/10 bg-neutral-950 w-full">
-      <div className="flex items-center justify-between  text-xs text-white/60">
+    <div className="rounded border border-white/10 bg-neutral-950 w-full overflow-hidden">
+      <div className="flex items-center justify-between text-xs text-white/60 px-2 sm:px-3">
         <WordCrudBar />
       </div>
 
       <div
         ref={containerRef}
-        className="relative h-72 overflow-x-auto overflow-y-auto border-t border-white/10 select-none"
+        className="relative h-32 sm:h-40 md:h-60 lg:h-72 overflow-x-auto overflow-y-auto border-t border-white/10 select-none"
       >
         <div
           className="relative h-full select-none"

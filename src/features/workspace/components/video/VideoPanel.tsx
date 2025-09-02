@@ -31,29 +31,35 @@ export function VideoPanel(): React.ReactElement {
 
   return (
     <div
-      className={`relative mx-auto w-full ${
+      className={`relative mx-auto w-full  ${
         (project as any)?.width > (project as any)?.height
-          ? "max-w-[800px]"
-          : "max-w-[400px]"
+          ? "max-w-[400px] sm:max-w-[600px] lg:max-w-[800px]"
+          : "max-w-[250px] sm:max-w-[300px] lg:max-w-[400px]"
       } rounded border border-white/10 bg-black`}
+      style={{
+        aspectRatio: `${baseW} / ${baseH}`,
+        minHeight: 0,
+        minWidth: 0,
+      }}
       ref={(el) => {
         if (!el) return;
         const rect = el.getBoundingClientRect();
         const scale = rect.width / baseW;
+        console.log("🎨 VideoPanel scale calculation:", {
+          rectWidth: rect.width,
+          baseW: baseW,
+          baseH: baseH,
+          scale: scale,
+          isPortrait: baseH > baseW,
+        });
         setRenderScale(scale);
-      }}
-      style={{
-        aspectRatio: `${baseW} / ${baseH}`,
-        // Force the container to respect the aspect ratio
-        minHeight: 0,
-        minWidth: 0,
       }}
     >
       <video
         ref={videoRef}
         key={project.video}
         src={project.video}
-        className="absolute inset-0 h-full w-full object-cover"
+        className="absolute inset-0 h-full w-full object-cover "
       />
       <OverlayCanvas />
       <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/80">

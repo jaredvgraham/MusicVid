@@ -33,14 +33,7 @@ export function mergeWordStyle(base: React.CSSProperties, override?: any) {
   if (!override) return base;
   const o = override || {};
 
-  // Debug logging for font size override
-  if (typeof o.fontSizePx === "number") {
-    console.log("🎨 FONT SIZE OVERRIDE:", {
-      baseFontSize: base.fontSize,
-      overrideFontSizePx: o.fontSizePx,
-      willUse: `${o.fontSizePx}px`,
-    });
-  }
+  // Font size override applied
 
   const merged: React.CSSProperties = {
     ...base,

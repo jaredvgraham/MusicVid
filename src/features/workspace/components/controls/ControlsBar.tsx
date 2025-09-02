@@ -16,20 +16,21 @@ export function ControlsBar(): React.ReactElement {
   useEditorHotkeys();
 
   return (
-    <div className="flex items-center justify-between rounded border border-white/10 bg-neutral-950/70 px-3 py-2">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col md:flex-row md:items-center justify-between rounded border border-white/10 bg-neutral-950/70 px-3 py-3 md:py-2 gap-3 md:gap-0">
+      <div className="flex items-center gap-3">
         <button
           onClick={togglePlay}
-          className="rounded bg-white/10 px-3 py-1.5 text-sm text-white hover:bg-white/15"
+          className="rounded bg-white/10 px-4 py-2 md:px-3 md:py-1.5 text-sm text-white hover:bg-white/15 touch-manipulation"
         >
           {playing ? "Pause" : "Play"}
         </button>
-        <div className="ml-3 text-sm text-white/70">
+        <div className="text-sm md:text-sm text-white/70">
           {formatTime(currentTimeMs)}
         </div>
       </div>
-      <div className="flex items-center gap-2 text-sm text-white/70">
-        <span>Zoom</span>
+      <div className="flex items-center gap-3 text-sm text-white/70">
+        <span className="hidden md:inline">Zoom</span>
+        <span className="md:hidden">Timeline Zoom:</span>
         <input
           type="range"
           min={40}
@@ -37,8 +38,11 @@ export function ControlsBar(): React.ReactElement {
           step={5}
           value={pixelsPerSecond}
           onChange={(e) => setPixelsPerSecond(Number(e.target.value))}
+          className="w-24 md:w-20 touch-manipulation"
         />
-        <span className="w-10 text-right">{pixelsPerSecond}</span>
+        <span className="w-10 md:w-8 text-right text-sm md:text-xs">
+          {pixelsPerSecond}
+        </span>
       </div>
     </div>
   );

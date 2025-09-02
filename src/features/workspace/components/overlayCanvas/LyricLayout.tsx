@@ -13,6 +13,7 @@ interface LyricLayoutProps {
   currentTimeMs: number;
   onPointerDown: (gi: number) => void;
   isPortrait?: boolean;
+  scale?: number;
 }
 
 // Individual layout components
@@ -143,10 +144,19 @@ const KaraokeLayout: React.FC<{
   config: any;
   isPortrait: boolean;
   currentTimeMs: number;
-}> = ({ preset, lines, onPointerDown, config, isPortrait, currentTimeMs }) => {
+  scale?: number;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  currentTimeMs,
+  scale = 1,
+}) => {
   const maxWords = isPortrait
-    ? Math.min(config.maxWords || 2, 2)
-    : config.maxWords || 5;
+    ? Math.min(config?.maxWords || 2, 2)
+    : config?.maxWords || 5;
   const allWords = lines.flat();
 
   // Calculate how many words can fit in the available width
@@ -191,13 +201,13 @@ const KaraokeLayout: React.FC<{
   const startIndex = currentBatch * batchSize;
   const words = allWords.slice(startIndex, startIndex + batchSize);
 
-  // Use flexbox for simple horizontal layout
+  // Use flexbox for simple horizontal layout (matching Remotion exactly)
   const baseY =
-    config.position === "top"
+    config?.position === "top"
       ? isPortrait
         ? "25%"
         : "20%"
-      : config.position === "bottom"
+      : config?.position === "bottom"
       ? isPortrait
         ? "75%"
         : "80%"
@@ -217,26 +227,50 @@ const KaraokeLayout: React.FC<{
           overflow: "hidden", // Hide any overflow
         }}
       >
-        {words.map(({ w, gi }) => (
-          <span
-            key={`karaoke-${gi}`}
-            className="cursor-grab whitespace-nowrap"
-            style={{
-              ...mergeWordStyle(
-                buildPresetTextStyle(preset, isPortrait),
-                w.style
-              ),
-              // Font size comes from preset styles and can be overridden
-            }}
-            onPointerDown={(e) => {
-              e.preventDefault();
-              e.stopPropagation();
-              onPointerDown(gi);
-            }}
-          >
-            {w.text}
-          </span>
-        ))}
+        {words.map(({ w, gi }) => {
+          const baseStyle = buildPresetTextStyle(preset, isPortrait);
+          const textStyle = mergeWordStyle(baseStyle, w.style);
+
+          return (
+            <span
+              key={`karaoke-${gi}`}
+              className="cursor-grab whitespace-nowrap"
+              style={{
+                ...textStyle,
+                fontSize: (() => {
+                  // console.log("🎨 LAYOUT FONT DEBUG:", {
+                  //   textStyleFontSize: textStyle.fontSize,
+                  //   scale,
+                  //   scaleLessThan1: scale < 1,
+                  //   condition: textStyle.fontSize && scale < 1,
+                  // });
+
+                  if (textStyle.fontSize && scale < 1) {
+                    const originalSize = parseFloat(
+                      textStyle.fontSize as string
+                    );
+                    const scaledSize = originalSize * scale;
+                    // console.log("🎨 LAYOUT FONT SCALING DEBUG:", {
+                    //   originalSize,
+                    //   scale,
+                    //   scaledSize,
+                    //   textStyle: textStyle.fontSize,
+                    // });
+                    return `${scaledSize}px`;
+                  }
+                  return textStyle.fontSize;
+                })(),
+              }}
+              onPointerDown={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                onPointerDown(gi);
+              }}
+            >
+              {w.text}
+            </span>
+          );
+        })}
       </div>
     </div>
   );
@@ -365,7 +399,14 @@ export function LyricLayout({
   currentTimeMs,
   onPointerDown,
   isPortrait = false,
+  scale = 1,
 }: LyricLayoutProps): React.ReactElement {
+  // console.log("🎨 LyricLayout scale debug:", {
+  //   scale,
+  //   isPortrait,
+  //   linesCount: lines.length,
+  // });
+
   // Render based on layout type
   switch (layoutPreset.type) {
     case "karaoke":
@@ -377,6 +418,7 @@ export function LyricLayout({
           config={layoutPreset.config.karaoke}
           isPortrait={isPortrait}
           currentTimeMs={currentTimeMs}
+          scale={scale}
         />
       );
     case "grid":

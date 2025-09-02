@@ -26,21 +26,21 @@ export function VideoControls(): React.ReactElement {
   });
 
   return (
-    <div className="border border-white/10 rounded-lg p-3 space-y-3">
+    <div className="border border-white/10 rounded-lg p-3 md:p-4 space-y-3">
       <div className="flex items-center justify-between">
-        <div className="text-xs text-white/60 ">
+        <div className="text-sm md:text-xs text-white/60 truncate">
           {formatTime(currentTimeMs)} / {formatTime(duration)}
         </div>
 
         {/* Control Buttons */}
-        <div className="flex items-center justify-center space-x-2">
+        <div className="flex items-center justify-center space-x-3">
           <button
             onClick={handleRestart}
-            className="p-1.5 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white transition-colors"
+            className="p-3 md:p-2 rounded-full bg-neutral-800 hover:bg-neutral-700 text-white transition-colors touch-manipulation"
             title="Restart from beginning"
           >
             <svg
-              className="w-3 h-3"
+              className="w-4 h-4 md:w-3 md:h-3"
               fill="none"
               stroke="currentColor"
               viewBox="0 0 24 24"
@@ -56,12 +56,12 @@ export function VideoControls(): React.ReactElement {
 
           <button
             onClick={togglePlay}
-            className="p-1 rounded-full bg-purple-500 hover:bg-purple-400 text-white transition-colors"
+            className="p-4 md:p-2 rounded-full bg-purple-500 hover:bg-purple-400 text-white transition-colors touch-manipulation"
             title={playing ? "Pause" : "Play"}
           >
             {playing ? (
               <svg
-                className="w-4 h-4"
+                className="w-6 h-6 md:w-4 md:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -75,7 +75,7 @@ export function VideoControls(): React.ReactElement {
               </svg>
             ) : (
               <svg
-                className="w-4 h-4"
+                className="w-6 h-6 md:w-4 md:h-4"
                 fill="none"
                 stroke="currentColor"
                 viewBox="0 0 24 24"
@@ -96,7 +96,7 @@ export function VideoControls(): React.ReactElement {
       <div className="relative">
         <div
           ref={progressBarRef}
-          className="w-full h-1.5 bg-neutral-700 rounded-full cursor-pointer relative select-none"
+          className="w-full h-3 md:h-2 bg-neutral-700 rounded-full cursor-pointer relative select-none touch-manipulation"
           onClick={handleProgressClick}
           onMouseDown={handleProgressMouseDown}
         >
@@ -111,7 +111,7 @@ export function VideoControls(): React.ReactElement {
             }}
           />
           <div
-            className="absolute top-1/2 w-2.5 h-2.5 bg-purple-500 rounded-full border border-white transform -translate-y-1/2 -translate-x-1/2 cursor-pointer"
+            className="absolute top-1/2 w-4 h-4 md:w-3 md:h-3 bg-purple-500 rounded-full border border-white transform -translate-y-1/2 -translate-x-1/2 cursor-pointer"
             style={{
               left: duration
                 ? `${
@@ -124,7 +124,7 @@ export function VideoControls(): React.ReactElement {
       </div>
 
       {/* Time Display */}
-      <div className="flex items-center justify-between text-[10px] text-white/60">
+      <div className="flex items-center justify-between text-xs md:text-[10px] text-white/60">
         <span>Current: {formatTime(currentTimeMs)}</span>
         <span>Total: {formatTime(duration)}</span>
       </div>
