@@ -17,6 +17,25 @@ export default function WelcomePage(): React.ReactElement {
 
   useEffect(() => {
     // Track registration completion for pixel analytics
+    
+    // send welcome email
+    const sendWelcomeEmail = async () => {
+      try {
+        const res = await fetch("/api/welcome-email", {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+        if (!res.ok) {
+          throw new Error("Failed to send welcome email");
+        }
+        console.log("Welcome email sent successfully");
+      } catch (error: unknown) {
+        console.error("Error sending welcome email", error);
+      }
+    }
+    sendWelcomeEmail();
     trackCompleteRegistration();
   }, []);
 
