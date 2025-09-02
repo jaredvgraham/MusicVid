@@ -60,6 +60,8 @@ export function VideoPanel(): React.ReactElement {
         key={project.video}
         src={project.video}
         className="absolute inset-0 h-full w-full object-cover "
+        playsInline
+        webkit-playsinline="true"
       />
       <OverlayCanvas />
       <div className="pointer-events-none absolute bottom-2 right-2 rounded bg-white/10 px-2 py-0.5 text-[10px] text-white/80">
