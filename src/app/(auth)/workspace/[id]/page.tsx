@@ -449,8 +449,8 @@ export default function WorkspacePage(): React.ReactElement {
                   Final render not available
                 </h3>
                 <p className="mt-2 text-sm text-white/80">
-                  You've used all final renders allowed on your current plan for
-                  this billing period.
+                  {`You've used all final renders allowed on your current plan for
+                  this billing period.`}
                 </p>
                 <div className="mt-5 flex flex-col sm:flex-row items-stretch sm:items-center justify-end gap-2">
                   <button
