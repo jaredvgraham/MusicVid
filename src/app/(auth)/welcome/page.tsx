@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
 import { trackCompleteRegistration } from "@/components/PixelTracker";
 import {
@@ -14,10 +14,15 @@ import Link from "next/link";
 
 export default function WelcomePage(): React.ReactElement {
   const router = useRouter();
+  const hasRun = useRef(false);
 
   useEffect(() => {
+    // Prevent duplicate calls in development (React Strict Mode)
+    if (hasRun.current) return;
+    hasRun.current = true;
+
     // Track registration completion for pixel analytics
-    
+
     // send welcome email
     const sendWelcomeEmail = async () => {
       try {
@@ -34,7 +39,7 @@ export default function WelcomePage(): React.ReactElement {
       } catch (error: unknown) {
         console.error("Error sending welcome email", error);
       }
-    }
+    };
     sendWelcomeEmail();
     trackCompleteRegistration();
   }, []);
