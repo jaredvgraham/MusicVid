@@ -18,6 +18,7 @@ import { EditorProvider } from "@/features/workspace/state/EditorContext";
 import { VideoPicker } from "@/components/upload/VideoPicker";
 import { useProjectSocket } from "@/hooks/useProjectSocket";
 import { useFinalRender } from "@/hooks/useFinalRender";
+import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
 type WorkspaceResponse = { project: Project };
@@ -57,10 +58,16 @@ export default function WorkspacePage(): React.ReactElement {
   // Fetch workspace data
   useEffect(() => {
     const check = async () => {
-      const response = await fetch("/api/usage-check?action=finalRender");
-      const data = await response.json();
-      setAllowed(data.allowed);
-      setRemainingFinalRenders(data.finalRenders);
+      try {
+        const response = await fetch("/api/usage-check?action=finalRender");
+        const data = await response.json();
+        setAllowed(data.allowed);
+        setRemainingFinalRenders(data.finalRenders);
+      } catch (e: any) {
+        console.log("e", e);
+        setAllowed(true);
+        setRemainingFinalRenders(1);
+      }
     };
     check();
     let mounted = true;
@@ -153,7 +160,12 @@ export default function WorkspacePage(): React.ReactElement {
   }, [isComplete, videoFinal, projectId, router]);
 
   if (!projectId) return <div className="p-6">No project id</div>;
-  if (loading) return <div className="p-6">Loading workspace…</div>;
+  if (loading)
+    return (
+      <div className="flex items-center justify-center h-screen">
+        <LoadingSpinner />
+      </div>
+    );
   if (fetchError) return <div className="p-6 text-red-400">{fetchError}</div>;
   if (!project) return <div className="p-6">Not found</div>;
 

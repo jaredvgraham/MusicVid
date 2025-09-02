@@ -12,6 +12,7 @@ export default function SignInPage(): React.ReactElement {
             card: "bg-neutral-950/80 backdrop-blur border border-white/10",
           },
         }}
+        forceRedirectUrl={"/dashboard"}
       />
     </main>
   );
