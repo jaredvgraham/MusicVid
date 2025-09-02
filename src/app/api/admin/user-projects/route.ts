@@ -3,6 +3,7 @@ import { auth, currentUser } from "@clerk/nextjs/server";
 import { ApiError } from "@/types/ApiError";
 import ProjectClient from "@/backend/lib/projectClient";
 import { getObjectUrl as getS3ObjectUrl } from "@/backend/lib/s3";
+import FinalRender from "@/backend/models/FinalRender";
 
 export async function GET(request: Request) {
   try {
@@ -79,6 +80,19 @@ export async function GET(request: Request) {
               video = await getS3ObjectUrl(key);
             } catch {}
           }
+          const finalRenders = await FinalRender.find({
+            projectId: doc._id.toString(),
+          });
+          let finalRenderUrls: string[] = [];
+          if (finalRenders) {
+            try {
+              finalRenderUrls = await Promise.all(
+                finalRenders.map(async (r) => {
+                  return await getS3ObjectUrl(r.renderKey);
+                })
+              );
+            } catch {}
+          }
 
           return {
             _id: doc._id.toString(),
@@ -94,7 +108,7 @@ export async function GET(request: Request) {
             s3_url: (doc as any).s3_url,
             transcript: (doc as any).transcript,
             textClips: (doc as any).textClips,
-            finalRender: (doc as any).finalRender,
+            finalRender: finalRenderUrls,
             video_url: (doc as any).video_url,
             width: (doc as any).width,
             height: (doc as any).height,
@@ -108,11 +122,11 @@ export async function GET(request: Request) {
       // Calculate statistics
       const totalProjects = projects.length;
       const activeProjects = projects.filter(
-        (p) => !p.failed && !p.renderInProgress && !p.finalRender
+        (p) => !p.failed && !p.renderInProgress && p.finalRender.length === 0
       ).length;
       const failedProjects = projects.filter((p) => p.failed).length;
       const projectsWithFinalRenders = projects.filter(
-        (p) => p.finalRender
+        (p) => p.finalRender.length > 0
       ).length;
       const projectsWithVideos = projects.filter(
         (p) => p.video_url || p.video

@@ -351,6 +351,18 @@ const AdminDashboard = () => {
                               <FolderOpen className="h-4 w-4" />
                               View in Workspace
                             </a>
+                            {project.finalRender &&
+                              project.finalRender.length > 0 && (
+                                <a
+                                  href={project.finalRender[0]}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Play className="h-4 w-4" />
+                                  View Final Render
+                                </a>
+                              )}
+
                             {project.video && (
                               <a
                                 href={project.video}
