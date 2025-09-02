@@ -12,6 +12,7 @@ import React, {
 import type { Line, Project } from "@/types";
 import type { EditorContextValue } from "../types";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
+import { useVideoState } from "../hooks/useVideoState";
 
 const EditorContext = createContext<EditorContextValue | null>(null);
 
@@ -24,11 +25,12 @@ export function EditorProvider({
   initialTranscript: Line[];
   children: React.ReactNode;
 }) {
-  // State
+  // Video state
+  const videoState = useVideoState();
+
+  // Editor state
   const [transcript, setTranscript] = useState<Line[]>(() => initialTranscript);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
-  const [currentTimeMs, _setCurrentTimeMs] = useState(0);
-  const [playing, setPlaying] = useState(false);
   const [pixelsPerSecond, setPixelsPerSecond] = useState(100);
   const [lyricPresetId, setLyricPresetId] = useState<string>(
     (project as any)?.lyricPresetId || "classic"
@@ -37,9 +39,6 @@ export function EditorProvider({
     project?.layoutPresetId || "centered-classic"
   );
   const [renderScale, setRenderScale] = useState<number>(1);
-
-  // Refs
-  const videoRef = useRef<HTMLVideoElement | null>(null);
   const transcriptRef = useRef<Line[]>(initialTranscript);
   const authFetch = useAuthFetch();
 
@@ -56,37 +55,12 @@ export function EditorProvider({
   }, [project?.layoutPresetId]);
 
   // Actions
-  const setCurrentTimeMs = useCallback((ms: number) => {
-    _setCurrentTimeMs(ms);
-  }, []);
-
-  const seekToMs = useCallback((ms: number) => {
-    _setCurrentTimeMs(ms);
-    const v = videoRef.current;
-    if (v) {
-      v.currentTime = ms / 1000;
-    }
-  }, []);
-
-  // Controls
-  const play = useCallback(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.play().catch(() => {});
-    setPlaying(true);
-  }, []);
-
-  const pause = useCallback(() => {
-    const v = videoRef.current;
-    if (!v) return;
-    v.pause();
-    setPlaying(false);
-  }, []);
-
-  const togglePlay = useCallback(() => {
-    if (playing) pause();
-    else play();
-  }, [playing, play, pause]);
+  const setCurrentTimeMs = useCallback(
+    (ms: number) => {
+      videoState.setCurrentTimeMs(ms);
+    },
+    [videoState]
+  );
 
   // Persistence
   const saveTranscript = useCallback(
@@ -159,11 +133,12 @@ export function EditorProvider({
       selectedIndex,
       lyricPresetId,
       layoutPresetId,
-      currentTimeMs,
-      playing,
+      currentTimeMs: videoState.currentTimeMs,
+      playing: videoState.playing,
       pixelsPerSecond,
       renderScale,
-      videoRef,
+      videoRef: videoState.videoRef,
+      mute: videoState.mute,
 
       // Actions
       setTranscript,
@@ -171,15 +146,18 @@ export function EditorProvider({
       setLyricPresetId,
       setLayoutPresetId,
       setCurrentTimeMs,
-      seekToMs,
-      setPlaying,
+      seekToMs: videoState.seekToMs,
+      setPlaying: videoState.setPlaying,
       setPixelsPerSecond,
       setRenderScale,
+      setMute: videoState.setMute,
+      forceSync: videoState.forceSync,
 
       // Controls
-      play,
-      pause,
-      togglePlay,
+      play: videoState.play,
+      pause: videoState.pause,
+      togglePlay: videoState.togglePlay,
+      toggleMute: videoState.toggleMute,
 
       // Persistence
       saveTranscript,
@@ -192,15 +170,10 @@ export function EditorProvider({
       selectedIndex,
       lyricPresetId,
       layoutPresetId,
-      currentTimeMs,
-      playing,
+      videoState,
       pixelsPerSecond,
       renderScale,
       setCurrentTimeMs,
-      seekToMs,
-      play,
-      pause,
-      togglePlay,
       saveTranscript,
       saveLyricPreset,
       saveLayoutPreset,

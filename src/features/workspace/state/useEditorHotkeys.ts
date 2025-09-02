@@ -6,8 +6,6 @@ import { deleteWord as deleteWordOp } from "../actions/wordCrud";
 
 export function useEditorHotkeys() {
   const {
-    playing,
-    togglePlay,
     transcript,
     setTranscript,
     selectedIndex,
@@ -31,10 +29,18 @@ export function useEditorHotkeys() {
       );
       if (isTyping || e.metaKey || e.ctrlKey || e.altKey) return;
 
-      // Space toggles play/pause
+      // Space should be handled by native video controls
       if (e.code === "Space") {
-        e.preventDefault();
-        togglePlay();
+        // Don't prevent default - let the video element handle spacebar naturally
+        // Only prevent if we're not focused on the video element
+        const videoElement = document.querySelector("video");
+        const isVideoFocused = document.activeElement === videoElement;
+
+        if (!isVideoFocused) {
+          // Focus the video element so native controls can handle spacebar
+          videoElement?.focus();
+        }
+        // Let the native video controls handle the spacebar press
         return;
       }
 
@@ -107,8 +113,6 @@ export function useEditorHotkeys() {
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
   }, [
-    playing,
-    togglePlay,
     transcript,
     setTranscript,
     selectedIndex,

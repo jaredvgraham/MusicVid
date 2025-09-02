@@ -248,7 +248,11 @@ export function OverlayCanvas(): React.ReactElement {
 
   // Render positioned text clips + active words overlay
   return (
-    <div className="pointer-events-none absolute inset-0 " ref={containerRef}>
+    <div
+      className="pointer-events-none absolute inset-0"
+      ref={containerRef}
+      style={{ zIndex: 2 }}
+    >
       {/* Scale a fixed 1080x1920 overlay to fit the container */}
       <div
         style={{
@@ -259,7 +263,7 @@ export function OverlayCanvas(): React.ReactElement {
           height: `${designH}px`,
           transform: `scale(${finalScale})`,
           transformOrigin: "top left",
-          pointerEvents: "auto",
+          pointerEvents: isDragging ? "auto" : "none",
         }}
         ref={dragContainerRef}
         onPointerMove={(e) => {

@@ -6,24 +6,12 @@ import { useEditorHotkeys } from "../../state/useEditorHotkeys";
 import { formatTime } from "../../utils/timelineUtils";
 
 export function ControlsBar(): React.ReactElement {
-  const {
-    playing,
-    togglePlay,
-    currentTimeMs,
-    pixelsPerSecond,
-    setPixelsPerSecond,
-  } = useEditor();
+  const { currentTimeMs, pixelsPerSecond, setPixelsPerSecond } = useEditor();
   useEditorHotkeys();
 
   return (
     <div className="flex flex-col md:flex-row md:items-center justify-between rounded border border-white/10 bg-neutral-950/70 px-3 py-3 md:py-2 gap-3 md:gap-0">
       <div className="flex items-center gap-3">
-        <button
-          onClick={togglePlay}
-          className="rounded bg-white/10 px-4 py-2 md:px-3 md:py-1.5 text-sm text-white hover:bg-white/15 touch-manipulation"
-        >
-          {playing ? "Pause" : "Play"}
-        </button>
         <div className="text-sm md:text-sm text-white/70">
           {formatTime(currentTimeMs)}
         </div>

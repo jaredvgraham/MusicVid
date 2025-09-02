@@ -7,10 +7,7 @@ import { Project } from "@/types";
 import { createPortal } from "react-dom";
 import { getSocket } from "@/lib/socket";
 
-import {
-  VideoPanel,
-  VideoControls,
-} from "@/features/workspace/components/video";
+import { VideoPanel } from "@/features/workspace/components/video";
 import { ControlsBar, Toolbox } from "@/features/workspace/components/controls";
 import { Timeline } from "@/features/workspace/components/timeline";
 import { EditorProvider } from "@/features/workspace/state/EditorContext";
@@ -219,7 +216,6 @@ export default function WorkspacePage(): React.ReactElement {
           {/* Mobile Layout - Stacked */}
           <div className="md:hidden space-y-3">
             <VideoPanel />
-            <VideoControls />
             <Timeline />
           </div>
 
@@ -227,7 +223,6 @@ export default function WorkspacePage(): React.ReactElement {
           <div className="hidden md:grid md:grid-cols-3 gap-6">
             <div className="md:col-span-2 space-y-4">
               <VideoPanel />
-              <VideoControls />
               <Timeline />
             </div>
 

@@ -33,7 +33,6 @@ workspace/
 
 #### Video Components (`components/video/`)
 
-- **VideoControls**: Video control component with separated logic
 - **VideoPanel**: Video preview panel component
 
 #### Control Components (`components/controls/`)
@@ -46,7 +45,6 @@ workspace/
 
 - **useTimelineDrag**: Handles timeline drag operations
 - **usePlayheadDrag**: Handles playhead drag operations
-- **useVideoControls**: Handles video control logic
 - **useEditor**: Global editor state management
 
 ### 3. **Type Safety**
@@ -82,22 +80,14 @@ function MyWorkspace() {
 ### Using Custom Hooks
 
 ```tsx
-import { useEditor, useVideoControls } from "@/features/workspace";
+import { useEditor } from "@/features/workspace";
 
 function MyComponent() {
   const { currentTimeMs, seekToMs, videoRef } = useEditor();
 
-  const { duration, formatTime, handleProgressClick } = useVideoControls({
-    videoRef,
-    currentTimeMs,
-    seekToMs,
-  });
-
   return (
     <div>
-      <span>
-        {formatTime(currentTimeMs)} / {formatTime(duration)}
-      </span>
+      <span>Current time: {currentTimeMs}ms</span>
     </div>
   );
 }

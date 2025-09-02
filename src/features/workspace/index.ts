@@ -8,7 +8,6 @@ export * from "./components";
 export { useEditor } from "./state/EditorContext";
 export { useTimelineDrag } from "./hooks/useTimelineDrag";
 export { usePlayheadDrag } from "./hooks/usePlayheadDrag";
-export { useVideoControls } from "./hooks/useVideoControls";
 //
 // Actions
 export * from "./actions/wordCrud";
