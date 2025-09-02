@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import { trackCompleteRegistration } from "@/components/PixelTracker";
 import {
@@ -15,8 +15,17 @@ import Link from "next/link";
 export default function WelcomePage(): React.ReactElement {
   const router = useRouter();
   const hasRun = useRef(false);
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    // Set client flag to true after hydration
+    setIsClient(true);
+  }, []);
+
+  useEffect(() => {
+    // Only run after client-side hydration is complete
+    if (!isClient) return;
+
     // Prevent duplicate calls in development (React Strict Mode)
     if (hasRun.current) return;
     hasRun.current = true;
@@ -40,9 +49,10 @@ export default function WelcomePage(): React.ReactElement {
         console.error("Error sending welcome email", error);
       }
     };
+
     sendWelcomeEmail();
     trackCompleteRegistration();
-  }, []);
+  }, [isClient]);
 
   return (
     <div className="min-h-screen bg-neutral-950 flex items-center justify-center p-4">
