@@ -121,15 +121,22 @@ export interface LayoutPreset {
     karaoke?: {
       position: "top" | "bottom" | "center";
       maxWords?: number;
+      portraitMaxWords?: number;
       wordSpacing?: number;
+      portraitWordSpacing?: number;
       highlightCurrent?: boolean;
     };
     // Scrolling lyrics (like music videos)
     scrolling?: {
       direction: "up" | "down" | "left" | "right";
       speed: number;
-      position: "left" | "right" | "top" | "bottom";
+      position: "left" | "right" | "top" | "bottom" | "center";
       maxLines?: number;
+      portraitMaxLines?: number;
+      lineSpacing?: number;
+      portraitLineSpacing?: number;
+      wordSpacing?: number;
+      portraitWordSpacing?: number;
     };
     // Grid layout (words in a grid pattern)
     grid?: {
@@ -137,13 +144,19 @@ export interface LayoutPreset {
       rows: number;
       startPosition: "top-left" | "top-right" | "bottom-left" | "bottom-right";
       spacing: number;
+      portraitSpacing?: number;
+      portraitColumns?: number;
+      portraitRows?: number;
     };
     // Wave layout (words follow a wave pattern)
     wave?: {
       amplitude: number;
+      portraitAmplitude?: number;
       frequency: number;
       direction: "horizontal" | "vertical";
       centerLine: number;
+      wordSpacing?: number;
+      portraitWordSpacing?: number;
     };
     // Custom layout (user-defined positions)
     custom?: {

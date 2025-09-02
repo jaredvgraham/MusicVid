@@ -43,7 +43,9 @@ export default function WorkspacePage(): React.ReactElement {
     videoFinal,
     isComplete,
     connected: renderConnected,
+    isCancelling,
     startRender,
+    cancelRender,
   } = useFinalRender(projectId);
   // const [serverLines, setServerLines] = useState<Line[]>([]);
   // const [draftWords, setDraftWords] = useState<Word[]>([]);
@@ -265,12 +267,14 @@ export default function WorkspacePage(): React.ReactElement {
                 >
                   {isRendering ? `${renderStatus}...` : "Render Final Video"}
                 </button>
-                <button
-                  onClick={() => router.push("/")}
-                  className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
-                >
-                  Back
-                </button>
+                {isRendering && !isCancelling && (
+                  <button
+                    onClick={() => cancelRender()}
+                    className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
+                  >
+                    cancel
+                  </button>
+                )}
                 <span
                   className={`ml-2 self-center text-xs ${
                     allowed ? "text-white/60" : "text-amber-300"

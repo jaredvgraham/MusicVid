@@ -13,7 +13,6 @@ interface LyricLayoutProps {
   currentTimeMs: number;
   onPointerDown: (gi: number) => void;
   isPortrait?: boolean;
-  scale?: number;
 }
 
 // Individual layout components
@@ -144,22 +143,13 @@ const KaraokeLayout: React.FC<{
   config: any;
   isPortrait: boolean;
   currentTimeMs: number;
-  scale?: number;
-}> = ({
-  preset,
-  lines,
-  onPointerDown,
-  config,
-  isPortrait,
-  currentTimeMs,
-  scale = 1,
-}) => {
+}> = ({ preset, lines, onPointerDown, config, isPortrait, currentTimeMs }) => {
   const maxWords = isPortrait
     ? Math.min(config?.maxWords || 2, 2)
     : config?.maxWords || 5;
   const allWords = lines.flat();
 
-  // Calculate how many words can fit in the available width
+  // Calculate how many words can fit in the available width (matching backend)
   const availableWidth = isPortrait ? 80 : 90; // More width for landscape
   const wordSpacing = isPortrait ? 2 : 12; // Larger spacing for landscape
   const estimatedWordWidth = isPortrait ? 8 : 15; // Larger word width for landscape
@@ -178,7 +168,7 @@ const KaraokeLayout: React.FC<{
     }
   }
 
-  // Calculate which batch to show based on current time
+  // Calculate which batch to show based on current time (matching backend)
   // Each batch shows exactly 'wordsThatFit' number of words
   const batchSize = wordsThatFit;
   const totalBatches = Math.ceil(allWords.length / batchSize);
@@ -201,7 +191,7 @@ const KaraokeLayout: React.FC<{
   const startIndex = currentBatch * batchSize;
   const words = allWords.slice(startIndex, startIndex + batchSize);
 
-  // Use flexbox for simple horizontal layout (matching Remotion exactly)
+  // Use flexbox for simple horizontal layout (matching backend)
   const baseY =
     config?.position === "top"
       ? isPortrait
@@ -227,50 +217,26 @@ const KaraokeLayout: React.FC<{
           overflow: "hidden", // Hide any overflow
         }}
       >
-        {words.map(({ w, gi }) => {
-          const baseStyle = buildPresetTextStyle(preset, isPortrait);
-          const textStyle = mergeWordStyle(baseStyle, w.style);
-
-          return (
-            <span
-              key={`karaoke-${gi}`}
-              className="cursor-grab whitespace-nowrap"
-              style={{
-                ...textStyle,
-                fontSize: (() => {
-                  // console.log("🎨 LAYOUT FONT DEBUG:", {
-                  //   textStyleFontSize: textStyle.fontSize,
-                  //   scale,
-                  //   scaleLessThan1: scale < 1,
-                  //   condition: textStyle.fontSize && scale < 1,
-                  // });
-
-                  if (textStyle.fontSize && scale < 1) {
-                    const originalSize = parseFloat(
-                      textStyle.fontSize as string
-                    );
-                    const scaledSize = originalSize * scale;
-                    // console.log("🎨 LAYOUT FONT SCALING DEBUG:", {
-                    //   originalSize,
-                    //   scale,
-                    //   scaledSize,
-                    //   textStyle: textStyle.fontSize,
-                    // });
-                    return `${scaledSize}px`;
-                  }
-                  return textStyle.fontSize;
-                })(),
-              }}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                onPointerDown(gi);
-              }}
-            >
-              {w.text}
-            </span>
-          );
-        })}
+        {words.map(({ w, gi }) => (
+          <span
+            key={`karaoke-${gi}`}
+            className="cursor-grab whitespace-nowrap"
+            style={{
+              ...mergeWordStyle(
+                buildPresetTextStyle(preset, isPortrait),
+                w.style
+              ),
+              // Font size comes from preset styles and can be overridden
+            }}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              onPointerDown(gi);
+            }}
+          >
+            {w.text}
+          </span>
+        ))}
       </div>
     </div>
   );
@@ -288,15 +254,15 @@ const WaveLayout: React.FC<{
   return (
     <div className="absolute inset-0 select-none">
       <div
-        className="flex items-center justify-center gap-6"
+        className="flex items-center justify-center"
         style={{
           position: "absolute",
           left: "50%",
           top: "50%",
           transform: "translate(-50%, -50%)",
-          maxWidth: isPortrait ? "80%" : "90%", // More width for landscape
+          maxWidth: "80%", // Match backend exactly
           flexWrap: "wrap", // Allow wrapping to new lines
-          gap: isPortrait ? "24px" : "48px", // Larger gap for landscape
+          gap: "24px", // Match backend exactly
         }}
       >
         {words.map(({ w, gi }, idx) => {
@@ -399,14 +365,7 @@ export function LyricLayout({
   currentTimeMs,
   onPointerDown,
   isPortrait = false,
-  scale = 1,
 }: LyricLayoutProps): React.ReactElement {
-  // console.log("🎨 LyricLayout scale debug:", {
-  //   scale,
-  //   isPortrait,
-  //   linesCount: lines.length,
-  // });
-
   // Render based on layout type
   switch (layoutPreset.type) {
     case "karaoke":
@@ -418,7 +377,6 @@ export function LyricLayout({
           config={layoutPreset.config.karaoke}
           isPortrait={isPortrait}
           currentTimeMs={currentTimeMs}
-          scale={scale}
         />
       );
     case "grid":

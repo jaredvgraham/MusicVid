@@ -11,6 +11,7 @@ export function useFinalRender(projectId: string | null) {
   const [videoFinal, setVideoFinal] = useState<string | null>(null);
   const [isComplete, setIsComplete] = useState(false);
   const [connected, setConnected] = useState(false);
+  const [isCancelling, setIsCancelling] = useState(false);
 
   // Reset all render state
   const resetRender = useCallback(() => {
@@ -20,6 +21,7 @@ export function useFinalRender(projectId: string | null) {
     setRenderStatus("");
     setVideoFinal(null);
     setIsComplete(false);
+    setIsCancelling(false);
   }, []);
 
   // Set up WebSocket listeners for final render events
@@ -48,6 +50,7 @@ export function useFinalRender(projectId: string | null) {
     const onDisconnect = () => {
       console.log("Final render socket disconnected");
       setConnected(false);
+      setIsCancelling(false);
       if (isRendering) {
         setRenderStatus("reconnecting");
       }
@@ -60,6 +63,13 @@ export function useFinalRender(projectId: string | null) {
         setRenderStatus(data.status || "rendering");
         setIsRendering(true);
         setRenderError(null);
+      }
+    };
+
+    // Cancel render
+    const onCancel = (data: any) => {
+      if (data?.id === projectId) {
+        setIsCancelling(true);
       }
     };
 
@@ -103,7 +113,7 @@ export function useFinalRender(projectId: string | null) {
     sock.on("finalRender:finished", onComplete);
     sock.on("finalRender:error", onError);
     sock.on("finalRender:resume", onResume);
-
+    sock.on("finalRender:cancel", onCancel);
     // Connect if not already connected
     if (!sock.connected) {
       sock.connect();
@@ -118,6 +128,7 @@ export function useFinalRender(projectId: string | null) {
       sock.off("finalRender:finished", onComplete);
       sock.off("finalRender:error", onError);
       sock.off("finalRender:resume", onResume);
+      sock.off("finalRender:cancel", onCancel);
       // do not disconnect here; keep singleton alive for other pages
     };
   }, [projectId, isRendering]);
@@ -142,12 +153,34 @@ export function useFinalRender(projectId: string | null) {
       setIsRendering(true);
       setRenderStatus("starting");
       setRenderError(null);
-
+      if (isCancelling) {
+        sock.emit("finalRender:cancel", { id: projectId });
+        return;
+      }
       sock.emit("finalRender", { id: projectId });
     } catch (error: any) {
       setRenderError(error?.message || "Failed to start render");
       setIsRendering(false);
     }
+  }, [projectId, resetRender, isCancelling]);
+
+  const cancelRender = useCallback(() => {
+    if (!projectId) {
+      setRenderError("No project ID");
+      return;
+    }
+
+    const sock = getSocket();
+    if (!sock) {
+      setRenderError("WebSocket not available");
+      return;
+    }
+
+    // Emit cancel event to backend
+    sock.emit("finalRender:cancel", { id: projectId });
+
+    resetRender();
+    setIsCancelling(true);
   }, [projectId, resetRender]);
 
   return {
@@ -159,9 +192,10 @@ export function useFinalRender(projectId: string | null) {
     videoFinal,
     isComplete,
     connected,
-
+    isCancelling,
     // Actions
     startRender,
     resetRender,
+    cancelRender,
   };
 }

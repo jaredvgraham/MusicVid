@@ -37,7 +37,9 @@ export function OverlayCanvas(): React.ReactElement {
   const isLandscape =
     (project as any)?.orientation === "landscape" || baseW > baseH;
 
-  // Use actual bg dimensions instead of hardcoded design dimensions
+  // Use actual video dimensions instead of hardcoded design dimensions
+  const designW = baseW;
+  const designH = baseH;
 
   // Calculate scale directly from container dimensions - use ref to prevent React resets
   const containerScaleRef = useRef(1);
@@ -253,12 +255,12 @@ export function OverlayCanvas(): React.ReactElement {
           position: "absolute",
           left: 0,
           top: 0,
-
+          width: `${designW}px`,
+          height: `${designH}px`,
           transform: `scale(${finalScale})`,
-
+          transformOrigin: "top left",
           pointerEvents: "auto",
         }}
-        className="w-full h-full"
         ref={dragContainerRef}
         onPointerMove={(e) => {
           if (!isDragging || draggingIdx == null) return;
@@ -303,10 +305,10 @@ export function OverlayCanvas(): React.ReactElement {
         }}
       >
         {/* Optional cinematic beams behind center lyrics */}
-        {/* {preset.fxBeams && <FxBeams designW={designW} designH={designH} />}
+        {preset.fxBeams && <FxBeams designW={baseW} designH={baseH} />}
         {preset.fxGodRays && (
-          <GodRays preset={preset} designW={designW} designH={designH} />
-        )} */}
+          <GodRays preset={preset} designW={baseW} designH={baseH} />
+        )}
 
         {/* Per-word placements from transcript (xPct/yPct) */}
         {(() => {
@@ -375,30 +377,7 @@ export function OverlayCanvas(): React.ReactElement {
                   setIsDragging(true);
                 }}
               >
-                <span
-                  style={{
-                    ...textStyle,
-                    fontSize: (() => {
-                      if (textStyle.fontSize && finalScale < 1) {
-                        const originalSize = parseFloat(
-                          textStyle.fontSize as string
-                        );
-                        const scaledSize = originalSize * finalScale;
-                        console.log("🎨 FONT SCALING DEBUG:", {
-                          originalSize,
-                          finalScale,
-                          scaledSize,
-                          textStyle: textStyle.fontSize,
-                          isDragging,
-                        });
-                        return `${scaledSize}px`;
-                      }
-                      return textStyle.fontSize;
-                    })(),
-                  }}
-                >
-                  {w.text}
-                </span>
+                <span style={textStyle}>{w.text}</span>
               </div>
             );
           });
@@ -419,7 +398,6 @@ export function OverlayCanvas(): React.ReactElement {
               setIsDragging(true);
             }}
             isPortrait={baseH > baseW}
-            scale={finalScale}
           />
         )}
       </div>
