@@ -28,6 +28,30 @@ export function Toolbox(): React.ReactElement {
     setLayoutPresetId,
     saveLayoutPreset,
   } = useEditor();
+  const [refreshing, setRefreshing] = useState(false);
+  const [refreshError, setRefreshError] = useState<string | null>(null);
+  const [refreshLimitReached, setRefreshLimitReached] = useState<boolean>(false);
+  const MAX_REFRESHES = 3;
+  const initialUsed = Math.max(
+    0,
+    Math.min(
+      MAX_REFRESHES,
+      Number(((project as any)?.transcriptRefreshes as number | undefined) ?? 0)
+    )
+  );
+  const [refreshesUsed, setRefreshesUsed] = useState<number>(initialUsed);
+  const [refreshSuccess, setRefreshSuccess] = useState<string | null>(null);
+
+  useEffect(() => {
+    const used = Math.max(
+      0,
+      Math.min(
+        MAX_REFRESHES,
+        Number(((project as any)?.transcriptRefreshes as number | undefined) ?? 0)
+      )
+    );
+    setRefreshesUsed(used);
+  }, [project]);
   const [text, setText] = useState("");
   const [presetId, setPresetId] = useState<string>(
     lyricPresetId || DEFAULT_LYRIC_PRESET_ID
@@ -172,6 +196,55 @@ export function Toolbox(): React.ReactElement {
     setCustomFontWeight(getCurrentFontWeight());
     setCustomFontColor(getCurrentFontColor());
   }, [transcript, presetId, project]);
+
+  async function refreshTranscriptFromServer() {
+    const base = process.env.NEXT_PUBLIC_EXPRESS_URL || "";
+    const id = (project as any)?.id as string | undefined;
+    if (!base) {
+      setRefreshError("Missing NEXT_PUBLIC_EXPRESS_URL env.");
+      return;
+    }
+    if (!id) {
+      setRefreshError("Missing project id.");
+      return;
+    }
+    const url = `${base.replace(/\/+$/, "")}/render/transcript`;
+    try {
+      setRefreshing(true);
+      setRefreshError(null);
+      const res = await fetch(url, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ id }),
+      });
+      const payload = await res
+        .json()
+        .catch(async () => ({ error: await res.text().catch(() => "") }));
+      if (!res.ok) {
+        const msg = payload?.error || `Failed: ${res.status}`;
+        throw new Error(typeof msg === "string" ? msg : JSON.stringify(msg));
+      }
+      const next = (payload?.transcript ?? null) as any;
+      if (!Array.isArray(next)) {
+        throw new Error("Server did not return a transcript array.");
+      }
+      console.log("next", next);
+      setTranscript(next);
+      // Optimistically count this refresh locally
+      setRefreshesUsed((u) => Math.min(MAX_REFRESHES, u + 1));
+      // Success toast
+      setRefreshSuccess("Transcript refreshed successfully");
+      setTimeout(() => setRefreshSuccess(null), 2000);
+    } catch (e: any) {
+      const msg = e?.message || "Failed to refresh transcript";
+      setRefreshError(msg);
+      if (String(msg).toLowerCase().includes("too many")) {
+        setRefreshLimitReached(true);
+      }
+    } finally {
+      setRefreshing(false);
+    }
+  }
 
   async function addTextClip() {
     // Insert a word at current playhead time
@@ -332,6 +405,47 @@ export function Toolbox(): React.ReactElement {
   return (
     <div className="rounded border border-white/10 bg-neutral-950/70 p-3 text-sm">
       <div className="font-medium text-white/80">Tools</div>
+      <div className="mt-2 flex items-center gap-2">
+        <button
+          onClick={refreshTranscriptFromServer}
+          disabled={refreshing || refreshLimitReached || (MAX_REFRESHES - refreshesUsed) <= 0}
+          className="inline-flex items-center gap-2 rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 disabled:opacity-60"
+        >
+          {refreshLimitReached || (MAX_REFRESHES - refreshesUsed) <= 0
+            ? "Limit reached"
+            : refreshing
+            ? "Refreshing…"
+            : "Refresh transcript"}
+        </button>
+        <span className="text-xs text-white/60">
+          {Math.max(0, MAX_REFRESHES - refreshesUsed)} remaining
+        </span>
+      </div>
+      {refreshSuccess && (
+        <div className="mt-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-200 text-xs">
+          {refreshSuccess}
+        </div>
+      )}
+      {refreshError && (
+        <div className="mt-2 rounded-lg border border-red-500/30 bg-gradient-to-r from-red-500/10 to-red-600/10 p-3 text-red-200">
+          <div className="flex items-start gap-2 text-xs">
+            <svg
+              className="h-4 w-4 text-red-300 flex-shrink-0"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01M4.93 19h14.14c1.54 0 2.5-1.66 1.73-2.5L13.73 5.5c-.77-.83-1.96-.83-2.73 0L3.2 16.5c-.77.84.19 2.5 1.73 2.5z" />
+            </svg>
+            <div className="flex-1">
+              <div className="font-medium text-red-200">{refreshError}</div>
+              {refreshLimitReached && (
+                <div className="mt-1 text-red-300/90">You can refresh a project’s transcript up to 3 times.</div>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
       <div className="mt-3 space-y-2">
         <div>
           <label className="mb-1 block text-white/60">Lyric style</label>

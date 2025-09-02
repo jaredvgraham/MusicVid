@@ -87,6 +87,7 @@ export async function GET(
         orientation: project.orientation,
         lyricPresetId: project.lyricPresetId,
         layoutPresetId: project.layoutPresetId,
+        transcriptRefreshes: project.transcriptRefreshes,
       },
     });
   } catch (error: unknown) {
