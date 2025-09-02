@@ -105,7 +105,7 @@ export function Timeline(): React.ReactElement {
   };
 
   const handleSegmentDragStart = (
-    e: React.MouseEvent,
+    e: React.MouseEvent | React.TouchEvent,
     mode: "move" | "resize-start" | "resize-end",
     globalIndex: number,
     originalWord: Word
@@ -122,6 +122,9 @@ export function Timeline(): React.ReactElement {
       <div
         ref={containerRef}
         className="relative h-32 sm:h-40 md:h-60 lg:h-72 overflow-x-auto overflow-y-auto border-t border-white/10 select-none"
+        style={{
+          touchAction: dragRef.current ? "none" : "auto",
+        }}
       >
         <div
           className="relative h-full select-none"

@@ -28,7 +28,7 @@ export function useTimelineDrag({
 
   const handleDragStart = useCallback(
     (
-      e: React.MouseEvent,
+      e: React.MouseEvent | React.TouchEvent,
       mode: DragState["mode"],
       globalIndex: number,
       originalWord: Word
@@ -42,9 +42,12 @@ export function useTimelineDrag({
       const pos = getPositionFromGlobalIndex(lines, globalIndex);
       if (!pos) return;
 
+      // Get clientX from either mouse or touch event
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+
       dragRef.current = {
         mode,
-        startX: e.clientX,
+        startX: clientX,
         originalStart: originalWord.start,
         originalEnd: originalWord.end,
         lineIndex: pos.lineIndex,
@@ -56,11 +59,13 @@ export function useTimelineDrag({
   );
 
   const handleDragMove = useCallback(
-    (e: MouseEvent) => {
+    (e: MouseEvent | TouchEvent) => {
       const d = dragRef.current;
       if (!d) return;
 
-      const dx = e.clientX - d.startX;
+      // Get clientX from either mouse or touch event
+      const clientX = "touches" in e ? e.touches[0].clientX : e.clientX;
+      const dx = clientX - d.startX;
       const deltaMs = Math.round((dx / pixelsPerSecond) * 1000);
       const minDur = TIMELINE_CONSTANTS.MIN_WORD_DURATION;
 
@@ -139,7 +144,7 @@ export function useTimelineDrag({
   }, [projectId, saveTranscript]);
 
   const setupGlobalDragHandlers = useCallback(() => {
-    const onMove = (e: MouseEvent) => {
+    const onMove = (e: MouseEvent | TouchEvent) => {
       handleDragMove(e);
     };
 
@@ -147,12 +152,17 @@ export function useTimelineDrag({
       handleDragEnd();
     };
 
+    // Add both mouse and touch event listeners
     window.addEventListener("mousemove", onMove);
     window.addEventListener("mouseup", onUp);
+    window.addEventListener("touchmove", onMove, { passive: false });
+    window.addEventListener("touchend", onUp);
 
     return () => {
       window.removeEventListener("mousemove", onMove);
       window.removeEventListener("mouseup", onUp);
+      window.removeEventListener("touchmove", onMove);
+      window.removeEventListener("touchend", onUp);
     };
   }, [handleDragMove, handleDragEnd]);
 
