@@ -73,6 +73,7 @@ export const VideoPanel = React.memo(function VideoPanel(): React.ReactElement {
           preload="metadata"
           controls={true}
           crossOrigin="anonymous"
+          playsInline={true}
           style={{
             zIndex: 1,
           }}
