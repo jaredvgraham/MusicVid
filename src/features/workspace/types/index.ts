@@ -25,15 +25,12 @@ export interface EditorActions {
   setPlaying: (p: boolean) => void;
   setPixelsPerSecond: (pps: number) => void;
   setRenderScale: (s: number) => void;
-  setMute: (m: boolean) => void;
-  forceSync: () => void;
 }
 
 export interface EditorControls {
   play: () => void;
   pause: () => void;
   togglePlay: () => void;
-  toggleMute: () => void;
 }
 
 export interface EditorPersistence {

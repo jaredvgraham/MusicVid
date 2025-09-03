@@ -151,7 +151,6 @@ export function EditorProvider({
       setPixelsPerSecond,
       setRenderScale,
       setMute: videoState.setMute,
-      forceSync: videoState.forceSync,
 
       // Controls
       play: videoState.play,
