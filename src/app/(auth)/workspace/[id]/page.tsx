@@ -202,106 +202,6 @@ export default function WorkspacePage(): React.ReactElement {
               </button>
             )}
           </div>
-
-          {/* Mobile Layout - Stacked */}
-          <div className="md:hidden space-y-3">
-            <VideoPanel />
-            <Timeline />
-          </div>
-
-          {/* Desktop Layout - Grid */}
-          <div className="hidden md:grid md:grid-cols-3 gap-6">
-            <div className="md:col-span-2 space-y-4">
-              <VideoPanel />
-              <Timeline />
-            </div>
-
-            {/* Desktop Sidebar */}
-            <div className="space-y-4">
-              <Toolbox />
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={() => setShowVideos(!showVideos)}
-                  className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white hover:bg-neutral-700 cursor-pointer"
-                >
-                  {showVideos ? "Hide videos" : "Change video?"}
-                </button>
-              </div>
-              {updatingVideo && (
-                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
-                  <div className="text-white text-sm">Updating video...</div>
-                </div>
-              )}
-              {showVideos && (
-                <VideoPicker
-                  selectedVideo={selectedVideo}
-                  onChange={onPickVideo}
-                  isWorkspace={true}
-                />
-              )}
-
-              <div className="mt-4 rounded border border-white/10 p-3 text-sm text-white/50">
-                Final render is produced server-side from the sanitized
-                transcript. Drag to adjust timings, then Save & Render.
-              </div>
-              <div className="mt-4 flex gap-2">
-                <button
-                  disabled={isRendering}
-                  onClick={onFinalRender}
-                  className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
-                >
-                  {isRendering ? `${renderStatus}...` : "Render Final Video"}
-                </button>
-                {isRendering && !isCancelling && (
-                  <button
-                    onClick={() => cancelRender()}
-                    className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
-                  >
-                    cancel
-                  </button>
-                )}
-                <span
-                  className={`ml-2 self-center text-xs ${
-                    allowed ? "text-white/60" : "text-amber-300"
-                  }`}
-                  title="Final renders remaining in this billing period"
-                >
-                  {remainingFinalRenders} final render
-                  {remainingFinalRenders === 1 ? "" : "s"} left
-                </span>
-              </div>
-
-              {/* Render Progress and Status */}
-              {isRendering && (
-                <div className="mt-4 space-y-2">
-                  <div className="flex items-center justify-between text-sm">
-                    <span className="text-white/80">{renderStatus}</span>
-                    <span className="text-white/60">{renderProgress}%</span>
-                  </div>
-                  <div className="w-full bg-neutral-800 rounded-full h-2">
-                    <div
-                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
-                      style={{ width: `${renderProgress}%` }}
-                    />
-                  </div>
-                </div>
-              )}
-
-              {/* Render Error */}
-              {renderError && (
-                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
-                  <div className="text-red-400 text-sm">{renderError}</div>
-                  <button
-                    onClick={() => startRender()}
-                    className="mt-2 text-xs text-red-300 hover:text-red-300 underline"
-                  >
-                    Retry
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-
           {/* Mobile Toolbox Button */}
           <div className="md:hidden">
             <button
@@ -413,6 +313,105 @@ export default function WorkspacePage(): React.ReactElement {
               )}
             </div>
           )}
+
+          {/* Mobile Layout - Stacked */}
+          <div className="md:hidden space-y-3">
+            <VideoPanel />
+            <Timeline />
+          </div>
+
+          {/* Desktop Layout - Grid */}
+          <div className="hidden md:grid md:grid-cols-3 gap-6">
+            <div className="md:col-span-2 space-y-4">
+              <VideoPanel />
+              <Timeline />
+            </div>
+
+            {/* Desktop Sidebar */}
+            <div className="space-y-4">
+              <Toolbox />
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setShowVideos(!showVideos)}
+                  className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white hover:bg-neutral-700 cursor-pointer"
+                >
+                  {showVideos ? "Hide videos" : "Change video?"}
+                </button>
+              </div>
+              {updatingVideo && (
+                <div className="absolute inset-0 bg-black/50 backdrop-blur-sm rounded-lg flex items-center justify-center z-10">
+                  <div className="text-white text-sm">Updating video...</div>
+                </div>
+              )}
+              {showVideos && (
+                <VideoPicker
+                  selectedVideo={selectedVideo}
+                  onChange={onPickVideo}
+                  isWorkspace={true}
+                />
+              )}
+
+              <div className="mt-4 rounded border border-white/10 p-3 text-sm text-white/50">
+                Final render is produced server-side from the sanitized
+                transcript. Drag to adjust timings, then Save & Render.
+              </div>
+              <div className="mt-4 flex gap-2">
+                <button
+                  disabled={isRendering}
+                  onClick={onFinalRender}
+                  className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                >
+                  {isRendering ? `${renderStatus}...` : "Render Final Video"}
+                </button>
+                {isRendering && !isCancelling && (
+                  <button
+                    onClick={() => cancelRender()}
+                    className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
+                  >
+                    cancel
+                  </button>
+                )}
+                <span
+                  className={`ml-2 self-center text-xs ${
+                    allowed ? "text-white/60" : "text-amber-300"
+                  }`}
+                  title="Final renders remaining in this billing period"
+                >
+                  {remainingFinalRenders} final render
+                  {remainingFinalRenders === 1 ? "" : "s"} left
+                </span>
+              </div>
+
+              {/* Render Progress and Status */}
+              {isRendering && (
+                <div className="mt-4 space-y-2">
+                  <div className="flex items-center justify-between text-sm">
+                    <span className="text-white/80">{renderStatus}</span>
+                    <span className="text-white/60">{renderProgress}%</span>
+                  </div>
+                  <div className="w-full bg-neutral-800 rounded-full h-2">
+                    <div
+                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${renderProgress}%` }}
+                    />
+                  </div>
+                </div>
+              )}
+
+              {/* Render Error */}
+              {renderError && (
+                <div className="mt-4 p-3 bg-red-900/20 border border-red-500/30 rounded-lg">
+                  <div className="text-red-400 text-sm">{renderError}</div>
+                  <button
+                    onClick={() => startRender()}
+                    className="mt-2 text-xs text-red-300 hover:text-red-300 underline"
+                  >
+                    Retry
+                  </button>
+                </div>
+              )}
+            </div>
+          </div>
         </div>
       </div>
       {showUpgradeModal &&
