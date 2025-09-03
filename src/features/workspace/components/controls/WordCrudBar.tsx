@@ -30,7 +30,8 @@ import {
   updateWordText as updateWordTextOp,
 } from "../../actions/wordCrud";
 
-export function WordCrudBar(): React.ReactElement {
+// Shared hook for common functionality
+function useWordCrudLogic() {
   const {
     project,
     transcript,
@@ -222,9 +223,204 @@ export function WordCrudBar(): React.ReactElement {
     debouncedTimestampSave(field, value);
   };
 
+  return {
+    handleAdd,
+    handleDuplicate,
+    handleDelete,
+    editText,
+    setEditText,
+    handleTextChange,
+    fontSizePx,
+    setFontSizePx,
+    color,
+    setColor,
+    startTimeSeconds,
+    endTimeSeconds,
+    handleStyleChange,
+    handleTimestampChange,
+    disabled,
+    selectedIndex,
+  };
+}
+
+// Mobile-optimized component
+function MobileWordCrudBar(): React.ReactElement {
+  const {
+    handleAdd,
+    handleDuplicate,
+    handleDelete,
+    editText,
+    setEditText,
+    handleTextChange,
+    fontSizePx,
+    setFontSizePx,
+    color,
+    setColor,
+    startTimeSeconds,
+    endTimeSeconds,
+    handleStyleChange,
+    handleTimestampChange,
+    disabled,
+    selectedIndex,
+  } = useWordCrudLogic();
+
   return (
-    <div className="w-full bg-white/[0.02] p-1">
-      <div className="flex flex-wrap items-center gap-2 sm:gap-4 w-full">
+    <div className="w-full bg-white/[0.02] p-2 md:hidden">
+      <div className="flex flex-col gap-3 w-full">
+        {/* Action buttons row */}
+        <div className="flex items-center gap-2 justify-center">
+          <button
+            className="rounded border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10 text-sm min-h-[40px]"
+            onClick={handleAdd}
+          >
+            Add
+          </button>
+          <button
+            className="rounded border border-white/10 bg-white/5 px-3 py-2 hover:bg-white/10 disabled:opacity-40 text-sm min-h-[40px]"
+            onClick={handleDuplicate}
+            disabled={disabled}
+          >
+            Duplicate
+          </button>
+          <button
+            className="rounded border border-red-500/20 bg-red-500/10 px-3 py-2 hover:bg-red-500/20 disabled:opacity-40 text-sm min-h-[40px]"
+            onClick={handleDelete}
+            disabled={disabled}
+          >
+            Delete
+          </button>
+        </div>
+
+        {/* Text input row */}
+        <div className="w-full">
+          <input
+            className="w-full rounded border border-white/10 bg-black/40 px-3 py-2 text-sm text-white placeholder:text-white/40 disabled:opacity-50 min-h-[40px]"
+            type="text"
+            placeholder="Edit selected word text"
+            value={editText}
+            onChange={(e) => {
+              setEditText(e.target.value);
+              handleTextChange(e.target.value);
+            }}
+            disabled={disabled}
+          />
+        </div>
+
+        {/* Style controls row - Font size and Color on same line */}
+        <div className="flex items-center gap-2">
+          {/* Font size */}
+          <label className="flex items-center gap-1 flex-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              Font (px)
+            </span>
+            <input
+              className="w-full rounded border border-white/10 bg-black/40 px-2 py-2 text-sm text-white placeholder:text-white/40 disabled:opacity-50 min-h-[40px]"
+              type="number"
+              placeholder="font px"
+              value={fontSizePx}
+              onChange={(e) => {
+                setFontSizePx(e.target.value);
+                handleStyleChange("fontSizePx", e.target.value);
+              }}
+              disabled={disabled}
+            />
+          </label>
+
+          {/* Color controls */}
+          <label className="flex items-center gap-1 flex-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              Color
+            </span>
+            <input
+              className="flex-1 rounded border border-white/10 bg-black/40 px-2 py-2 text-sm text-white placeholder:text-white/40 disabled:opacity-50 min-h-[40px]"
+              type="text"
+              placeholder="#ffffff"
+              value={color}
+              onChange={(e) => {
+                setColor(e.target.value);
+                handleStyleChange("color", e.target.value);
+              }}
+              disabled={disabled}
+            />
+            <input
+              className="h-10 w-10 rounded border border-white/10 bg-transparent p-0 flex-shrink-0"
+              type="color"
+              value={
+                color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)
+                  ? color
+                  : "#ffffff"
+              }
+              onChange={(e) => {
+                setColor(e.target.value);
+                handleStyleChange("color", e.target.value);
+              }}
+              disabled={disabled}
+            />
+          </label>
+        </div>
+
+        {/* Timestamp controls row - Start and End on same line */}
+        <div className="flex items-center gap-2">
+          <label className="flex items-center gap-1 flex-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              Start (s)
+            </span>
+            <input
+              key={`start-${selectedIndex}`}
+              className="w-full rounded border border-white/10 bg-black/40 px-2 py-2 text-sm text-white placeholder:text-white/40 disabled:opacity-50 min-h-[40px]"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={startTimeSeconds}
+              onChange={(e) => handleTimestampChange("start", e.target.value)}
+              disabled={disabled}
+            />
+          </label>
+          <label className="flex items-center gap-1 flex-1">
+            <span className="text-[11px] text-white/50 whitespace-nowrap">
+              End (s)
+            </span>
+            <input
+              key={`end-${selectedIndex}`}
+              className="w-full rounded border border-white/10 bg-black/40 px-2 py-2 text-sm text-white placeholder:text-white/40 disabled:opacity-50 min-h-[40px]"
+              type="text"
+              inputMode="decimal"
+              placeholder="0.00"
+              value={endTimeSeconds}
+              onChange={(e) => handleTimestampChange("end", e.target.value)}
+              disabled={disabled}
+            />
+          </label>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Desktop-optimized component (original layout)
+function DesktopWordCrudBar(): React.ReactElement {
+  const {
+    handleAdd,
+    handleDuplicate,
+    handleDelete,
+    editText,
+    setEditText,
+    handleTextChange,
+    fontSizePx,
+    setFontSizePx,
+    color,
+    setColor,
+    startTimeSeconds,
+    endTimeSeconds,
+    handleStyleChange,
+    handleTimestampChange,
+    disabled,
+    selectedIndex,
+  } = useWordCrudLogic();
+
+  return (
+    <div className="w-full bg-white/[0.02] p-1 hidden md:block">
+      <div className="flex flex-row flex-wrap items-center gap-2 lg:gap-4 w-full">
         <div className="flex items-center gap-2">
           <button
             className="rounded border border-white/10 bg-white/5 px-2 py-1 hover:bg-white/10"
@@ -267,7 +463,7 @@ export function WordCrudBar(): React.ReactElement {
             Font (px)
           </span>
           <input
-            className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+            className="w-16 lg:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
             type="number"
             placeholder="font px"
             value={fontSizePx}
@@ -285,7 +481,7 @@ export function WordCrudBar(): React.ReactElement {
               Color
             </span>
             <input
-              className="w-20 sm:w-24 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
+              className="w-20 lg:w-24 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
               type="text"
               placeholder="#ffffff"
               value={color}
@@ -297,7 +493,7 @@ export function WordCrudBar(): React.ReactElement {
             />
           </div>
           <input
-            className="h-8 w-8 sm:h-9 sm:w-9 rounded border border-white/10 bg-transparent p-0"
+            className="h-8 w-8 lg:h-9 lg:w-9 rounded border border-white/10 bg-transparent p-0"
             type="color"
             value={
               color && /^#([0-9a-fA-F]{3}){1,2}$/.test(color)
@@ -311,40 +507,17 @@ export function WordCrudBar(): React.ReactElement {
             disabled={disabled}
           />
         </label>
-
-        <div className="flex items-center gap-2 flex-shrink-0">
-          <label className="flex items-center gap-1">
-            <span className="text-[11px] text-white/50 whitespace-nowrap">
-              Start (s)
-            </span>
-            <input
-              key={`start-${selectedIndex}`}
-              className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-              type="text"
-              inputMode="decimal"
-              placeholder="0.00"
-              value={startTimeSeconds}
-              onChange={(e) => handleTimestampChange("start", e.target.value)}
-              disabled={disabled}
-            />
-          </label>
-          <label className="flex items-center gap-1">
-            <span className="text-[11px] text-white/50 whitespace-nowrap">
-              End (s)
-            </span>
-            <input
-              key={`end-${selectedIndex}`}
-              className="w-16 sm:w-20 rounded border border-white/10 bg-black/40 px-2 py-1 text-sm text-white placeholder:text-white/40 disabled:opacity-50"
-              type="text"
-              inputMode="decimal"
-              placeholder="0.00"
-              value={endTimeSeconds}
-              onChange={(e) => handleTimestampChange("end", e.target.value)}
-              disabled={disabled}
-            />
-          </label>
-        </div>
       </div>
     </div>
+  );
+}
+
+// Main component that conditionally renders based on screen size
+export function WordCrudBar(): React.ReactElement {
+  return (
+    <>
+      <MobileWordCrudBar />
+      <DesktopWordCrudBar />
+    </>
   );
 }
