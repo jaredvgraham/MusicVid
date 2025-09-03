@@ -24,51 +24,70 @@ export function VideoPicker({
   const [debouncedQuery, setDebouncedQuery] = useState<string>(initialQuery);
   const [loading, setLoading] = useState<boolean>(false);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+  const [page, setPage] = useState<number>(1);
+  const [error, setError] = useState<string | null>(null);
 
-  const apiKey = useMemo(() => process.env.NEXT_PUBLIC_PIXELBAY_API_KEY, []);
-
-  const fetchVideos = useCallback(
-    async (q: string) => {
-      try {
-        setLoading(true);
-        const response = await fetch(
-          `https://pixabay.com/api/videos/?key=${apiKey}&q=${encodeURIComponent(
-            q
-          )}&video_type=film&per_page=21`
-        );
-        if (!response.ok) {
-          setVideos([]);
-          return;
-        }
-        const data = await response.json();
-        setVideos(data.hits.map((hit: any) => hit.videos.medium.url));
-      } catch {
-        setVideos([]);
-      } finally {
-        setLoading(false);
-      }
-    },
-    [apiKey]
-  );
-
-  useEffect(() => {
-    const handle = setTimeout(() => setDebouncedQuery(query), 500);
-    return () => clearTimeout(handle);
-  }, [query]);
+  const apiKey = process.env.NEXT_PUBLIC_PIXELBAY_API_KEY;
 
   useEffect(() => {
     fetchVideos(debouncedQuery);
-  }, [debouncedQuery, fetchVideos]);
+  }, [debouncedQuery]);
+
+  const fetchVideos = async (q: string) => {
+    console.log("fetching videos", q, page);
+
+    if (page === 3) {
+      setError("maximum refreshes for this search try changing the query");
+      return;
+    }
+    setPage((prev) => prev + 1);
+
+    try {
+      setLoading(true);
+      const response = await fetch(
+        `https://pixabay.com/api/videos/?key=${apiKey}&q=${encodeURIComponent(
+          q
+        )}&video_type=film&per_page=41&page=${page}`
+      );
+      if (!response.ok) {
+        setVideos([]);
+        return;
+      }
+
+      const data = await response.json();
+      console.log("data", data.hits);
+
+      const filtered = data.hits.filter((hit: any) => {
+        const { width, height } = hit.videos.medium;
+        // block anything larger than 1920x1080
+        return width <= 1920 && height <= 1080;
+      });
+
+      setVideos(
+        filtered.map((hit: any) => {
+          console.log("hit", hit);
+          return hit.videos.medium.url;
+        })
+      );
+    } catch {
+      setVideos([]);
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className={className}>
       <div className="mb-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-sm font-medium text-white/90">{title}</h2>
+        {error && <div className="text-xs text-red-500">{error}</div>}
         <form
           className="flex w-full items-center gap-2 sm:w-auto"
           onSubmit={(e) => {
             e.preventDefault();
-            fetchVideos(query);
+            setDebouncedQuery(query);
+            setPage(1);
+            setError(null);
           }}
         >
           <input
@@ -76,7 +95,11 @@ export function VideoPicker({
             placeholder="Search videos (e.g., cinematic, nature)"
             className="w-full rounded-md border border-white/10 bg-neutral-900/60 px-3 py-2 text-sm text-white placeholder:text-white/40 outline-none ring-0 transition focus:border-white/20 focus:bg-neutral-900/70 sm:w-64"
             value={query}
-            onChange={(e) => setQuery(e.target.value)}
+            onChange={(e) => {
+              setQuery(e.target.value);
+              setPage(1);
+              setError(null);
+            }}
           />
           <button
             type="submit"
@@ -84,6 +107,16 @@ export function VideoPicker({
             disabled={loading}
           >
             {loading ? "Searching…" : "Search"}
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              fetchVideos(query);
+            }}
+            disabled={loading}
+            className="inline-flex items-center gap-2 rounded-md border border-white/10 bg-white/5 px-3 py-2 text-xs font-medium text-white/80 transition hover:bg-white/10 disabled:opacity-50"
+          >
+            {loading ? "Loading…" : "More"}
           </button>
         </form>
       </div>
@@ -123,7 +156,6 @@ export function VideoPicker({
                 loop
                 playsInline
                 autoPlay
-                preload="metadata"
                 className="aspect-video w-full object-cover"
               />
               <button
