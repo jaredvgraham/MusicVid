@@ -777,8 +777,8 @@ const AdminDashboard = () => {
               {inactiveUsers.length > 0 && (
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-neutral-300 text-sm">
-                    Found {inactiveUsers.length} users who haven't created their
-                    first project
+                    Found {inactiveUsers.length} users who haven&apos;t created
+                    their first project
                   </p>
                   <button
                     onClick={handleSelectAll}
@@ -841,8 +841,8 @@ const AdminDashboard = () => {
                 <div className="text-center py-8 text-neutral-400">
                   <Mail className="h-12 w-12 mx-auto mb-4 opacity-50" />
                   <p>
-                    No inactive users found or click "Load Inactive Users" to
-                    fetch them
+                    No inactive users found or click &quot;Load Inactive
+                    Users&quot; to fetch them
                   </p>
                 </div>
               )}
@@ -1332,7 +1332,8 @@ const AdminDashboard = () => {
               <div className="text-center py-12 text-neutral-400">
                 <Users className="h-16 w-16 mx-auto mb-4 opacity-50" />
                 <p>
-                  No users loaded. Click "Load All Users" to fetch user data.
+                  No users loaded. Click &quot;Load All Users&quot; to fetch
+                  user data.
                 </p>
               </div>
             )}
