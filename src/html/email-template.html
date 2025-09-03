@@ -28,13 +28,44 @@
       }
       .button {
         display: inline-block;
-        background: #007bff;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        padding: 12px 30px;
+        padding: 15px 35px;
         text-decoration: none;
-        border-radius: 8px;
+        border-radius: 10px;
         margin: 20px 0;
         font-weight: bold;
+        font-size: 16px;
+        text-align: center;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        transition: all 0.3s ease;
+        border: none;
+        cursor: pointer;
+      }
+      .button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+        text-decoration: none;
+        color: white;
+      }
+      .footer-button {
+        display: inline-block;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 12px 25px;
+        text-decoration: none;
+        border-radius: 8px;
+        margin: 10px 0;
+        font-weight: bold;
+        font-size: 14px;
+        text-align: center;
+        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+      }
+      .footer-button:hover {
+        text-decoration: none;
+        color: white;
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.4);
       }
       .footer {
         text-align: center;
@@ -77,11 +108,14 @@
   </head>
   <body>
     <div class="header">
+      <!-- DYNAMIC_HEADER_PLACEHOLDER -->
       <h1>🎵 Welcome to Sonexa!</h1>
       <p>Create stunning lyric videos with AI-powered timing</p>
+      <!-- END_DYNAMIC_HEADER_PLACEHOLDER -->
     </div>
 
     <div class="content">
+      <!-- CUSTOM_MESSAGE_PLACEHOLDER -->
       <h2>Hello there! 👋</h2>
       <p>
         Welcome to Sonexa, where your music comes to life with stunning lyric
@@ -98,7 +132,9 @@
         </ul>
       </div>
 
-      <a href="https://sonexa.cc" class="button">🚀 Start Creating Now</a>
+      <a href="https://sonexa.cc" class="button"
+        >🚀 Start Creating Now at Sonexa.cc</a
+      >
 
       <p>
         Ready to transform your music? Our AI-powered platform makes it easy to
@@ -118,7 +154,12 @@
       <p>
         <strong>Need more projects?</strong> Upgrade to our Pro plan for
         unlimited projects, premium templates, and priority support.
-        <a href="https://sonexa.cc/pricing">View pricing →</a>
+        <a
+          href="https://sonexa.cc/pricing"
+          class="button"
+          style="padding: 8px 20px; font-size: 14px; margin: 10px 0"
+          >💎 View Pro Pricing at Sonexa.cc</a
+        >
       </p>
 
       <p>
@@ -127,11 +168,17 @@
       </p>
 
       <p>Best regards,<br />The Sonexa Team 🎬</p>
+      <!-- END_CUSTOM_MESSAGE_PLACEHOLDER -->
     </div>
 
     <div class="footer">
       <p>© 2025 Sonexa. All rights reserved.</p>
       <p>You received this email because you signed up for Sonexa.</p>
+      <div style="text-align: center; margin: 20px 0">
+        <a href="https://sonexa.cc" class="footer-button"
+          >🎵 Visit Sonexa.cc - Start Creating Now!</a
+        >
+      </div>
     </div>
   </body>
 </html>
