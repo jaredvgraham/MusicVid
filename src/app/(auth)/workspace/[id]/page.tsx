@@ -18,7 +18,7 @@ import { useFinalRender } from "@/hooks/useFinalRender";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
-type WorkspaceResponse = { project: Project };
+type WorkspaceResponse = { project: Project; lyricPreset?: any };
 
 export default function WorkspacePage(): React.ReactElement {
   const params = useParams<{ id: string }>();
@@ -28,6 +28,7 @@ export default function WorkspacePage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+  const [lyricPreset, setLyricPreset] = useState<any>(null);
   const [showVideos, setShowVideos] = useState(false);
 
   const { connected, error, status } = useProjectSocket(projectId ?? "");
@@ -81,6 +82,7 @@ export default function WorkspacePage(): React.ReactElement {
         );
         if (!mounted) return;
         setProject(res.project);
+        setLyricPreset(res.lyricPreset);
       } catch (e: any) {
         setFetchError(e?.message || "Failed to load workspace");
       } finally {
@@ -160,7 +162,11 @@ export default function WorkspacePage(): React.ReactElement {
   if (!project) return <div className="p-6">Not found</div>;
 
   return (
-    <EditorProvider project={project} initialTranscript={project.transcript}>
+    <EditorProvider
+      project={project}
+      initialTranscript={project.transcript}
+      initialPreset={lyricPreset}
+    >
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <div className="mx-auto max-w-7xl p-2 sm:p-4 space-y-4">
           <ControlsBar />

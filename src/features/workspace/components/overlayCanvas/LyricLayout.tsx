@@ -53,7 +53,7 @@ const GridLayout: React.FC<{
 
   // Estimate word width based on font properties and text length
   const estimateWordWidth = (word: WordRef) => {
-    const fontSize = word.w.style?.fontSizePx || (isPortrait ? 60 : 100);
+    const fontSize = word.w.style?.fontSizePx || (isPortrait ? 50 : 80);
     const textLength = word.w.text.length;
 
     // Use a more realistic character width calculation

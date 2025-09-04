@@ -11,6 +11,29 @@ import { LyricLayout } from "./LyricLayout";
 import { buildPresetTextStyle, mergeWordStyle } from "./utils/style";
 import GodRays from "./fx/GodRays";
 import FxBeams from "./fx/FxBeams";
+import FxParticles from "./fx/FxParticles";
+import FxGlow from "./fx/FxGlow";
+import FxShimmer from "./fx/FxShimmer";
+import FxPulse from "./fx/FxPulse";
+import FxRainbow from "./fx/FxRainbow";
+import FxFire from "./fx/FxFire";
+import FxIce from "./fx/FxIce";
+import FxElectric from "./fx/FxElectric";
+import FxHologram from "./fx/FxHologram";
+import FxSmoke from "./fx/FxSmoke";
+import FxLightning from "./fx/FxLightning";
+import FxStars from "./fx/FxStars";
+import FxWaves from "./fx/FxWaves";
+import FxMatrix from "./fx/FxMatrix";
+import FxNeon from "./fx/FxNeon";
+import FxSparkle from "./fx/FxSparkle";
+import FxGlitter from "./fx/FxGlitter";
+import FxDiamond from "./fx/FxDiamond";
+import FxCrystal from "./fx/FxCrystal";
+import FxPrism from "./fx/FxPrism";
+import FxBlur from "./fx/FxBlur";
+import FxFade from "./fx/FxFade";
+import "./fx/effects.css";
 import {
   LAYOUT_PRESETS,
   DEFAULT_LAYOUT_PRESET_ID,
@@ -25,14 +48,14 @@ export const OverlayCanvas = React.memo(
       setSelectedIndex,
       project,
       currentTimeMs,
-      lyricPresetId,
+      currentPreset,
       layoutPresetId,
       renderScale,
       saveTranscript,
     } = useEditor();
     const [clips] = useState<TextClip[]>(project.textClips ?? []);
     const preset: LyricPreset =
-      LYRIC_PRESETS[lyricPresetId] ?? LYRIC_PRESETS[DEFAULT_LYRIC_PRESET_ID];
+      currentPreset ?? LYRIC_PRESETS[DEFAULT_LYRIC_PRESET_ID];
     const baseW = (project as any)?.width || 1080;
     const baseH = (project as any)?.height || 1920;
     const isLandscape =
@@ -267,96 +290,272 @@ export const OverlayCanvas = React.memo(
             setDraggingIdx(null);
           }}
         >
-          {/* Optional cinematic beams behind center lyrics */}
-          {preset.fxBeams && <FxBeams designW={baseW} designH={baseH} />}
-          {preset.fxGodRays && (
-            <GodRays preset={preset} designW={baseW} designH={baseH} />
-          )}
+          {/* Visual Effects - Background Layer */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
+            {preset.fxBeams && (
+              <FxBeams
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxBeamsIntensity || 0.5}
+              />
+            )}
+            {preset.fxGodRays && (
+              <GodRays
+                preset={preset}
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxGodRaysIntensity || 0.5}
+              />
+            )}
+            {preset.fxParticles && (
+              <FxParticles
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxParticlesIntensity || 0.5}
+              />
+            )}
+            {preset.fxGlow && (
+              <FxGlow
+                designW={baseW}
+                designH={baseH}
+                color={preset.fxGlowColor || "#ffffff"}
+                intensity={preset.fxGlowIntensity || 0.5}
+              />
+            )}
+            {preset.fxShimmer && (
+              <FxShimmer
+                designW={baseW}
+                designH={baseH}
+                speed={preset.fxShimmerSpeed || 2}
+              />
+            )}
+            {preset.fxPulse && (
+              <FxPulse
+                designW={baseW}
+                designH={baseH}
+                speed={preset.fxPulseSpeed || 2}
+              />
+            )}
+            {preset.fxRainbow && (
+              <FxRainbow
+                designW={baseW}
+                designH={baseH}
+                speed={preset.fxRainbowSpeed || 2}
+              />
+            )}
+            {preset.fxFire && (
+              <FxFire
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxFireIntensity || 0.5}
+              />
+            )}
+            {preset.fxIce && (
+              <FxIce
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxIceIntensity || 0.5}
+              />
+            )}
+            {preset.fxElectric && (
+              <FxElectric
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxElectricIntensity || 0.5}
+              />
+            )}
+            {preset.fxHologram && (
+              <FxHologram
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxHologramIntensity || 0.5}
+              />
+            )}
+            {preset.fxSmoke && (
+              <FxSmoke
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxSmokeIntensity || 0.5}
+              />
+            )}
+            {preset.fxLightning && (
+              <FxLightning
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxLightningIntensity || 0.5}
+              />
+            )}
+            {preset.fxStars && (
+              <FxStars
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxStarsIntensity || 0.5}
+              />
+            )}
+            {preset.fxWaves && (
+              <FxWaves
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxWavesIntensity || 0.5}
+              />
+            )}
+            {preset.fxMatrix && (
+              <FxMatrix
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxMatrixIntensity || 0.5}
+              />
+            )}
 
-          {/* Per-word placements from transcript (xPct/yPct) */}
-          {(() => {
-            // Build placed words with their global indices
-            const placed: Array<{ w: any; gi: number }> = [];
-            let acc = 0;
-            for (let li = 0; li < transcript.length; li++) {
-              const words = transcript[li]?.words || [];
-              for (let wi = 0; wi < words.length; wi++) {
-                const w = words[wi] as any;
-                const gi = acc + wi;
-                if (
-                  currentTimeMs >= w.start &&
-                  currentTimeMs < w.end &&
-                  typeof w.xPct === "number" &&
-                  typeof w.yPct === "number"
-                ) {
-                  placed.push({ w, gi });
+            {/* Additional Effects */}
+            {preset.fxNeon && (
+              <FxNeon
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxNeonIntensity || 0.5}
+                color={preset.fxNeonColor || "#00ffff"}
+              />
+            )}
+            {preset.fxSparkle && (
+              <FxSparkle
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxSparkleIntensity || 0.5}
+              />
+            )}
+            {preset.fxGlitter && (
+              <FxGlitter
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxGlitterIntensity || 0.5}
+              />
+            )}
+            {preset.fxDiamond && (
+              <FxDiamond
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxDiamondIntensity || 0.5}
+              />
+            )}
+            {preset.fxCrystal && (
+              <FxCrystal
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxCrystalIntensity || 0.5}
+              />
+            )}
+            {preset.fxPrism && (
+              <FxPrism
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxPrismIntensity || 0.5}
+              />
+            )}
+            {preset.fxBlur && (
+              <FxBlur
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxBlurIntensity || 0.5}
+              />
+            )}
+            {preset.fxFade && (
+              <FxFade
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxFadeIntensity || 0.5}
+              />
+            )}
+          </div>
+
+          {/* Text Layer */}
+          <div style={{ position: "absolute", inset: 0, zIndex: 4 }}>
+            {/* Per-word placements from transcript (xPct/yPct) */}
+            {(() => {
+              // Build placed words with their global indices
+              const placed: Array<{ w: any; gi: number }> = [];
+              let acc = 0;
+              for (let li = 0; li < transcript.length; li++) {
+                const words = transcript[li]?.words || [];
+                for (let wi = 0; wi < words.length; wi++) {
+                  const w = words[wi] as any;
+                  const gi = acc + wi;
+                  if (
+                    currentTimeMs >= w.start &&
+                    currentTimeMs < w.end &&
+                    typeof w.xPct === "number" &&
+                    typeof w.yPct === "number"
+                  ) {
+                    placed.push({ w, gi });
+                  }
                 }
+                acc += words.length;
               }
-              acc += words.length;
-            }
 
-            return placed.map(({ w, gi }, idx) => {
-              const rotate =
-                typeof w.rotationDeg === "number" ? w.rotationDeg : 0;
-              const scl =
-                typeof w.scale === "number" && isFinite(w.scale) && w.scale > 0
-                  ? w.scale
-                  : 1;
-              const transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scl})`;
-              // Only apply fontSizeBump if the word doesn't have custom fontSizePx
-              const hasCustomFontSize =
-                typeof (w as any)?.style?.fontSizePx === "number";
-              const textStyle = mergeWordStyle(
-                buildPresetTextStyle(preset, baseH > baseW),
-                (w as any).style
-              );
-              return (
-                <div
-                  key={`${idx}-${w.text}`}
-                  style={{
-                    position: "absolute",
-                    left: `${w.xPct}%`,
-                    top: `${w.yPct}%`,
-                    transform,
-                    transformOrigin: "center center",
-                    zIndex: w.zIndex,
-                    opacity: w.opacity,
-                  }}
-                  className="select-none cursor-grab active:cursor-grabbing"
-                  onPointerDown={(e) => {
-                    e.preventDefault();
-                    e.stopPropagation();
+              return placed.map(({ w, gi }, idx) => {
+                const rotate =
+                  typeof w.rotationDeg === "number" ? w.rotationDeg : 0;
+                const scl =
+                  typeof w.scale === "number" &&
+                  isFinite(w.scale) &&
+                  w.scale > 0
+                    ? w.scale
+                    : 1;
+                const transform = `translate(-50%, -50%) rotate(${rotate}deg) scale(${scl})`;
+                // Only apply fontSizeBump if the word doesn't have custom fontSizePx
+                const hasCustomFontSize =
+                  typeof (w as any)?.style?.fontSizePx === "number";
+                const textStyle = mergeWordStyle(
+                  buildPresetTextStyle(preset, baseH > baseW),
+                  (w as any).style
+                );
+                return (
+                  <div
+                    key={`${idx}-${w.text}`}
+                    style={{
+                      position: "absolute",
+                      left: `${w.xPct}%`,
+                      top: `${w.yPct}%`,
+                      transform,
+                      transformOrigin: "center center",
+                      zIndex: w.zIndex,
+                      opacity: w.opacity,
+                    }}
+                    className="select-none cursor-grab active:cursor-grabbing"
+                    onPointerDown={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
 
-                    // Drag start debug
+                      // Drag start debug
 
-                    setSelectedIndex(gi);
-                    setDraggingIdx(gi);
-                    setIsDragging(true);
-                  }}
-                >
-                  <span style={textStyle}>{w.text}</span>
-                </div>
-              );
-            });
-          })()}
-          {/* Default lyrics overlay: group active unplaced words into lines using layout preset */}
-          {groupedUnplacedWords.length > 0 && (
-            <LyricLayout
-              preset={preset}
-              layoutPreset={
-                LAYOUT_PRESETS[layoutPresetId] ||
-                LAYOUT_PRESETS[DEFAULT_LAYOUT_PRESET_ID]
-              }
-              lines={groupedUnplacedWords as any}
-              currentTimeMs={currentTimeMs}
-              onPointerDown={(gi: number) => {
-                setSelectedIndex(gi);
-                setDraggingIdx(gi);
-                setIsDragging(true);
-              }}
-              isPortrait={baseH > baseW}
-            />
-          )}
+                      setSelectedIndex(gi);
+                      setDraggingIdx(gi);
+                      setIsDragging(true);
+                    }}
+                  >
+                    <span style={textStyle}>{w.text}</span>
+                  </div>
+                );
+              });
+            })()}
+            {/* Default lyrics overlay: group active unplaced words into lines using layout preset */}
+            {groupedUnplacedWords.length > 0 && (
+              <LyricLayout
+                preset={preset}
+                layoutPreset={
+                  LAYOUT_PRESETS[layoutPresetId] ||
+                  LAYOUT_PRESETS[DEFAULT_LAYOUT_PRESET_ID]
+                }
+                lines={groupedUnplacedWords as any}
+                currentTimeMs={currentTimeMs}
+                onPointerDown={(gi: number) => {
+                  setSelectedIndex(gi);
+                  setDraggingIdx(gi);
+                  setIsDragging(true);
+                }}
+                isPortrait={baseH > baseW}
+              />
+            )}
+          </div>
         </div>
       </div>
     );

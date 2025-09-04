@@ -4,6 +4,8 @@ import { ApiError } from "@/types/ApiError";
 import ProjectClient from "@/backend/lib/projectClient";
 import { getObjectUrl as getS3ObjectUrl } from "@/backend/lib/s3";
 import User from "@/backend/models/User";
+import Preset from "@/backend/models/Preset";
+import { Project } from "@/backend/models/Project";
 import dbConnect from "@/backend/lib/db";
 
 export async function GET(
@@ -70,6 +72,57 @@ export async function GET(
       }
     }
 
+    // Fetch the full preset data if lyricPresetId exists
+    let lyricPreset = null;
+    if (project.lyricPresetId) {
+      console.log("project.lyricPresetId", project.lyricPresetId);
+      try {
+        // Check if lyricPresetId is a MongoDB ObjectId (24 hex chars) or a string preset ID
+        const isObjectId = /^[0-9a-fA-F]{24}$/.test(project.lyricPresetId);
+
+        if (isObjectId) {
+          // New system: lyricPresetId is an ObjectId pointing to a Preset document
+          const presetDoc = await Preset.findById(project.lyricPresetId).lean();
+          console.log("presetDoc found:", !!presetDoc);
+          if (presetDoc) {
+            console.log("presetDoc keys:", Object.keys(presetDoc));
+
+            // Use lyricPreset field (already migrated)
+            lyricPreset = presetDoc.lyricPreset;
+            console.log("lyricPreset name:", lyricPreset?.name);
+          }
+        } else {
+          // Old system: lyricPresetId is a string like "classic" - migrate to new system
+          const { getSystemPreset } = await import(
+            "@/features/workspace/services/presetService"
+          );
+          const systemPreset = getSystemPreset(project.lyricPresetId);
+          if (systemPreset) {
+            // Create a new preset document for this project
+            const presetDoc = new Preset({
+              projectId: project._id.toString(),
+              lyricPreset: systemPreset,
+            });
+            await presetDoc.save();
+
+            // Update the project to use the new preset document
+            await Project.findByIdAndUpdate(project._id, {
+              lyricPresetId: presetDoc._id.toString(),
+            });
+
+            console.log(
+              `[migration] Created preset document for project ${project._id} (${systemPreset.name}): ${presetDoc._id}`
+            );
+
+            // Return the preset data
+            lyricPreset = systemPreset;
+          }
+        }
+      } catch (error) {
+        console.warn("Failed to fetch preset:", error);
+      }
+    }
+
     return NextResponse.json({
       project: {
         id: project._id,
@@ -81,10 +134,10 @@ export async function GET(
         width: project.width,
         height: project.height,
         orientation: project.orientation,
-        lyricPresetId: project.lyricPresetId,
         layoutPresetId: project.layoutPresetId,
         transcriptRefreshes: project.transcriptRefreshes,
       },
+      lyricPreset,
     });
   } catch (error: unknown) {
     console.error("Workspace API error:", error);

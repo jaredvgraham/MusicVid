@@ -11,18 +11,22 @@ import React, {
 } from "react";
 import type { Line, Project } from "@/types";
 import type { EditorContextValue } from "../types";
+import type { LyricPreset } from "../styles/lyricPresets";
 import { useAuthFetch } from "@/hooks/useAuthFetch";
 import { useVideoState } from "../hooks/useVideoState";
+import { getDefaultSystemPreset } from "../services/presetService";
 
 const EditorContext = createContext<EditorContextValue | null>(null);
 
 export function EditorProvider({
   project,
   initialTranscript,
+  initialPreset,
   children,
 }: {
   project: Project;
   initialTranscript: Line[];
+  initialPreset?: LyricPreset | null;
   children: React.ReactNode;
 }) {
   // Video state
@@ -32,8 +36,8 @@ export function EditorProvider({
   const [transcript, setTranscript] = useState<Line[]>(() => initialTranscript);
   const [selectedIndex, setSelectedIndex] = useState<number | null>(null);
   const [pixelsPerSecond, setPixelsPerSecond] = useState(100);
-  const [lyricPresetId, setLyricPresetId] = useState<string>(
-    (project as any)?.lyricPresetId || "classic"
+  const [currentPreset, setCurrentPreset] = useState<LyricPreset | null>(
+    initialPreset || getDefaultSystemPreset()
   );
   const [layoutPresetId, setLayoutPresetId] = useState<string>(
     project?.layoutPresetId || "centered-classic"
@@ -84,8 +88,8 @@ export function EditorProvider({
     [authFetch, project?.id]
   );
 
-  const saveLyricPreset = useCallback(
-    async (presetId: string) => {
+  const savePreset = useCallback(
+    async (preset: LyricPreset) => {
       try {
         if (!project?.id) return;
         await authFetch(
@@ -94,14 +98,23 @@ export function EditorProvider({
           {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ presetId }),
+            body: JSON.stringify({ presetData: preset }),
           }
         );
       } catch (e) {
-        console.error("Failed to save lyric preset", e);
+        console.error("Failed to save preset", e);
       }
     },
     [authFetch, project?.id]
+  );
+
+  const createCustomPreset = useCallback(
+    async (preset: LyricPreset) => {
+      // Custom presets are now handled by updating the existing preset document
+      // This function is kept for compatibility but just calls savePreset
+      await savePreset(preset);
+    },
+    [savePreset]
   );
 
   const saveLayoutPreset = useCallback(
@@ -131,7 +144,7 @@ export function EditorProvider({
       project,
       transcript,
       selectedIndex,
-      lyricPresetId,
+      currentPreset,
       layoutPresetId,
       currentTimeMs: videoState.currentTimeMs,
       playing: videoState.playing,
@@ -143,7 +156,7 @@ export function EditorProvider({
       // Actions
       setTranscript,
       setSelectedIndex,
-      setLyricPresetId,
+      setCurrentPreset,
       setLayoutPresetId,
       setCurrentTimeMs,
       seekToMs: videoState.seekToMs,
@@ -160,21 +173,23 @@ export function EditorProvider({
 
       // Persistence
       saveTranscript,
-      saveLyricPreset,
+      savePreset,
+      createCustomPreset,
       saveLayoutPreset,
     }),
     [
       project,
       transcript,
       selectedIndex,
-      lyricPresetId,
+      currentPreset,
       layoutPresetId,
       videoState,
       pixelsPerSecond,
       renderScale,
       setCurrentTimeMs,
       saveTranscript,
-      saveLyricPreset,
+      savePreset,
+      createCustomPreset,
       saveLayoutPreset,
     ]
   );
