@@ -6,7 +6,7 @@ import { SignedIn, SignedOut, UserButton } from "@clerk/nextjs";
 import { useState } from "react";
 import Image from "next/image";
 import { ChevronDown, ChevronRight } from "lucide-react";
-import { useAuth } from "@clerk/nextjs";
+import { useAuth, useUser } from "@clerk/nextjs";
 
 type NavItem = { label: string; href: string };
 type DropdownItem = { label: string; href: string; description?: string };
@@ -52,6 +52,7 @@ export default function NavBar(): React.ReactElement {
     null
   );
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
 
   const handleDropdownEnter = () => {
     if (dropdownTimeout) {
@@ -165,6 +166,15 @@ export default function NavBar(): React.ReactElement {
             >
               Help
             </Link>
+            {user?.primaryEmailAddress?.emailAddress ===
+              process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+              <Link
+                href="/admin"
+                className="text-base text-white/70 transition hover:text-white py-2 px-3 rounded-lg hover:bg-white/5"
+              >
+                Admin
+              </Link>
+            )}
           </SignedIn>
 
           {/* Main Navigation Items */}
@@ -307,6 +317,16 @@ export default function NavBar(): React.ReactElement {
                   >
                     Help
                   </Link>
+                  {user?.primaryEmailAddress?.emailAddress ===
+                    process.env.NEXT_PUBLIC_ADMIN_EMAIL && (
+                    <Link
+                      href="/admin"
+                      className="rounded-lg px-3 py-3 text-base text-white/80 hover:bg-white/10"
+                      onClick={() => setOpen(false)}
+                    >
+                      Admin
+                    </Link>
+                  )}
                 </div>
               </SignedIn>
               {/* Main Navigation */}

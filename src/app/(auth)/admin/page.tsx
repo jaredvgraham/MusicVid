@@ -342,8 +342,10 @@ const AdminDashboard = () => {
     }
   };
 
-  const searchUser = async () => {
-    if (!userId.trim()) {
+  const searchUser = async (clerkId?: string) => {
+    const userIdToSearch = clerkId || userId.trim();
+
+    if (!userIdToSearch) {
       setError("Please enter a user ID");
       return;
     }
@@ -353,9 +355,9 @@ const AdminDashboard = () => {
     setUserProjects(null);
 
     try {
-      console.log("Searching for user:", userId.trim());
+      console.log("Searching for user:", userIdToSearch);
       const response = await fetch(
-        `/api/admin/user-projects?userId=${encodeURIComponent(userId.trim())}`
+        `/api/admin/user-projects?userId=${encodeURIComponent(userIdToSearch)}`
       );
 
       console.log("Response status:", response.status);
@@ -377,6 +379,12 @@ const AdminDashboard = () => {
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleUserClick = async (clerkId: string) => {
+    setActiveTab("search");
+    setUserId(clerkId);
+    await searchUser(clerkId);
   };
 
   const formatDate = (dateInput: string | Date | undefined) => {
@@ -458,7 +466,10 @@ const AdminDashboard = () => {
     return (
       <div className="bg-neutral-900/80 border border-white/10 rounded-2xl p-6 hover:bg-neutral-800/50 transition-all duration-300 group">
         {/* Project Header */}
-        <div className="flex items-start justify-between mb-4">
+        <div
+          className="flex items-start justify-between mb-4 cursor-pointer"
+          onClick={() => handleUserClick(project.user!.clerkId)}
+        >
           <div className="flex-1">
             <div className="flex items-center gap-3 mb-2">
               <h3 className="text-lg font-semibold text-white group-hover:text-purple-300 transition-colors">
@@ -489,9 +500,12 @@ const AdminDashboard = () => {
                   </div>
                 )}
                 <div>
-                  <p className="text-sm font-medium text-white">
+                  <button
+                    onClick={() => handleUserClick(project.user!.clerkId)}
+                    className="text-sm font-medium text-white hover:text-purple-300 transition-colors text-left hover:underline"
+                  >
                     {project.user.name || "Unknown User"}
-                  </p>
+                  </button>
                   <p className="text-xs text-neutral-400">
                     {project.user.email} • {project.user.plan || "Free"}
                   </p>
@@ -737,7 +751,7 @@ const AdminDashboard = () => {
                 </div>
                 <div className="flex items-end">
                   <button
-                    onClick={searchUser}
+                    onClick={() => searchUser()}
                     disabled={loading}
                     className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:from-purple-400 disabled:to-fuchsia-400 text-white px-6 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-2xl shadow-purple-500/25"
                   >
