@@ -441,7 +441,7 @@ export function PresetSelector({
         </span>
         {searchQuery && (
           <span className="text-xs text-blue-400">
-            Showing results for "{searchQuery}"
+            {`Showing results for "${searchQuery}"`}
           </span>
         )}
       </div>
