@@ -7,6 +7,8 @@ import {
   DEFAULT_LYRIC_PRESET_ID,
   LYRIC_PRESETS,
 } from "../../styles/lyricPresets";
+import EffectCustomizer from "./EffectCustomizer";
+import { PresetSelector } from "./PresetSelector";
 import {
   DEFAULT_LAYOUT_PRESET_ID,
   LAYOUT_PRESETS,
@@ -21,9 +23,9 @@ export function Toolbox(): React.ReactElement {
     currentTimeMs,
     saveTranscript,
     project,
-    lyricPresetId,
-    setLyricPresetId,
-    saveLyricPreset,
+    currentPreset,
+    setCurrentPreset,
+    savePreset,
     layoutPresetId,
     setLayoutPresetId,
     saveLayoutPreset,
@@ -57,7 +59,7 @@ export function Toolbox(): React.ReactElement {
   }, [project]);
   const [text, setText] = useState("");
   const [presetId, setPresetId] = useState<string>(
-    lyricPresetId || DEFAULT_LYRIC_PRESET_ID
+    currentPreset?.id || DEFAULT_LYRIC_PRESET_ID
   );
   const [layoutPresetIdLocal, setLayoutPresetIdLocal] = useState<string>(
     layoutPresetId || DEFAULT_LAYOUT_PRESET_ID
@@ -99,7 +101,7 @@ export function Toolbox(): React.ReactElement {
     }
 
     // Return default based on orientation
-    return isPortrait ? 60 : 100;
+    return isPortrait ? 50 : 80;
   };
 
   const getCurrentFontWeight = (): number => {
@@ -186,8 +188,8 @@ export function Toolbox(): React.ReactElement {
 
   // Sync local state with context state
   useEffect(() => {
-    setPresetId(lyricPresetId || DEFAULT_LYRIC_PRESET_ID);
-  }, [lyricPresetId]);
+    setPresetId(currentPreset?.id || DEFAULT_LYRIC_PRESET_ID);
+  }, [currentPreset]);
 
   useEffect(() => {
     setLayoutPresetIdLocal(layoutPresetId || DEFAULT_LAYOUT_PRESET_ID);
@@ -406,38 +408,37 @@ export function Toolbox(): React.ReactElement {
   }
 
   return (
-    <div className="rounded border border-white/10 bg-neutral-950/70 p-3 text-sm">
-      <div className="font-medium text-white/80">Tools</div>
-      <div className="mt-2 flex items-center gap-2">
-        <button
-          onClick={refreshTranscriptFromServer}
-          disabled={
-            refreshing ||
-            refreshLimitReached ||
-            MAX_REFRESHES - refreshesUsed <= 0
-          }
-          className="inline-flex items-center gap-2 rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 disabled:opacity-60"
-        >
-          {refreshLimitReached || MAX_REFRESHES - refreshesUsed <= 0
-            ? "Limit reached"
-            : refreshing
-            ? "Refreshing…"
-            : "Refresh transcript"}
-        </button>
-        <span className="text-xs text-white/60">
-          {Math.max(0, MAX_REFRESHES - refreshesUsed)} remaining
-        </span>
+    <div className="rounded-lg border border-white/10 bg-neutral-950/80 backdrop-blur-sm p-4 text-sm">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <h3 className="text-lg font-semibold text-white">Editor Tools</h3>
+        <div className="flex items-center gap-2">
+          <div className="h-2 w-2 rounded-full bg-emerald-500"></div>
+          <span className="text-xs text-white/60">Auto-save enabled</span>
+        </div>
       </div>
+
+      {/* Status Messages */}
       {refreshSuccess && (
-        <div className="mt-2 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-200 text-xs">
-          {refreshSuccess}
+        <div className="mb-4 rounded-lg border border-emerald-500/30 bg-emerald-500/10 p-3 text-emerald-200 text-sm">
+          <div className="flex items-center gap-2">
+            <svg className="h-4 w-4" fill="currentColor" viewBox="0 0 20 20">
+              <path
+                fillRule="evenodd"
+                d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                clipRule="evenodd"
+              />
+            </svg>
+            {refreshSuccess}
+          </div>
         </div>
       )}
+
       {refreshError && (
-        <div className="mt-2 rounded-lg border border-red-500/30 bg-gradient-to-r from-red-500/10 to-red-600/10 p-3 text-red-200">
-          <div className="flex items-start gap-2 text-xs">
+        <div className="mb-4 rounded-lg border border-red-500/30 bg-red-500/10 p-3 text-red-200">
+          <div className="flex items-start gap-2">
             <svg
-              className="h-4 w-4 text-red-300 flex-shrink-0"
+              className="h-4 w-4 text-red-300 flex-shrink-0 mt-0.5"
               fill="none"
               viewBox="0 0 24 24"
               stroke="currentColor"
@@ -452,39 +453,87 @@ export function Toolbox(): React.ReactElement {
             <div className="flex-1">
               <div className="font-medium text-red-200">{refreshError}</div>
               {refreshLimitReached && (
-                <div className="mt-1 text-red-300/90">
-                  You can refresh a project’s transcript up to 3 times.
+                <div className="mt-1 text-red-300/90 text-xs">
+                  {`  You can refresh a project's transcript up to 3 times.`}
                 </div>
               )}
             </div>
           </div>
         </div>
       )}
-      <div className="mt-3 space-y-2">
-        <div>
-          <label className="mb-1 block text-white/60">Lyric style</label>
-          <div className="flex gap-2">
-            <select
-              value={presetId}
-              onChange={async (e) => {
-                const chosen = e.target.value;
-                setPresetId(chosen);
-                setLyricPresetId(chosen);
-                await saveLyricPreset(chosen);
-              }}
-              className="rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
-            >
-              {Object.values(LYRIC_PRESETS).map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.name}
-                </option>
-              ))}
-            </select>
+
+      {/* Main Content */}
+      <div className="space-y-6">
+        {/* Transcript Actions */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-white/90">Transcript</h4>
+            <span className="text-xs text-white/50">
+              {Math.max(0, MAX_REFRESHES - refreshesUsed)} refreshes left
+            </span>
           </div>
+          <button
+            onClick={refreshTranscriptFromServer}
+            disabled={
+              refreshing ||
+              refreshLimitReached ||
+              MAX_REFRESHES - refreshesUsed <= 0
+            }
+            className="w-full flex items-center justify-center gap-2 rounded-lg border border-white/10 bg-white/5 px-4 py-3 text-white hover:bg-white/10 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200"
+          >
+            {refreshing ? (
+              <>
+                <svg
+                  className="h-4 w-4 animate-spin"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                >
+                  <circle
+                    className="opacity-25"
+                    cx="12"
+                    cy="12"
+                    r="10"
+                    stroke="currentColor"
+                    strokeWidth="4"
+                  ></circle>
+                  <path
+                    className="opacity-75"
+                    fill="currentColor"
+                    d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"
+                  ></path>
+                </svg>
+                Refreshing...
+              </>
+            ) : refreshLimitReached || MAX_REFRESHES - refreshesUsed <= 0 ? (
+              "Refresh limit reached"
+            ) : (
+              <>
+                <svg
+                  className="h-4 w-4"
+                  fill="none"
+                  viewBox="0 0 24 24"
+                  stroke="currentColor"
+                >
+                  <path
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    strokeWidth={2}
+                    d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"
+                  />
+                </svg>
+                Refresh transcript
+              </>
+            )}
+          </button>
         </div>
-        <div>
-          <label className="mb-1 block text-white/60">Lyric layout</label>
-          <div className="flex gap-2">
+
+        {/* Style Presets */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-white/90">Style & Layout</h4>
+          <div>
+            <label className="block text-xs text-white/60 mb-2">
+              Lyric Layout
+            </label>
             <select
               value={layoutPresetId}
               onChange={async (e) => {
@@ -493,7 +542,7 @@ export function Toolbox(): React.ReactElement {
                 setLayoutPresetId(chosen);
                 await saveLayoutPreset(chosen);
               }}
-              className="rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
+              className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/30 transition-colors"
             >
               {Object.values(LAYOUT_PRESETS).map((p) => (
                 <option key={p.id} value={p.id}>
@@ -502,181 +551,220 @@ export function Toolbox(): React.ReactElement {
               ))}
             </select>
           </div>
-        </div>
-        <div>
-          <label className="mb-1 block text-white/60">Custom font size</label>
-          <div className="flex gap-2">
-            <input
-              type="number"
-              min="12"
-              max="200"
-              className="flex-1 rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none placeholder:text-white/40"
-              placeholder={`${getCurrentFontSize()}px`}
-              value={customFontSize || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setCustomFontSize(value ? parseInt(value) : null);
-              }}
-            />
-            <button
-              onClick={applyCustomFontSize}
-              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
-            >
-              Apply
-            </button>
+          <div className="grid grid-cols-1 gap-3">
+            <div>
+              <label className="block text-xs text-white/60 mb-2">
+                Lyric Style
+              </label>
+              <PresetSelector
+                selectedPresetId={presetId}
+                onPresetChange={async (chosen) => {
+                  setPresetId(chosen);
+                  const preset = LYRIC_PRESETS[chosen];
+                  if (preset) {
+                    setCurrentPreset(preset);
+                    await savePreset(preset);
+                  }
+                }}
+              />
+            </div>
           </div>
         </div>
-        <div>
-          <label className="mb-1 block text-white/60">Custom font weight</label>
-          <div className="flex gap-2">
-            <select
-              value={customFontWeight || ""}
-              onChange={(e) => {
-                const value = e.target.value;
-                setCustomFontWeight(value ? parseInt(value) : null);
-              }}
-              className="flex-1 rounded border border-white/10 bg-black/40 px-2 py-1 text-white outline-none"
-            >
-              <option value="">Default ({getCurrentFontWeight()})</option>
-              <option value="100">Thin (100)</option>
-              <option value="300">Light (300)</option>
-              <option value="400">Normal (400)</option>
-              <option value="500">Medium (500)</option>
-              <option value="600">Semi-bold (600)</option>
-              <option value="700">Bold (700)</option>
-              <option value="800">Extra-bold (800)</option>
-              <option value="900">Black (900)</option>
-            </select>
-            <button
-              onClick={applyCustomFontWeight}
-              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
-            >
-              Apply
-            </button>
+
+        {/* Typography Controls */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-white/90">Typography</h4>
+          <div className="grid grid-cols-1 gap-3">
+            {/* Font Size */}
+            <div>
+              <label className="block text-xs text-white/60 mb-2">
+                Font Size
+              </label>
+              <div className="flex gap-2">
+                <input
+                  type="number"
+                  min="12"
+                  max="200"
+                  className="flex-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none placeholder:text-white/40 focus:border-white/30 transition-colors"
+                  placeholder={`${getCurrentFontSize()}px`}
+                  value={customFontSize || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomFontSize(value ? parseInt(value) : null);
+                  }}
+                />
+                <button
+                  onClick={applyCustomFontSize}
+                  className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
+
+            {/* Font Weight */}
+            <div>
+              <label className="block text-xs text-white/60 mb-2">
+                Font Weight
+              </label>
+              <div className="flex gap-2">
+                <select
+                  value={customFontWeight || ""}
+                  onChange={(e) => {
+                    const value = e.target.value;
+                    setCustomFontWeight(value ? parseInt(value) : null);
+                  }}
+                  className="flex-1 rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/30 transition-colors"
+                >
+                  <option value="">Default ({getCurrentFontWeight()})</option>
+                  <option value="100">Thin (100)</option>
+                  <option value="300">Light (300)</option>
+                  <option value="400">Normal (400)</option>
+                  <option value="500">Medium (500)</option>
+                  <option value="600">Semi-bold (600)</option>
+                  <option value="700">Bold (700)</option>
+                  <option value="800">Extra-bold (800)</option>
+                  <option value="900">Black (900)</option>
+                </select>
+                <button
+                  onClick={applyCustomFontWeight}
+                  className="px-4 py-2 rounded-lg border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
+                >
+                  Apply
+                </button>
+              </div>
+            </div>
           </div>
         </div>
-        <div>
-          <div className="flex items-center justify-between mb-3">
-            <label className="text-white/80 font-medium">Font Color</label>
-            <div className="flex items-center gap-2 text-xs text-white/40">
+
+        {/* Color Controls */}
+        <div className="space-y-3">
+          <div className="flex items-center justify-between">
+            <h4 className="text-sm font-medium text-white/90">Colors</h4>
+            <div className="flex items-center gap-2">
               {getCustomColorCount() > 0 && (
-                <span className="px-2 py-1 bg-white/5 rounded text-xs text-white/60">
+                <span className="px-2 py-1 bg-white/10 rounded-full text-xs text-white/80 font-medium">
                   {getCustomColorCount()} custom
                 </span>
               )}
               {selectedIndex !== null && (
-                <span className="px-2 py-1 bg-white/5 rounded text-xs text-white/60">
-                  {(() => {
-                    let acc = 0;
-                    for (let li = 0; li < transcript.length; li++) {
-                      const words = transcript[li]?.words ?? [];
-                      if (selectedIndex < acc + words.length) {
-                        const word = words[selectedIndex - acc];
-                        return word?.style?.color || "preset";
-                      }
-                      acc += words.length;
-                    }
-                    return "preset";
-                  })()}
+                <span className="px-2 py-1 bg-blue-500/20 text-blue-300 rounded-full text-xs font-medium">
+                  Word selected
                 </span>
               )}
             </div>
           </div>
 
-          {/* Color Palette */}
-          <div className="grid grid-cols-5 gap-2 mb-4">
-            {[
-              "#ffffff",
-              "#ff6b6b",
-              "#4ecdc4",
-              "#45b7d1",
-              "#96ceb4",
-              "#feca57",
-              "#ff9ff3",
-              "#54a0ff",
-              "#5f27cd",
-              "#00d2d3",
-            ].map((color) => (
-              <button
-                key={color}
-                onClick={() => {
-                  setCustomFontColor(color);
-                  const updatedTranscript = transcript.map((line) => ({
-                    ...line,
-                    words: line.words.map((word) => ({
-                      ...word,
-                      style: { ...word.style, color: color },
-                    })),
-                  }));
-                  setTranscript(updatedTranscript);
-                  saveTranscript(updatedTranscript);
-                }}
-                className="group relative h-8 w-full rounded border border-white/10 hover:border-white/30 transition-all duration-200 hover:scale-105"
-                style={{ backgroundColor: color }}
-                title={color}
-              >
-                <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded" />
-                <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200">
-                  <svg
-                    className="w-3 h-3 text-white"
-                    fill="currentColor"
-                    viewBox="0 0 20 20"
-                  >
-                    <path
-                      fillRule="evenodd"
-                      d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
-                      clipRule="evenodd"
-                    />
-                  </svg>
-                </div>
-              </button>
-            ))}
-          </div>
-
-          {/* Custom Color Input */}
-          <div className="flex gap-3 mb-4">
-            <div className="flex-1">
-              <label className="block text-xs text-white/60 mb-2">
-                Custom Color
-              </label>
-              <div className="flex gap-2">
-                <input
-                  type="color"
-                  className="h-9 w-16 rounded border border-white/10 bg-black/40 cursor-pointer hover:border-white/20 transition-colors"
-                  value={customFontColor || getCurrentFontColor()}
-                  onChange={(e) => setCustomFontColor(e.target.value)}
-                />
-                <input
-                  type="text"
-                  className="flex-1 h-9 rounded border border-white/10 bg-black/40 px-2 text-white outline-none font-mono text-sm placeholder:text-white/40 transition-colors"
-                  placeholder="#ffffff"
-                  value={customFontColor || ""}
-                  onChange={(e) => setCustomFontColor(e.target.value)}
-                />
-              </div>
+          {/* Quick Color Palette */}
+          <div>
+            <label className="block text-xs text-white/60 mb-2">
+              Quick Colors
+            </label>
+            <div className="grid grid-cols-5 gap-2">
+              {[
+                "#ffffff",
+                "#ff6b6b",
+                "#4ecdc4",
+                "#45b7d1",
+                "#96ceb4",
+                "#feca57",
+                "#ff9ff3",
+                "#54a0ff",
+                "#5f27cd",
+                "#00d2d3",
+              ].map((color) => (
+                <button
+                  key={color}
+                  onClick={() => {
+                    setCustomFontColor(color);
+                    const updatedTranscript = transcript.map((line) => ({
+                      ...line,
+                      words: line.words.map((word) => ({
+                        ...word,
+                        style: { ...word.style, color: color },
+                      })),
+                    }));
+                    setTranscript(updatedTranscript);
+                    saveTranscript(updatedTranscript);
+                  }}
+                  className={`group relative h-10 w-full rounded-lg border-2 transition-all duration-200 hover:scale-105 ${
+                    customFontColor === color
+                      ? "border-white/50 shadow-lg shadow-white/20"
+                      : "border-white/10 hover:border-white/30"
+                  }`}
+                  style={{ backgroundColor: color }}
+                  title={color}
+                >
+                  <div className="absolute inset-0 bg-black/0 group-hover:bg-black/20 transition-colors duration-200 rounded-lg" />
+                  {customFontColor === color && (
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <svg
+                        className="w-4 h-4 text-white drop-shadow-lg"
+                        fill="currentColor"
+                        viewBox="0 0 20 20"
+                      >
+                        <path
+                          fillRule="evenodd"
+                          d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                          clipRule="evenodd"
+                        />
+                      </svg>
+                    </div>
+                  )}
+                </button>
+              ))}
             </div>
           </div>
 
-          {/* Action Buttons */}
+          {/* Custom Color Input */}
+          <div>
+            <label className="block text-xs text-white/60 mb-2">
+              Custom Color
+            </label>
+            <div className="flex gap-2">
+              <input
+                type="color"
+                className="h-10 w-16 rounded-lg border border-white/10 bg-black/40 cursor-pointer hover:border-white/20 transition-colors"
+                value={customFontColor || getCurrentFontColor()}
+                onChange={(e) => setCustomFontColor(e.target.value)}
+              />
+              <input
+                type="text"
+                className="flex-1 h-10 rounded-lg border border-white/10 bg-black/40 px-3 text-white outline-none font-mono text-sm placeholder:text-white/40 focus:border-white/30 transition-colors"
+                placeholder="#ffffff"
+                value={customFontColor || ""}
+                onChange={(e) => setCustomFontColor(e.target.value)}
+              />
+            </div>
+          </div>
+
+          {/* Color Actions */}
           <div className="grid grid-cols-2 gap-2">
             <button
               onClick={applyCustomFontColor}
-              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
+              className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
             >
-              Apply to All Words
+              Apply to All
             </button>
-            {selectedIndex !== null && (
+            {selectedIndex !== null ? (
               <button
                 onClick={applyColorToSelectedWords}
-                className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
+                className="px-3 py-2 rounded-lg border border-blue-500/30 bg-blue-500/10 text-blue-300 hover:bg-blue-500/20 transition-colors text-sm font-medium"
               >
                 Apply to Selected
+              </button>
+            ) : (
+              <button
+                onClick={applyColorToTimeRange}
+                className="px-3 py-2 rounded-lg border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
+              >
+                Apply to Current
               </button>
             )}
           </div>
 
-          {/* Utility Buttons */}
-          <div className="flex gap-2 mt-3">
+          {/* Reset Actions */}
+          <div className="flex gap-2">
             <button
               onClick={() => {
                 setCustomFontColor(null);
@@ -690,17 +778,23 @@ export function Toolbox(): React.ReactElement {
                 setTranscript(updatedTranscript);
                 saveTranscript(updatedTranscript);
               }}
-              className="rounded border border-white/10 bg-white/5 px-3 py-2 text-white hover:bg-white/10 transition-colors"
+              className="flex-1 px-3 py-2 rounded-lg border border-white/10 bg-white/5 text-white hover:bg-white/10 transition-colors text-sm font-medium"
             >
               Reset to Preset
             </button>
             <button
               onClick={clearAllCustomColors}
-              className="rounded border border-red-500/20 bg-red-500/10 px-3 py-2 text-white hover:bg-red-500/20 transition-colors"
+              className="px-3 py-2 rounded-lg border border-red-500/30 bg-red-500/10 text-red-300 hover:bg-red-500/20 transition-colors text-sm font-medium"
             >
-              Clear All Colors
+              Clear All
             </button>
           </div>
+        </div>
+
+        {/* Effect Customization */}
+        <div className="space-y-3">
+          <h4 className="text-sm font-medium text-white/90">Visual Effects</h4>
+          <EffectCustomizer />
         </div>
       </div>
     </div>

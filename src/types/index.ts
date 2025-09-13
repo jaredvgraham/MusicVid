@@ -47,7 +47,7 @@ export type Project = {
   videoFinal?: string;
   transcript: Line[];
   textClips?: TextClip[];
-  lyricPresetId: string;
+  // Reference to Preset document
   layoutPresetId?: string; // Optional layout preset ID
 };
 

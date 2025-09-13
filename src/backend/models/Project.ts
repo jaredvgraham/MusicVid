@@ -59,7 +59,7 @@ export interface ProjectDocument extends Document {
   width?: number;
   height?: number;
   orientation?: "portrait" | "landscape";
-  lyricPresetId?: string;
+  lyricPresetId?: string; // Reference to Preset document
   layoutPresetId?: string;
   callback_status?: number;
   transcriptRefreshes?: number; // how many times the transcript has been refreshed
@@ -84,7 +84,7 @@ const ProjectSchema = new Schema<ProjectDocument>(
     videoKey: { type: String },
     song: { type: String },
     lyrics: { type: String },
-    lyricPresetId: { type: String, default: "classic" },
+    lyricPresetId: { type: String },
     layoutPresetId: { type: String, default: "centered-classic" },
     finalRender: { type: String },
     deleted: { type: Boolean, required: true, default: false },

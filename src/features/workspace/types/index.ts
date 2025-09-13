@@ -1,11 +1,12 @@
 import type { Line, Word, Project } from "@/types";
+import type { LyricPreset } from "../styles/lyricPresets";
 
 // Editor State Types
 export interface EditorState {
   project: Project;
   transcript: Line[];
   selectedIndex: number | null;
-  lyricPresetId: string;
+  currentPreset: LyricPreset | null;
   layoutPresetId: string;
   currentTimeMs: number;
   playing: boolean;
@@ -18,7 +19,7 @@ export interface EditorState {
 export interface EditorActions {
   setTranscript: React.Dispatch<React.SetStateAction<Line[]>>;
   setSelectedIndex: React.Dispatch<React.SetStateAction<number | null>>;
-  setLyricPresetId: React.Dispatch<React.SetStateAction<string>>;
+  setCurrentPreset: React.Dispatch<React.SetStateAction<LyricPreset | null>>;
   setLayoutPresetId: React.Dispatch<React.SetStateAction<string>>;
   setCurrentTimeMs: (ms: number) => void;
   seekToMs: (ms: number) => void;
@@ -35,7 +36,8 @@ export interface EditorControls {
 
 export interface EditorPersistence {
   saveTranscript: (override?: Line[]) => Promise<void>;
-  saveLyricPreset: (presetId: string) => Promise<void>;
+  savePreset: (preset: LyricPreset) => Promise<void>;
+  createCustomPreset: (preset: LyricPreset) => Promise<void>;
   saveLayoutPreset: (presetId: string) => Promise<void>;
 }
 

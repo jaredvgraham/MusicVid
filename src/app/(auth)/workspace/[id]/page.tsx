@@ -18,7 +18,7 @@ import { useFinalRender } from "@/hooks/useFinalRender";
 import { LoadingSpinner } from "@/components/ui/LoadingSpinner";
 // import { getEditorSocket } from "@/lib/editorSocket";
 
-type WorkspaceResponse = { project: Project };
+type WorkspaceResponse = { project: Project; lyricPreset?: any };
 
 export default function WorkspacePage(): React.ReactElement {
   const params = useParams<{ id: string }>();
@@ -28,6 +28,7 @@ export default function WorkspacePage(): React.ReactElement {
   const [loading, setLoading] = useState(true);
   const [fetchError, setFetchError] = useState<string | null>(null);
   const [project, setProject] = useState<Project | null>(null);
+  const [lyricPreset, setLyricPreset] = useState<any>(null);
   const [showVideos, setShowVideos] = useState(false);
 
   const { connected, error, status } = useProjectSocket(projectId ?? "");
@@ -81,6 +82,7 @@ export default function WorkspacePage(): React.ReactElement {
         );
         if (!mounted) return;
         setProject(res.project);
+        setLyricPreset(res.lyricPreset);
       } catch (e: any) {
         setFetchError(e?.message || "Failed to load workspace");
       } finally {
@@ -160,47 +162,92 @@ export default function WorkspacePage(): React.ReactElement {
   if (!project) return <div className="p-6">Not found</div>;
 
   return (
-    <EditorProvider project={project} initialTranscript={project.transcript}>
+    <EditorProvider
+      project={project}
+      initialTranscript={project.transcript}
+      initialPreset={lyricPreset}
+    >
       <div className="min-h-screen bg-neutral-950 text-neutral-100">
         <div className="mx-auto max-w-7xl p-2 sm:p-4 space-y-4">
           <ControlsBar />
 
           {/* Connection Status */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  connected ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              <span className={connected ? "text-green-400" : "text-red-400"}>
-                Project: {connected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
+            <div className="w-full flex justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      connected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={connected ? "text-green-400" : "text-red-400"}
+                  >
+                    Project: {connected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  renderConnected ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              <span
-                className={renderConnected ? "text-green-400" : "text-red-400"}
-              >
-                Render: {renderConnected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      renderConnected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={
+                      renderConnected ? "text-green-400" : "text-red-400"
+                    }
+                  >
+                    Render: {renderConnected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
 
-            {(!connected || !renderConnected) && (
-              <button
-                onClick={() => {
-                  window.location.reload();
-                }}
-                className="text-xs text-blue-400 hover:text-blue-300 underline self-start sm:self-auto"
-              >
-                Reconnect
-              </button>
-            )}
+                {(!connected || !renderConnected) && (
+                  <button
+                    onClick={() => {
+                      window.location.reload();
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300 underline self-start sm:self-auto"
+                  >
+                    Reconnect
+                  </button>
+                )}
+              </div>
+              {/* Export button  aka render button */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  {isRendering && (
+                    <button
+                      onClick={() => cancelRender()}
+                      className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={onFinalRender}
+                    className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                  >
+                    Export
+                  </button>
+                </div>
+                {/* Progress bar */}
+                {isRendering && (
+                  <div className="w-full bg-neutral-800 rounded-full h-2">
+                    <div
+                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${renderProgress}%` }}
+                    />
+                  </div>
+                )}
+
+                {/* Render error */}
+                {renderError && (
+                  <div className="text-xs text-red-400">{renderError}</div>
+                )}
+              </div>
+            </div>
           </div>
           {/* Mobile Toolbox Button */}
           <div className="md:hidden">
