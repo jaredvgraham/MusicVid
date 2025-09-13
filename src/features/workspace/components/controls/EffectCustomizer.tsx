@@ -97,7 +97,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
       allEffectKeys.forEach((key) => {
         const value = currentPreset[key as keyof LyricPreset];
         if (value !== undefined) {
-          initialCustomizations[key as keyof LyricPreset] = value;
+          (initialCustomizations as any)[key] = value;
         }
       });
 
@@ -171,7 +171,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
         <div className="flex items-center gap-2">
           <input
             type="checkbox"
-            checked={isEnabled}
+            checked={!!isEnabled}
             onChange={(e) => updateEffect(effect.key, e.target.checked)}
             className="rounded border border-white/20"
           />
@@ -189,7 +189,10 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
                   type="color"
                   value={color as string}
                   onChange={(e) =>
-                    updateEffect(`${effect.key}Color`, e.target.value)
+                    updateEffect(
+                      `${effect.key}Color` as keyof LyricPreset,
+                      e.target.value
+                    )
                   }
                   className="h-8 w-16 rounded border border-white/10 bg-black/40 cursor-pointer"
                 />
@@ -209,7 +212,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
                   value={intensity as number}
                   onChange={(e) =>
                     updateEffect(
-                      `${effect.key}Intensity`,
+                      `${effect.key}Intensity` as keyof LyricPreset,
                       parseFloat(e.target.value)
                     )
                   }
@@ -221,7 +224,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
             {effect.hasSpeed && (
               <div>
                 <label className="block text-xs text-white/60 mb-1">
-                  Speed: {speed}x
+                  Speed: {speed as number}x
                 </label>
                 <input
                   type="range"
@@ -231,7 +234,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
                   value={speed as number}
                   onChange={(e) =>
                     updateEffect(
-                      `${effect.key}Speed`,
+                      `${effect.key}Speed` as keyof LyricPreset,
                       parseFloat(e.target.value)
                     )
                   }
@@ -243,7 +246,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
             {effect.hasAngle && (
               <div>
                 <label className="block text-xs text-white/60 mb-1">
-                  Angle: {angle}°
+                  Angle: {angle as number}°
                 </label>
                 <input
                   type="range"
@@ -253,7 +256,7 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
                   value={angle as number}
                   onChange={(e) =>
                     updateEffect(
-                      `${effect.key}AngleDeg`,
+                      `${effect.key}AngleDeg` as keyof LyricPreset,
                       parseInt(e.target.value)
                     )
                   }
