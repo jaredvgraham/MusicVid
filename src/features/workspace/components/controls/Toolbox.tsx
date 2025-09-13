@@ -530,6 +530,27 @@ export function Toolbox(): React.ReactElement {
         {/* Style Presets */}
         <div className="space-y-3">
           <h4 className="text-sm font-medium text-white/90">Style & Layout</h4>
+          <div>
+            <label className="block text-xs text-white/60 mb-2">
+              Lyric Layout
+            </label>
+            <select
+              value={layoutPresetId}
+              onChange={async (e) => {
+                const chosen = e.target.value;
+                setLayoutPresetIdLocal(chosen);
+                setLayoutPresetId(chosen);
+                await saveLayoutPreset(chosen);
+              }}
+              className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/30 transition-colors"
+            >
+              {Object.values(LAYOUT_PRESETS).map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
           <div className="grid grid-cols-1 gap-3">
             <div>
               <label className="block text-xs text-white/60 mb-2">
@@ -546,25 +567,6 @@ export function Toolbox(): React.ReactElement {
                   }
                 }}
               />
-            </div>
-            <div>
-              <label className="block text-xs text-white/60 mb-2">Layout</label>
-              <select
-                value={layoutPresetId}
-                onChange={async (e) => {
-                  const chosen = e.target.value;
-                  setLayoutPresetIdLocal(chosen);
-                  setLayoutPresetId(chosen);
-                  await saveLayoutPreset(chosen);
-                }}
-                className="w-full rounded-lg border border-white/10 bg-black/40 px-3 py-2 text-white outline-none focus:border-white/30 transition-colors"
-              >
-                {Object.values(LAYOUT_PRESETS).map((p) => (
-                  <option key={p.id} value={p.id}>
-                    {p.name}
-                  </option>
-                ))}
-              </select>
             </div>
           </div>
         </div>

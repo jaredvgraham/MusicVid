@@ -235,8 +235,6 @@ export const LYRIC_PRESETS: Record<string, LyricPreset> = {
     fxBeams: true,
     fxGodRays: true,
     fxRayAngleDeg: -10,
-    fxLightning: true,
-    fxLightningIntensity: 0.4,
   },
   // NEON & GLOW STYLES
   neon: {
@@ -302,8 +300,6 @@ export const LYRIC_PRESETS: Record<string, LyricPreset> = {
     },
     fxElectric: true,
     fxElectricIntensity: 0.8,
-    fxLightning: true,
-    fxLightningIntensity: 0.5,
   },
   plasma: {
     id: "plasma",
@@ -640,25 +636,6 @@ export const LYRIC_PRESETS: Record<string, LyricPreset> = {
     fxParticles: true,
     fxWaves: true,
     fxWavesIntensity: 0.6,
-  },
-  lightning: {
-    id: "lightning",
-    name: "Lightning",
-    category: "Special Effects",
-    fontWeight: 900,
-    fontSizePx: 80,
-    color: "#ffffff",
-    backgroundColor: "transparent",
-    letterSpacingPx: 1,
-    textTransform: "uppercase",
-    textShadow:
-      "0 0 15px rgba(255,255,255,0.9), 0 0 30px rgba(255,255,255,0.7)",
-    gradientText: { from: "#ffffff", to: "#e0e7ff" },
-    textAlign: "center",
-    fxLightning: true,
-    fxLightningIntensity: 0.9,
-    fxElectric: true,
-    fxElectricIntensity: 0.8,
   },
 };
 

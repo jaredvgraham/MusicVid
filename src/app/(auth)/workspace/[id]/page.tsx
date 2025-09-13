@@ -173,40 +173,81 @@ export default function WorkspacePage(): React.ReactElement {
 
           {/* Connection Status */}
           <div className="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-sm">
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  connected ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              <span className={connected ? "text-green-400" : "text-red-400"}>
-                Project: {connected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
+            <div className="w-full flex justify-between">
+              <div className="flex items-center gap-2">
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      connected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={connected ? "text-green-400" : "text-red-400"}
+                  >
+                    Project: {connected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
 
-            <div className="flex items-center gap-2">
-              <div
-                className={`w-2 h-2 rounded-full ${
-                  renderConnected ? "bg-green-500" : "bg-red-500"
-                }`}
-              />
-              <span
-                className={renderConnected ? "text-green-400" : "text-red-400"}
-              >
-                Render: {renderConnected ? "Connected" : "Disconnected"}
-              </span>
-            </div>
+                <div className="flex items-center gap-2">
+                  <div
+                    className={`w-2 h-2 rounded-full ${
+                      renderConnected ? "bg-green-500" : "bg-red-500"
+                    }`}
+                  />
+                  <span
+                    className={
+                      renderConnected ? "text-green-400" : "text-red-400"
+                    }
+                  >
+                    Render: {renderConnected ? "Connected" : "Disconnected"}
+                  </span>
+                </div>
 
-            {(!connected || !renderConnected) && (
-              <button
-                onClick={() => {
-                  window.location.reload();
-                }}
-                className="text-xs text-blue-400 hover:text-blue-300 underline self-start sm:self-auto"
-              >
-                Reconnect
-              </button>
-            )}
+                {(!connected || !renderConnected) && (
+                  <button
+                    onClick={() => {
+                      window.location.reload();
+                    }}
+                    className="text-xs text-blue-400 hover:text-blue-300 underline self-start sm:self-auto"
+                  >
+                    Reconnect
+                  </button>
+                )}
+              </div>
+              {/* Export button  aka render button */}
+              <div className="flex flex-col gap-2">
+                <div className="flex items-center gap-2">
+                  {isRendering && (
+                    <button
+                      onClick={() => cancelRender()}
+                      className="rounded bg-neutral-800 px-3 py-1.5 text-sm text-white"
+                    >
+                      Cancel
+                    </button>
+                  )}
+                  <button
+                    onClick={onFinalRender}
+                    className="rounded bg-emerald-600 px-3 py-1.5 text-sm text-white disabled:opacity-50"
+                  >
+                    Export
+                  </button>
+                </div>
+                {/* Progress bar */}
+                {isRendering && (
+                  <div className="w-full bg-neutral-800 rounded-full h-2">
+                    <div
+                      className="bg-emerald-500 h-2 rounded-full transition-all duration-300"
+                      style={{ width: `${renderProgress}%` }}
+                    />
+                  </div>
+                )}
+
+                {/* Render error */}
+                {renderError && (
+                  <div className="text-xs text-red-400">{renderError}</div>
+                )}
+              </div>
+            </div>
           </div>
           {/* Mobile Toolbox Button */}
           <div className="md:hidden">
