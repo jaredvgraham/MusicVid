@@ -454,7 +454,7 @@ export function Toolbox(): React.ReactElement {
               <div className="font-medium text-red-200">{refreshError}</div>
               {refreshLimitReached && (
                 <div className="mt-1 text-red-300/90 text-xs">
-                  You can refresh a project's transcript up to 3 times.
+                  {`  You can refresh a project's transcript up to 3 times.`}
                 </div>
               )}
             </div>
