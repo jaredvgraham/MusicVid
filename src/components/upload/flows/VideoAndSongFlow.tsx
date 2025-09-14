@@ -66,7 +66,10 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
 
   const MAX_DURATION_SECONDS = 60 * 10; // 10 minutes
 
-  const getMediaDuration = (file: File, type: "audio" | "video"): Promise<number> => {
+  const getMediaDuration = (
+    file: File,
+    type: "audio" | "video"
+  ): Promise<number> => {
     return new Promise((resolve, reject) => {
       try {
         const url = URL.createObjectURL(file);
@@ -75,14 +78,25 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
         const cleanup = () => {
           URL.revokeObjectURL(url);
           el.removeAttribute("src");
-          try { el.load(); } catch {}
+          try {
+            el.load();
+          } catch {}
         };
-        const onLoaded = () => { const d = Number((el as any).duration); cleanup(); resolve(d); };
-        const onError = () => { cleanup(); reject(new Error("Failed to read duration")); };
+        const onLoaded = () => {
+          const d = Number((el as any).duration);
+          cleanup();
+          resolve(d);
+        };
+        const onError = () => {
+          cleanup();
+          reject(new Error("Failed to read duration"));
+        };
         el.addEventListener("loadedmetadata", onLoaded, { once: true });
         el.addEventListener("error", onError, { once: true });
         (el as HTMLMediaElement).src = url;
-      } catch (e) { reject(e as Error); }
+      } catch (e) {
+        reject(e as Error);
+      }
     });
   };
 
@@ -182,7 +196,9 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
         setLastFileName(file.name);
         setPendingAudio(file);
       } catch {
-        setUploadError("Could not read audio duration. Please try another file.");
+        setUploadError(
+          "Could not read audio duration. Please try another file."
+        );
         return;
       }
     }
@@ -212,7 +228,9 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
         }
         setPendingVideo(file);
       } catch {
-        setUploadError("Could not read video duration. Please try another file.");
+        setUploadError(
+          "Could not read video duration. Please try another file."
+        );
         return;
       }
     }
@@ -292,24 +310,35 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
 
       {/* Audio uploader */}
       <div className="grid place-items-center">
+        <div className="w-full max-w-2xl">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center">
+              <FileAudio className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Audio File</h3>
+            <span className="rounded-full bg-emerald-500/20 px-2 py-1 text-xs text-emerald-200">
+              Required
+            </span>
+          </div>
+        </div>
         <label
           htmlFor="audio-upload"
           onDragEnter={onDragOverAudio}
           onDragOver={onDragOverAudio}
           onDragLeave={onDragLeaveAudio}
           onDrop={onDropAudio}
-          className={`group relative grid w-full  place-items-center rounded-3xl border-2 border-dashed text-center transition-all duration-300 p-4 ${
+          className={`group relative grid w-full place-items-center rounded-3xl border-2 border-dashed text-center transition-all duration-300 p-4 ${
             isDraggingAudio
-              ? "border-fuchsia-400/60 bg-gradient-to-br from-fuchsia-500/10 via-purple-500/10 to-indigo-500/10 scale-105 shadow-2xl shadow-fuchsia-500/25"
-              : "border-white/20 bg-gradient-to-br from-white/5 via-white/3 to-transparent hover:border-white/40 hover:bg-gradient-to-br hover:from-white/10 hover:via-white/5 hover:to-transparent hover:scale-102"
+              ? "border-emerald-400/60 bg-gradient-to-br from-emerald-500/10 via-teal-500/10 to-cyan-500/10 scale-105 shadow-2xl shadow-emerald-500/25"
+              : "border-emerald-500/30 bg-gradient-to-br from-emerald-500/5 via-teal-500/3 to-transparent hover:border-emerald-400/50 hover:bg-gradient-to-br hover:from-emerald-500/10 hover:via-teal-500/5 hover:to-transparent hover:scale-102"
           }`}
         >
           {/* Background gradient overlay */}
           <div
             className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
               isDraggingAudio
-                ? "bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-indigo-500/5 opacity-100"
-                : "bg-gradient-to-br from-white/5 via-white/3 to-transparent opacity-0 group-hover:opacity-100"
+                ? "bg-gradient-to-br from-emerald-500/5 via-teal-500/5 to-cyan-500/5 opacity-100"
+                : "bg-gradient-to-br from-emerald-500/5 via-teal-500/3 to-transparent opacity-0 group-hover:opacity-100"
             }`}
           />
 
@@ -317,8 +346,8 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           <div
             className={`absolute inset-0 rounded-3xl transition-all duration-300 ${
               isDraggingAudio
-                ? "ring-4 ring-fuchsia-400/20"
-                : "ring-0 group-hover:ring-2 group-hover:ring-white/10"
+                ? "ring-4 ring-emerald-400/20"
+                : "ring-0 group-hover:ring-2 group-hover:ring-emerald-400/20"
             }`}
           />
 
@@ -327,15 +356,15 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             <div
               className={`grid h-16 w-16 place-items-center rounded-2xl transition-all duration-300 ${
                 isDraggingAudio
-                  ? "bg-gradient-to-r from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/25 scale-110"
-                  : "bg-gradient-to-r from-white/10 to-white/5 group-hover:bg-gradient-to-r group-hover:from-white/15 group-hover:to-white/10 group-hover:scale-105"
+                  ? "bg-gradient-to-r from-emerald-500 to-teal-500 shadow-lg shadow-emerald-500/25 scale-110"
+                  : "bg-gradient-to-r from-emerald-500/20 to-teal-500/20 group-hover:bg-gradient-to-r group-hover:from-emerald-500/30 group-hover:to-teal-500/30 group-hover:scale-105"
               }`}
             >
               <FileAudio
                 className={`h-7 w-7 transition-all duration-300 ${
                   isDraggingAudio
                     ? "text-white scale-110"
-                    : "text-purple-300 group-hover:text-purple-200"
+                    : "text-emerald-300 group-hover:text-emerald-200"
                 }`}
                 strokeWidth={2}
               />
@@ -346,7 +375,7 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
               <p
                 className={`text-lg font-semibold transition-all duration-300 ${
                   isDraggingAudio
-                    ? "text-fuchsia-200"
+                    ? "text-emerald-200"
                     : "text-white group-hover:text-white/90"
                 }`}
               >
@@ -397,13 +426,13 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           {/* Floating particles when dragging */}
           {isDraggingAudio && (
             <>
-              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-fuchsia-400 animate-ping" />
+              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
               <div
-                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping"
+                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-teal-400 animate-ping"
                 style={{ animationDelay: "0.5s" }}
               />
               <div
-                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-indigo-400 animate-ping"
+                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-cyan-400 animate-ping"
                 style={{ animationDelay: "1s" }}
               />
             </>
@@ -432,7 +461,7 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
               </div>
               <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-white/70 bg-white/5">
                 <div className="flex items-center gap-3">
-                  <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-500 flex items-center justify-center">
+                  <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-emerald-500 to-teal-500 flex items-center justify-center">
                     <FileAudio className="h-4 w-4 text-white" />
                   </div>
                   <div>
@@ -473,6 +502,17 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
 
       {/* Video uploader */}
       <div className="grid place-items-center">
+        <div className="w-full max-w-2xl">
+          <div className="mb-3 flex items-center gap-2">
+            <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
+              <FileVideo className="h-4 w-4 text-white" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">Video File</h3>
+            <span className="rounded-full bg-blue-500/20 px-2 py-1 text-xs text-blue-200">
+              Required
+            </span>
+          </div>
+        </div>
         <label
           htmlFor="video-upload"
           onDragEnter={onDragOverVideo}
@@ -481,16 +521,16 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           onDrop={onDropVideo}
           className={`group relative grid w-full place-items-center rounded-3xl border-2 border-dashed text-center transition-all duration-300 p-4 ${
             isDraggingVideo
-              ? "border-fuchsia-400/60 bg-gradient-to-br from-fuchsia-500/10 via-purple-500/10 to-indigo-500/10 scale-105 shadow-2xl shadow-fuchsia-500/25"
-              : "border-white/20 bg-gradient-to-br from-white/5 via-white/3 to-transparent hover:border-white/40 hover:bg-gradient-to-br hover:from-white/10 hover:via-white/5 hover:to-transparent hover:scale-102"
+              ? "border-blue-400/60 bg-gradient-to-br from-blue-500/10 via-indigo-500/10 to-purple-500/10 scale-105 shadow-2xl shadow-blue-500/25"
+              : "border-blue-500/30 bg-gradient-to-br from-blue-500/5 via-indigo-500/3 to-transparent hover:border-blue-400/50 hover:bg-gradient-to-br hover:from-blue-500/10 hover:via-indigo-500/5 hover:to-transparent hover:scale-102"
           }`}
         >
           {/* Background gradient overlay */}
           <div
             className={`absolute inset-0 rounded-3xl transition-opacity duration-300 ${
               isDraggingVideo
-                ? "bg-gradient-to-br from-fuchsia-500/5 via-purple-500/5 to-indigo-500/5 opacity-100"
-                : "bg-gradient-to-br from-white/5 via-white/3 to-transparent opacity-0 group-hover:opacity-100"
+                ? "bg-gradient-to-br from-blue-500/5 via-indigo-500/5 to-purple-500/5 opacity-100"
+                : "bg-gradient-to-br from-blue-500/5 via-indigo-500/3 to-transparent opacity-0 group-hover:opacity-100"
             }`}
           />
 
@@ -498,8 +538,8 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           <div
             className={`absolute inset-0 rounded-3xl transition-all duration-300 ${
               isDraggingVideo
-                ? "ring-4 ring-fuchsia-400/20"
-                : "ring-0 group-hover:ring-2 group-hover:ring-white/10"
+                ? "ring-4 ring-blue-400/20"
+                : "ring-0 group-hover:ring-2 group-hover:ring-blue-400/20"
             }`}
           />
 
@@ -508,15 +548,15 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
             <div
               className={`grid h-16 w-16 place-items-center rounded-2xl transition-all duration-300 ${
                 isDraggingVideo
-                  ? "bg-gradient-to-r from-fuchsia-500 to-purple-500 shadow-lg shadow-fuchsia-500/25 scale-110"
-                  : "bg-gradient-to-r from-white/10 to-white/5 group-hover:bg-gradient-to-r group-hover:from-white/15 group-hover:to-white/10 group-hover:scale-105"
+                  ? "bg-gradient-to-r from-blue-500 to-indigo-500 shadow-lg shadow-blue-500/25 scale-110"
+                  : "bg-gradient-to-r from-blue-500/20 to-indigo-500/20 group-hover:bg-gradient-to-r group-hover:from-blue-500/30 group-hover:to-indigo-500/30 group-hover:scale-105"
               }`}
             >
               <FileVideo
                 className={`h-7 w-7 transition-all duration-300 ${
                   isDraggingVideo
                     ? "text-white scale-110"
-                    : "text-purple-300 group-hover:text-purple-200"
+                    : "text-blue-300 group-hover:text-blue-200"
                 }`}
                 strokeWidth={2}
               />
@@ -527,7 +567,7 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
               <p
                 className={`text-lg font-semibold transition-all duration-300 ${
                   isDraggingVideo
-                    ? "text-fuchsia-200"
+                    ? "text-blue-200"
                     : "text-white group-hover:text-white/90"
                 }`}
               >
@@ -578,13 +618,13 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
           {/* Floating particles when dragging */}
           {isDraggingVideo && (
             <>
-              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-fuchsia-400 animate-ping" />
+              <div className="absolute top-4 left-4 h-2 w-2 rounded-full bg-blue-400 animate-ping" />
               <div
-                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-purple-400 animate-ping"
+                className="absolute top-8 right-6 h-1.5 w-1.5 rounded-full bg-indigo-400 animate-ping"
                 style={{ animationDelay: "0.5s" }}
               />
               <div
-                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-indigo-400 animate-ping"
+                className="absolute bottom-6 left-8 h-1 w-1 rounded-full bg-purple-400 animate-ping"
                 style={{ animationDelay: "1s" }}
               />
             </>
@@ -615,7 +655,7 @@ export default function VideoAndSongFlow(props: Props): React.ReactElement {
                 </div>
                 <div className="flex items-center justify-between border-t border-white/10 px-4 py-3 text-sm text-white/70 bg-white/5">
                   <div className="flex items-center gap-3">
-                    <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-fuchsia-500 to-purple-500 flex items-center justify-center">
+                    <div className="h-8 w-8 rounded-lg bg-gradient-to-r from-blue-500 to-indigo-500 flex items-center justify-center">
                       <FileVideo className="h-4 w-4 text-white" />
                     </div>
                     <div>
