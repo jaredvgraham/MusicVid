@@ -1,6 +1,8 @@
 import Stripe from "stripe";
 import { NextRequest, NextResponse } from "next/server";
 import User, { UserDocument } from "@/backend/models/User";
+import Project from "@/backend/models/Project";
+import FinalRender from "@/backend/models/FinalRender";
 import dbConnect from "@/backend/lib/db";
 import { clerkClient } from "@clerk/nextjs/server";
 
@@ -9,6 +11,34 @@ const webhookSecret = process.env.STRIPE_WEBHOOK_SECRET;
 
 if (!webhookSecret) {
   throw new Error("STRIPE_WEBHOOK_SECRET is not set");
+}
+
+async function resetUserUsage(clerkId: string) {
+  try {
+    console.log(`[stripe:webhook] Resetting usage for user: ${clerkId}`);
+
+    // Reset billing period tracking for all projects
+    await Project.updateMany(
+      { user_id: clerkId },
+      {
+        $unset: {
+          billingPeriodStart: 1,
+          billingPeriodEnd: 1,
+        },
+      }
+    );
+
+    // Note: We don't delete FinalRender records as they represent completed work
+    // The usage limits are calculated based on billing period, so resetting
+    // the billing period tracking effectively resets their usage count
+
+    console.log(`[stripe:webhook] Usage reset completed for user: ${clerkId}`);
+  } catch (error) {
+    console.error(
+      `[stripe:webhook] Failed to reset usage for user ${clerkId}:`,
+      error
+    );
+  }
 }
 
 export async function POST(req: NextRequest) {
@@ -127,6 +157,9 @@ export async function POST(req: NextRequest) {
         },
       });
 
+      // Reset user usage when they purchase a plan
+      await resetUserUsage(user.clerkId);
+
       await user.save();
       console.log("[stripe:webhook] user updated and saved");
     }
@@ -195,6 +228,10 @@ export async function POST(req: NextRequest) {
           plan: productName,
         },
       });
+
+      // Reset user usage when they change their plan
+      await resetUserUsage(user.clerkId);
+
       await user.save();
       console.log("[stripe:webhook] user updated and saved after update");
     }
