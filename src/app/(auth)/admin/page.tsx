@@ -683,7 +683,7 @@ const AdminDashboard = () => {
                   Recent Projects
                 </h2>
                 <p className="text-neutral-300">
-                  Latest 20 projects with user information and final renders
+                  Latest 100 projects with user information and final renders
                 </p>
               </div>
               <button

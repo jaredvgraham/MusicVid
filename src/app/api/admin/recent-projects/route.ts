@@ -37,7 +37,7 @@ export async function GET(request: NextRequest) {
     // Fetch 20 most recent projects with user info
     const projects = await Project.find({ deleted: { $ne: true } })
       .sort({ time_created: -1 })
-      .limit(20)
+      .limit(100)
       .lean();
 
     // Get unique user IDs
