@@ -19,44 +19,13 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
   );
   const [isExpanded, setIsExpanded] = useState(false);
 
-  // Effect categories for better organization
+  // Effect categories - STATIC EFFECTS ONLY (no animations to avoid frontend/backend discrepancies)
   const effectCategories = [
     {
-      name: "Basic Effects",
+      name: "Static Effects",
       effects: [
         { key: "fxGlow", name: "Glow", hasColor: true, hasIntensity: true },
-        { key: "fxShimmer", name: "Shimmer", hasSpeed: true },
-        { key: "fxPulse", name: "Pulse", hasSpeed: true },
-        { key: "fxRainbow", name: "Rainbow", hasSpeed: true },
-      ],
-    },
-    {
-      name: "Environmental Effects",
-      effects: [
-        { key: "fxFire", name: "Fire", hasIntensity: true },
-        { key: "fxIce", name: "Ice", hasIntensity: true },
-        { key: "fxElectric", name: "Electric", hasIntensity: true },
-        { key: "fxHologram", name: "Hologram", hasIntensity: true },
-        { key: "fxSmoke", name: "Smoke", hasIntensity: true },
-        { key: "fxLightning", name: "Lightning", hasIntensity: true },
-      ],
-    },
-    {
-      name: "Particle Effects",
-      effects: [
-        { key: "fxParticles", name: "Particles", hasIntensity: true },
-        { key: "fxStars", name: "Stars", hasIntensity: true },
-        { key: "fxSparkle", name: "Sparkle", hasIntensity: true },
-        { key: "fxGlitter", name: "Glitter", hasIntensity: true },
-        { key: "fxDiamond", name: "Diamond", hasIntensity: true },
-        { key: "fxCrystal", name: "Crystal", hasIntensity: true },
-        { key: "fxPrism", name: "Prism", hasIntensity: true },
-      ],
-    },
-    {
-      name: "Neon & Light Effects",
-      effects: [
-        { key: "fxNeon", name: "Neon", hasIntensity: true },
+        { key: "fxNeon", name: "Neon", hasColor: true, hasIntensity: true },
         { key: "fxBeams", name: "Beams", hasIntensity: true },
         {
           key: "fxGodRays",
@@ -64,20 +33,21 @@ export default function EffectCustomizer({ className }: EffectCustomizerProps) {
           hasIntensity: true,
           hasAngle: true,
         },
-        { key: "fxAurora", name: "Aurora", hasIntensity: true },
-        { key: "fxNebula", name: "Nebula", hasIntensity: true },
-        { key: "fxGalaxy", name: "Galaxy", hasIntensity: true },
-        { key: "fxCosmic", name: "Cosmic", hasIntensity: true },
-        { key: "fxStellar", name: "Stellar", hasIntensity: true },
-      ],
-    },
-    {
-      name: "Overlay Effects",
-      effects: [
-        { key: "fxWaves", name: "Waves", hasIntensity: true },
-        { key: "fxRipple", name: "Ripple", hasIntensity: true },
         { key: "fxBlur", name: "Blur", hasIntensity: true },
         { key: "fxFade", name: "Fade", hasIntensity: true },
+        // Static versions of previously animated effects
+        { key: "fxStars", name: "Stars", hasIntensity: true },
+        { key: "fxParticles", name: "Particles", hasIntensity: true },
+        { key: "fxWaves", name: "Waves", hasIntensity: true },
+        { key: "fxShimmer", name: "Shimmer", hasIntensity: false },
+        { key: "fxPulse", name: "Pulse", hasIntensity: false },
+        { key: "fxRainbow", name: "Rainbow", hasIntensity: false },
+        { key: "fxElectric", name: "Electric", hasIntensity: true },
+        { key: "fxHologram", name: "Hologram", hasIntensity: true },
+        { key: "fxFire", name: "Fire", hasIntensity: true },
+        { key: "fxIce", name: "Ice", hasIntensity: true },
+
+        { key: "fxMatrix", name: "Matrix", hasIntensity: true },
       ],
     },
   ];

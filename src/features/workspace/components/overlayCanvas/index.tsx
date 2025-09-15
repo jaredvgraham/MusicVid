@@ -33,6 +33,19 @@ import FxCrystal from "./fx/FxCrystal";
 import FxPrism from "./fx/FxPrism";
 import FxBlur from "./fx/FxBlur";
 import FxFade from "./fx/FxFade";
+// Static versions of previously animated effects
+import FxStarsStatic from "./fx/FxStarsStatic";
+import FxParticlesStatic from "./fx/FxParticlesStatic";
+import FxWavesStatic from "./fx/FxWavesStatic";
+import FxShimmerStatic from "./fx/FxShimmerStatic";
+import FxPulseStatic from "./fx/FxPulseStatic";
+import FxRainbowStatic from "./fx/FxRainbowStatic";
+import FxElectricStatic from "./fx/FxElectricStatic";
+import FxHologramStatic from "./fx/FxHologramStatic";
+import FxFireStatic from "./fx/FxFireStatic";
+import FxIceStatic from "./fx/FxIceStatic";
+import FxSmokeStatic from "./fx/FxSmokeStatic";
+import FxMatrixStatic from "./fx/FxMatrixStatic";
 import "./fx/effects.css";
 import {
   LAYOUT_PRESETS,
@@ -290,7 +303,7 @@ export const OverlayCanvas = React.memo(
             setDraggingIdx(null);
           }}
         >
-          {/* Visual Effects - Background Layer */}
+          {/* Visual Effects - Background Layer - STATIC EFFECTS ONLY */}
           <div style={{ position: "absolute", inset: 0, zIndex: 3 }}>
             {preset.fxBeams && (
               <FxBeams
@@ -307,13 +320,6 @@ export const OverlayCanvas = React.memo(
                 intensity={preset.fxGodRaysIntensity || 0.5}
               />
             )}
-            {preset.fxParticles && (
-              <FxParticles
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxParticlesIntensity || 0.5}
-              />
-            )}
             {preset.fxGlow && (
               <FxGlow
                 designW={baseW}
@@ -322,133 +328,12 @@ export const OverlayCanvas = React.memo(
                 intensity={preset.fxGlowIntensity || 0.5}
               />
             )}
-            {preset.fxShimmer && (
-              <FxShimmer
-                designW={baseW}
-                designH={baseH}
-                speed={preset.fxShimmerSpeed || 2}
-              />
-            )}
-            {preset.fxPulse && (
-              <FxPulse
-                designW={baseW}
-                designH={baseH}
-                speed={preset.fxPulseSpeed || 2}
-              />
-            )}
-            {preset.fxRainbow && (
-              <FxRainbow
-                designW={baseW}
-                designH={baseH}
-                speed={preset.fxRainbowSpeed || 2}
-              />
-            )}
-            {preset.fxFire && (
-              <FxFire
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxFireIntensity || 0.5}
-              />
-            )}
-            {preset.fxIce && (
-              <FxIce
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxIceIntensity || 0.5}
-              />
-            )}
-            {preset.fxElectric && (
-              <FxElectric
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxElectricIntensity || 0.5}
-              />
-            )}
-            {preset.fxHologram && (
-              <FxHologram
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxHologramIntensity || 0.5}
-              />
-            )}
-            {preset.fxSmoke && (
-              <FxSmoke
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxSmokeIntensity || 0.5}
-              />
-            )}
-            {preset.fxLightning && (
-              <FxLightning
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxLightningIntensity || 0.5}
-              />
-            )}
-            {preset.fxStars && (
-              <FxStars
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxStarsIntensity || 0.5}
-              />
-            )}
-            {preset.fxWaves && (
-              <FxWaves
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxWavesIntensity || 0.5}
-              />
-            )}
-            {preset.fxMatrix && (
-              <FxMatrix
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxMatrixIntensity || 0.5}
-              />
-            )}
-
-            {/* Additional Effects */}
             {preset.fxNeon && (
               <FxNeon
                 designW={baseW}
                 designH={baseH}
                 intensity={preset.fxNeonIntensity || 0.5}
                 color={preset.fxNeonColor || "#00ffff"}
-              />
-            )}
-            {preset.fxSparkle && (
-              <FxSparkle
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxSparkleIntensity || 0.5}
-              />
-            )}
-            {preset.fxGlitter && (
-              <FxGlitter
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxGlitterIntensity || 0.5}
-              />
-            )}
-            {preset.fxDiamond && (
-              <FxDiamond
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxDiamondIntensity || 0.5}
-              />
-            )}
-            {preset.fxCrystal && (
-              <FxCrystal
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxCrystalIntensity || 0.5}
-              />
-            )}
-            {preset.fxPrism && (
-              <FxPrism
-                designW={baseW}
-                designH={baseH}
-                intensity={preset.fxPrismIntensity || 0.5}
               />
             )}
             {preset.fxBlur && (
@@ -463,6 +348,88 @@ export const OverlayCanvas = React.memo(
                 designW={baseW}
                 designH={baseH}
                 intensity={preset.fxFadeIntensity || 0.5}
+              />
+            )}
+
+            {/* Static versions of previously animated effects */}
+            {preset.fxStars && (
+              <FxStarsStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxStarsIntensity || 0.5}
+              />
+            )}
+            {preset.fxParticles && (
+              <FxParticlesStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxParticlesIntensity || 0.5}
+              />
+            )}
+            {preset.fxWaves && (
+              <FxWavesStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxWavesIntensity || 0.5}
+              />
+            )}
+            {preset.fxShimmer && (
+              <FxShimmerStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={0.5}
+              />
+            )}
+            {preset.fxPulse && (
+              <FxPulseStatic designW={baseW} designH={baseH} intensity={0.5} />
+            )}
+            {preset.fxRainbow && (
+              <FxRainbowStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={0.5}
+              />
+            )}
+            {preset.fxElectric && (
+              <FxElectricStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxElectricIntensity || 0.5}
+              />
+            )}
+            {preset.fxHologram && (
+              <FxHologramStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxHologramIntensity || 0.5}
+              />
+            )}
+            {preset.fxFire && (
+              <FxFireStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxFireIntensity || 0.5}
+              />
+            )}
+            {preset.fxIce && (
+              <FxIceStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxIceIntensity || 0.5}
+              />
+            )}
+            {preset.fxSmoke && (
+              <FxSmokeStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxSmokeIntensity || 0.5}
+              />
+            )}
+            {preset.fxMatrix && (
+              <FxMatrixStatic
+                designW={baseW}
+                designH={baseH}
+                intensity={preset.fxMatrixIntensity || 0.5}
               />
             )}
           </div>

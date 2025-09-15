@@ -529,6 +529,13 @@ export function Toolbox(): React.ReactElement {
 
         {/* Style Presets */}
         <div className="space-y-3">
+          {/* Effect Customization */}
+          <div className="space-y-3">
+            <h4 className="text-sm font-medium text-white/90">
+              Visual Effects
+            </h4>
+            <EffectCustomizer />
+          </div>
           <h4 className="text-sm font-medium text-white/90">Style & Layout</h4>
           <div>
             <label className="block text-xs text-white/60 mb-2">
@@ -789,12 +796,6 @@ export function Toolbox(): React.ReactElement {
               Clear All
             </button>
           </div>
-        </div>
-
-        {/* Effect Customization */}
-        <div className="space-y-3">
-          <h4 className="text-sm font-medium text-white/90">Visual Effects</h4>
-          <EffectCustomizer />
         </div>
       </div>
     </div>
