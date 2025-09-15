@@ -9,15 +9,21 @@ export default function CenterLines({
   lines,
   onPointerDown,
   isPortrait,
+  width,
+  height,
+  gap,
 }: {
   preset: LyricPreset;
   lines: Array<Array<WordRef>>;
   onPointerDown: (gi: number) => void;
   isPortrait?: boolean;
+  width?: number;
+  height?: number;
+  gap?: string;
 }) {
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
-      <div className="flex flex-col items-center gap-1">
+      <div className={`flex flex-col items-center gap-[${gap}px] `}>
         {lines.map((lineRefs, idx) => (
           <div
             key={`line-${idx}`}
@@ -28,7 +34,7 @@ export default function CenterLines({
                 key={`tok-${gi}`}
                 style={{
                   ...mergeWordStyle(
-                    buildPresetTextStyle(preset, isPortrait),
+                    buildPresetTextStyle(preset, isPortrait, width, height),
                     w.style
                   ),
                   // Font size comes from preset styles and can be overridden

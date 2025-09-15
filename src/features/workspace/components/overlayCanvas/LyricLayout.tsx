@@ -13,6 +13,9 @@ interface LyricLayoutProps {
   currentTimeMs: number;
   onPointerDown: (gi: number) => void;
   isPortrait?: boolean;
+  width?: number;
+  height?: number;
+  gap?: string;
 }
 
 // Individual layout components
@@ -22,7 +25,19 @@ const CenteredLayout: React.FC<{
   onPointerDown: (gi: number) => void;
   config: any;
   isPortrait: boolean;
-}> = ({ preset, lines, onPointerDown, config, isPortrait }) => {
+  width?: number;
+  height?: number;
+  gap?: string;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  width,
+  height,
+  gap,
+}) => {
   const maxLines = config.maxLines || 4;
 
   return (
@@ -32,6 +47,9 @@ const CenteredLayout: React.FC<{
         lines={lines.slice(0, maxLines)}
         onPointerDown={onPointerDown}
         isPortrait={isPortrait}
+        width={width}
+        height={height}
+        gap={gap}
       />
     </div>
   );
@@ -42,7 +60,19 @@ const GridLayout: React.FC<{
   onPointerDown: (gi: number) => void;
   config: any;
   isPortrait: boolean;
-}> = ({ preset, lines, onPointerDown, config, isPortrait }) => {
+  width?: number;
+  height?: number;
+  gap?: string;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  width,
+  height,
+  gap,
+}) => {
   const words = lines.flat();
   const gridItems: Array<{ word: WordRef; col: number; row: number }> = [];
 
@@ -104,7 +134,7 @@ const GridLayout: React.FC<{
           top: "20%",
           left: isPortrait ? "20%" : "30%",
           right: isPortrait ? "15%" : "10%",
-          gap: isPortrait ? "20px" : "30px",
+          gap: gap,
           maxWidth: isPortrait ? "70%" : "50%",
         }}
       >
@@ -121,7 +151,7 @@ const GridLayout: React.FC<{
             <span
               style={{
                 ...mergeWordStyle(
-                  buildPresetTextStyle(preset, isPortrait),
+                  buildPresetTextStyle(preset, isPortrait, width, height),
                   word.w.style
                 ),
                 // Font size comes from preset styles and can be overridden
@@ -143,15 +173,30 @@ const KaraokeLayout: React.FC<{
   config: any;
   isPortrait: boolean;
   currentTimeMs: number;
-}> = ({ preset, lines, onPointerDown, config, isPortrait, currentTimeMs }) => {
+  width?: number;
+  height?: number;
+  gap?: string;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  currentTimeMs,
+  width,
+  height,
+  gap,
+}) => {
   const maxWords = isPortrait
     ? Math.min(config?.maxWords || 2, 2)
     : config?.maxWords || 5;
   const allWords = lines.flat();
 
+  const wordSpacing = isPortrait ? 2 : 12;
+
   // Calculate how many words can fit in the available width (matching backend)
   const availableWidth = isPortrait ? 80 : 90; // More width for landscape
-  const wordSpacing = isPortrait ? 2 : 12; // Larger spacing for landscape
+
   const estimatedWordWidth = isPortrait ? 8 : 15; // Larger word width for landscape
 
   // Calculate how many words can fit
@@ -213,7 +258,7 @@ const KaraokeLayout: React.FC<{
           top: baseY,
           transform: "translate(-50%, -50%)",
           maxWidth: isPortrait ? "90%" : "80%", // More width for portrait
-          gap: isPortrait ? "16px" : "32px", // Smaller gap for portrait
+          gap: gap, // Smaller gap for portrait
           overflow: "hidden", // Hide any overflow
         }}
       >
@@ -223,7 +268,7 @@ const KaraokeLayout: React.FC<{
             className="cursor-grab whitespace-nowrap"
             style={{
               ...mergeWordStyle(
-                buildPresetTextStyle(preset, isPortrait),
+                buildPresetTextStyle(preset, isPortrait, width, height),
                 w.style
               ),
               // Font size comes from preset styles and can be overridden
@@ -248,7 +293,19 @@ const WaveLayout: React.FC<{
   onPointerDown: (gi: number) => void;
   config: any;
   isPortrait: boolean;
-}> = ({ preset, lines, onPointerDown, config, isPortrait }) => {
+  width?: number;
+  height?: number;
+  gap?: string;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  width,
+  height,
+  gap,
+}) => {
   const words = lines.flat();
 
   return (
@@ -262,7 +319,7 @@ const WaveLayout: React.FC<{
           transform: "translate(-50%, -50%)",
           maxWidth: "80%", // Match backend exactly
           flexWrap: "wrap", // Allow wrapping to new lines
-          gap: "24px", // Match backend exactly
+          gap: gap, // Match backend exactly
         }}
       >
         {words.map(({ w, gi }, idx) => {
@@ -277,7 +334,7 @@ const WaveLayout: React.FC<{
               className="cursor-grab whitespace-nowrap"
               style={{
                 ...mergeWordStyle(
-                  buildPresetTextStyle(preset, isPortrait),
+                  buildPresetTextStyle(preset, isPortrait, width, height),
                   w.style
                 ),
                 // Font size comes from preset styles and can be overridden
@@ -304,7 +361,19 @@ const ScrollingLayout: React.FC<{
   onPointerDown: (gi: number) => void;
   config: any;
   isPortrait: boolean;
-}> = ({ preset, lines, onPointerDown, config, isPortrait }) => {
+  width?: number;
+  height?: number;
+  gap?: string;
+}> = ({
+  preset,
+  lines,
+  onPointerDown,
+  config,
+  isPortrait,
+  width,
+  height,
+  gap,
+}) => {
   const words = lines.flat();
   const maxLines = config?.maxLines || 3;
 
@@ -318,7 +387,7 @@ const ScrollingLayout: React.FC<{
           top: "50%",
           transform: "translate(-50%, -50%)",
           maxWidth: isPortrait ? "90%" : "95%", // Use most of the width
-          gap: isPortrait ? "16px" : "32px", // Larger gap for landscape
+          gap: gap, // Larger gap for landscape
         }}
       >
         {lines.slice(0, maxLines).map((lineRefs, lineIdx) => (
@@ -326,7 +395,7 @@ const ScrollingLayout: React.FC<{
             key={`scrolling-line-${lineIdx}`}
             className="flex items-center justify-center gap-3"
             style={{
-              gap: isPortrait ? "12px" : "24px", // Larger word spacing for landscape
+              gap: gap, // Larger word spacing for landscape
             }}
           >
             {lineRefs.map(({ w, gi }) => (
@@ -335,7 +404,7 @@ const ScrollingLayout: React.FC<{
                 className="cursor-grab whitespace-nowrap"
                 style={{
                   ...mergeWordStyle(
-                    buildPresetTextStyle(preset, isPortrait),
+                    buildPresetTextStyle(preset, isPortrait, width, height),
                     w.style
                   ),
                   // Scale font size appropriately for each mode
@@ -365,6 +434,9 @@ export function LyricLayout({
   currentTimeMs,
   onPointerDown,
   isPortrait = false,
+  width,
+  height,
+  gap,
 }: LyricLayoutProps): React.ReactElement {
   // Render based on layout type
   switch (layoutPreset.type) {
@@ -377,6 +449,9 @@ export function LyricLayout({
           config={layoutPreset.config.karaoke}
           isPortrait={isPortrait}
           currentTimeMs={currentTimeMs}
+          width={width}
+          height={height}
+          gap={gap}
         />
       );
     case "grid":
@@ -387,6 +462,9 @@ export function LyricLayout({
           onPointerDown={onPointerDown}
           config={layoutPreset.config.grid}
           isPortrait={isPortrait}
+          width={width}
+          height={height}
+          gap={gap}
         />
       );
     case "wave":
@@ -397,6 +475,9 @@ export function LyricLayout({
           onPointerDown={onPointerDown}
           config={layoutPreset.config.wave}
           isPortrait={isPortrait}
+          width={width}
+          height={height}
+          gap={gap}
         />
       );
 
@@ -408,6 +489,9 @@ export function LyricLayout({
           onPointerDown={onPointerDown}
           config={layoutPreset.config.scrolling}
           isPortrait={isPortrait}
+          width={width}
+          height={height}
+          gap={gap}
         />
       );
 
@@ -420,6 +504,9 @@ export function LyricLayout({
           onPointerDown={onPointerDown}
           config={layoutPreset.config.centered}
           isPortrait={isPortrait}
+          width={width}
+          height={height}
+          gap={gap}
         />
       );
   }

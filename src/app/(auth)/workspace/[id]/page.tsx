@@ -81,6 +81,7 @@ export default function WorkspacePage(): React.ReactElement {
           `api/workspace/${projectId}`
         );
         if (!mounted) return;
+        console.log("res.project", res.project);
         setProject(res.project);
         setLyricPreset(res.lyricPreset);
       } catch (e: any) {

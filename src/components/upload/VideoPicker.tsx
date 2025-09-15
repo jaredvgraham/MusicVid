@@ -66,7 +66,7 @@ export function VideoPicker({
       setVideos(
         filtered.map((hit: any) => {
           console.log("hit", hit);
-          return hit.videos.medium.url;
+          return hit.videos.tiny.url;
         })
       );
     } catch {

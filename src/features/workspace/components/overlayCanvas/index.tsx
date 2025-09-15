@@ -71,6 +71,12 @@ export const OverlayCanvas = React.memo(
       currentPreset ?? LYRIC_PRESETS[DEFAULT_LYRIC_PRESET_ID];
     const baseW = (project as any)?.width || 1080;
     const baseH = (project as any)?.height || 1920;
+    let gap = baseH > baseW ? "16px" : "32px";
+    if (baseW < 720 && baseW > 480) {
+      gap = "12px";
+    } else if (baseW < 480) {
+      gap = "8px";
+    }
     const isLandscape =
       (project as any)?.orientation === "landscape" || baseW > baseH;
 
@@ -472,7 +478,7 @@ export const OverlayCanvas = React.memo(
                 const hasCustomFontSize =
                   typeof (w as any)?.style?.fontSizePx === "number";
                 const textStyle = mergeWordStyle(
-                  buildPresetTextStyle(preset, baseH > baseW),
+                  buildPresetTextStyle(preset, baseH > baseW, baseW, baseH),
                   (w as any).style
                 );
                 return (
@@ -512,6 +518,9 @@ export const OverlayCanvas = React.memo(
                   LAYOUT_PRESETS[layoutPresetId] ||
                   LAYOUT_PRESETS[DEFAULT_LAYOUT_PRESET_ID]
                 }
+                width={baseW}
+                height={baseH}
+                gap={gap}
                 lines={groupedUnplacedWords as any}
                 currentTimeMs={currentTimeMs}
                 onPointerDown={(gi: number) => {

@@ -2,7 +2,9 @@ import type { LyricPreset } from "../../../styles/lyricPresets";
 
 export function buildPresetTextStyle(
   preset: LyricPreset,
-  isPortrait: boolean = false
+  isPortrait: boolean = false,
+  width?: number,
+  height?: number
 ): React.CSSProperties {
   const style: React.CSSProperties = {
     color: (preset as any).gradientText
