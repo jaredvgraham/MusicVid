@@ -23,7 +23,12 @@ export default function CenterLines({
 }) {
   return (
     <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 select-none">
-      <div className={`flex flex-col items-center gap-[${gap}px] `}>
+      <div
+        className="flex flex-col items-center"
+        style={{
+          gap: gap || (isPortrait ? "16px" : "32px"),
+        }}
+      >
         {lines.map((lineRefs, idx) => (
           <div
             key={`line-${idx}`}
@@ -39,7 +44,13 @@ export default function CenterLines({
                   ),
                   // Font size comes from preset styles and can be overridden
                   marginRight:
-                    wi < lineRefs.length - 1 ? (isPortrait ? 15 : 40) : 0,
+                    wi < lineRefs.length - 1
+                      ? gap
+                        ? gap
+                        : isPortrait
+                        ? "15px"
+                        : "40px"
+                      : 0,
                   cursor: "grab",
                 }}
                 onPointerDown={(e) => {
