@@ -140,6 +140,37 @@ What can we help you with today?`,
     headerSubtitle: "Let us support your creative journey",
   },
   {
+    id: "maintenance-notification",
+    name: "Maintenance Notification",
+    subject: "Sonexa is Back Online - Your Projects are Ready!",
+    message: `Hi there! 👋
+
+We wanted to reach out personally about the recent maintenance we performed on Sonexa.
+
+We've resolved the issues that may have affected your video creation process. Our systems are now fully operational and running smoothly.
+
+🎬 [Create a New Project at Sonexa.cc](https://sonexa.cc)
+
+What's improved:
+✨ Faster rendering times
+✨ Enhanced stability
+✨ Better error handling
+✨ Improved user experience
+
+We apologize for any inconvenience this may have caused. We're committed to providing you with the best possible experience.
+
+If you encounter any issues, please don't hesitate to reach out to our support team.
+
+Thank you for your patience and continued support!
+
+Happy creating!`,
+    description:
+      "Notification for users whose projects may have failed due to maintenance",
+    category: "support",
+    headerTitle: "🔧 We're Back Online!",
+    headerSubtitle: "Your video creation experience is now better than ever",
+  },
+  {
     id: "custom",
     name: "Custom Template",
     subject: "",

@@ -684,20 +684,61 @@ const AdminDashboard = () => {
                 </h2>
                 <p className="text-neutral-300">
                   Latest 100 projects with user information and final renders
+                  {recentProjects.length > 0 && (
+                    <span className="ml-2">
+                      • {recentProjects.filter((p) => p.failed).length} failed
+                      projects
+                    </span>
+                  )}
                 </p>
               </div>
-              <button
-                onClick={fetchRecentProjects}
-                disabled={recentProjectsLoading}
-                className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:from-purple-400 disabled:to-fuchsia-400 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-lg shadow-purple-500/25"
-              >
-                <RefreshCw
-                  className={`h-4 w-4 ${
-                    recentProjectsLoading ? "animate-spin" : ""
-                  }`}
-                />
-                Refresh
-              </button>
+              <div className="flex gap-3">
+                {recentProjects.length > 0 &&
+                  recentProjects.filter((p) => p.failed).length > 0 && (
+                    <button
+                      onClick={() => {
+                        const failedProjectEmails = recentProjects
+                          .filter((p) => p.failed && p.user?.email)
+                          .map((p) => p.user!.email)
+                          .filter(
+                            (email, index, array) =>
+                              array.indexOf(email) === index
+                          ); // Remove duplicates
+
+                        setSelectedEmails(failedProjectEmails);
+                        setActiveTab("email");
+                        setSelectedTemplate("maintenance-notification");
+                        handleTemplateSelect("maintenance-notification");
+                      }}
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-lg shadow-orange-500/25"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email Failed Projects (
+                      {
+                        recentProjects
+                          .filter((p) => p.failed && p.user?.email)
+                          .map((p) => p.user!.email)
+                          .filter(
+                            (email, index, array) =>
+                              array.indexOf(email) === index
+                          ).length
+                      }
+                      )
+                    </button>
+                  )}
+                <button
+                  onClick={fetchRecentProjects}
+                  disabled={recentProjectsLoading}
+                  className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:from-purple-400 disabled:to-fuchsia-400 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-lg shadow-purple-500/25"
+                >
+                  <RefreshCw
+                    className={`h-4 w-4 ${
+                      recentProjectsLoading ? "animate-spin" : ""
+                    }`}
+                  />
+                  Refresh
+                </button>
+              </div>
             </div>
 
             {/* Recent Projects Grid */}
@@ -767,17 +808,17 @@ const AdminDashboard = () => {
         {/* Email Users Tab */}
         {activeTab === "email" && (
           <div className="space-y-6">
-            {/* Inactive Users Section */}
-            <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
-                  <Mail className="h-5 w-5" />
-                  Inactive Users
-                </h2>
+            {/* Quick Actions Section */}
+            <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-6 mb-6">
+              <h2 className="text-xl font-semibold text-white flex items-center gap-2 mb-4">
+                <Mail className="h-5 w-5" />
+                Quick Email Actions
+              </h2>
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <button
                   onClick={fetchInactiveUsers}
                   disabled={inactiveUsersLoading}
-                  className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:from-purple-400 disabled:to-fuchsia-400 text-white px-4 py-2 rounded-lg flex items-center gap-2 transition-all duration-300 shadow-lg shadow-purple-500/25"
+                  className="bg-gradient-to-r from-purple-500 to-fuchsia-500 hover:from-purple-600 hover:to-fuchsia-600 disabled:from-purple-400 disabled:to-fuchsia-400 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 shadow-lg shadow-purple-500/25"
                 >
                   <RefreshCw
                     className={`h-4 w-4 ${
@@ -786,6 +827,48 @@ const AdminDashboard = () => {
                   />
                   {inactiveUsersLoading ? "Loading..." : "Load Inactive Users"}
                 </button>
+                {recentProjects.length > 0 &&
+                  recentProjects.filter((p) => p.failed).length > 0 && (
+                    <button
+                      onClick={() => {
+                        const failedProjectEmails = recentProjects
+                          .filter((p) => p.failed && p.user?.email)
+                          .map((p) => p.user!.email)
+                          .filter(
+                            (email, index, array) =>
+                              array.indexOf(email) === index
+                          ); // Remove duplicates
+
+                        setSelectedEmails(failedProjectEmails);
+                        setSelectedTemplate("maintenance-notification");
+                        handleTemplateSelect("maintenance-notification");
+                      }}
+                      className="bg-gradient-to-r from-orange-500 to-red-500 hover:from-orange-600 hover:to-red-600 text-white px-4 py-3 rounded-lg flex items-center justify-center gap-2 transition-all duration-300 shadow-lg shadow-orange-500/25"
+                    >
+                      <Mail className="h-4 w-4" />
+                      Email Failed Projects (
+                      {
+                        recentProjects
+                          .filter((p) => p.failed && p.user?.email)
+                          .map((p) => p.user!.email)
+                          .filter(
+                            (email, index, array) =>
+                              array.indexOf(email) === index
+                          ).length
+                      }
+                      )
+                    </button>
+                  )}
+              </div>
+            </div>
+
+            {/* Inactive Users Section */}
+            <div className="bg-neutral-900/80 border border-white/10 rounded-3xl p-6">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-semibold text-white flex items-center gap-2">
+                  <Users className="h-5 w-5" />
+                  Inactive Users
+                </h2>
               </div>
 
               {inactiveUsers.length > 0 && (
@@ -868,6 +951,11 @@ const AdminDashboard = () => {
                 <h3 className="text-lg font-semibold text-white mb-4 flex items-center gap-2">
                   <Send className="h-5 w-5" />
                   Compose Email ({selectedEmails.length} selected)
+                  {selectedTemplate === "maintenance-notification" && (
+                    <span className="ml-2 px-2 py-1 bg-orange-500/20 text-orange-300 text-xs rounded-full">
+                      Maintenance Notification
+                    </span>
+                  )}
                 </h3>
 
                 <div className="space-y-4">
